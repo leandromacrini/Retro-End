@@ -1,7 +1,7 @@
-/* Base Model class
+/* Main Window class
  *
- * Create the interface for access to any Model
- * Create the SQLite DB data layer
+ * The Main parent of any GUI elements
+ * Pass the input only to the top level child
  */
 
 #ifndef _MAINWINDOW_H_
@@ -9,22 +9,24 @@
 
 #include "../../globals.h"
 
+#include "BaseView.h"
+#include "../Model/InputConfigModel.h"
+
 using namespace std;
 
 namespace RetroEnd
 {
 	namespace View
 	{
-		class MainWindow
+		class MainWindow : public BaseView
 		{
 		public:
 			MainWindow();
 			~MainWindow();
 
-			bool init(int width, int height);
+			bool input(Model::InputConfigModel* config, Model::Input input);
+
 			bool isRunning();
-			void update(int deltaTime);
-			void render();
 
 		private:
 

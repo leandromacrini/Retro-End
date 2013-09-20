@@ -1,8 +1,8 @@
 #include "MainWindow.h"
 
-
-
+using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
+using namespace RetroEnd::Controller;
 
 MainWindow::MainWindow()
 {
@@ -14,24 +14,14 @@ MainWindow::~MainWindow()
 
 }
 
-bool MainWindow::init(int width, int height)
-{
-
-	return true;
-}
-
 bool MainWindow::isRunning()
 {
 
 	return true;
 }
 
-void MainWindow::update(int deltaTime)
+bool MainWindow::input(InputConfigModel* config, Input input)
 {
 
-}
-
-void MainWindow::render()
-{
-
+	return true;
 }

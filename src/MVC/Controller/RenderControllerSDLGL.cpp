@@ -103,16 +103,22 @@ void RenderController::update()
 	if(deltaTime > 1000 || deltaTime < 0) deltaTime = 1000;
 
 	//update the main window
-	window.update(deltaTime);
+	mainWindow->update(deltaTime);
 	
 	//swap here so we can read the last screen state during updates (see ImageComponent::copyScreen())
 	swapBuffers(); 
 
-	//render the main window and all its child
-	window.render();
+	//render the main window and all its child starting from Identity Matrix
+	mainWindow->render(Eigen::Affine3f::Identity());
 }
 
 void RenderController::swapBuffers()
 {
+	SDL_GL_SwapBuffers();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
 
+View::MainWindow* RenderController::getCurrentWindow()
+{
+	return mainWindow;
 }

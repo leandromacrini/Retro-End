@@ -55,17 +55,18 @@ namespace RetroEnd
 
 			void start();
 			void stop();
-
 			void update();
 
 			bool isRunning();
+
+			View::MainWindow* getCurrentWindow();
 		protected:
 
 		private:
 			bool mRunning;
 			int mLastTime;
 			SDL_Surface* mSdlScreen;
-			View::MainWindow window;
+			View::MainWindow* mainWindow;
 
 			bool createSurface();
 			void swapBuffers();
