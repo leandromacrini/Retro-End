@@ -8,6 +8,8 @@
 
 #include "../../globals.h"
 
+#include "BaseController.h"
+
 using namespace std;
 using namespace RetroEnd;
 
@@ -17,15 +19,23 @@ namespace RetroEnd
 	{
 		class InputController : public BaseController
 		{
-
 		public:
-			void start();
-			void stop();
+			static InputController& getInstance()
+			{
+				static InputController instance;
+				return instance;
+			}
 
 		protected:
 
 		private:
+			//---Singleton---
+			InputController mInstance();
 
+			InputController() {}; //private instance costructor for Singleton Controller
+			InputController(InputController const&);// Don't Implement
+			void operator=(InputController const&); // Don't implement
+			//---Singleton---
 		};
 	}
 }

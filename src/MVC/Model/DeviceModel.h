@@ -6,6 +6,9 @@
 #define _DEVICEMODEL_H_
 
 #include "../../globals.h"
+#include "../Controller/LogController.h"
+
+#include "BaseModel.h"
 
 namespace RetroEnd
 {

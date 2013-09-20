@@ -8,6 +8,8 @@
 
 #include "../../globals.h"
 
+#include "BaseController.h"
+
 using namespace std;
 using namespace RetroEnd;
 

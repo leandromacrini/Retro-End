@@ -5,9 +5,9 @@
 
 using namespace RetroEnd::Model;
 
-BaseModel::BaseModel()
+BaseModel::BaseModel() : id(0)
 {
-	id = 0;
+	
 }
 
 BaseModel::~BaseModel()

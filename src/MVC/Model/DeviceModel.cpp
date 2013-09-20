@@ -93,7 +93,7 @@ void DeviceModel::init()
 	vector<string> queries;
 
 	//THE CREATE PART - MUST BE ALWAYS RUN (if table already exists we simply have an error)
-	string create = "CREATE TABLE " + DeviceModel::table + " (";
+	string create = "CREATE TABLE IF NOT EXISTS " + DeviceModel::table + " (";
 	create += "ID INTEGER PRIMARY KEY, NAME TEXT, DESCRIPTION TEXT, DEVELOPER TEXT, MANUFACTURER TEXT, CPU TEXT, MEMORY TEXT, ";
 	create += "GRAPHICS TEXT, SOUND TEXT, DISPLAY TEXT, MEDIA_TYPE TEXT, MAX_CONTROLLERS TEXT, RELEASE_DATE TEXT, TGDB_ID TEXT, TGDB_RATING TEXT, ";
 	create += "IMAGE_CONSOLE TEXT, IMAGE_LOGO TEXT);";

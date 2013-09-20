@@ -16,7 +16,6 @@
 #include <vector>
 #include <iostream>
 #include <string>
-#include <sqlite3.h>
 
 using namespace std;
 
@@ -26,8 +25,3 @@ namespace RetroEnd
 
 	const string APP_DIRECTORY = "retro-end";
 }
-
-//base classes
-#include "MVC/Model/BaseModel.h";
-#include "MVC/Controller/BaseController.h"
-#include "MVC/Controller/LogController.h"

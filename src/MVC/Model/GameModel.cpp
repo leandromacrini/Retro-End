@@ -93,7 +93,7 @@ void GameModel::init()
 	vector<string> queries;
 
 	//THE CREATE PART - MUST BE ALWAYS RUN (if table already exists we simply have an error)
-	string create = "CREATE TABLE " + GameModel::table + " (";
+	string create = "CREATE TABLE IF NOT EXISTS " + GameModel::table + " (";
 	create += "ID INTEGER PRIMARY KEY, TITLE TEXT, DEVICE_ID INTEGER, DESCRIPTION TEXT, DEVELOPER TEXT, PUBLISHER TEXT, ESRB TEXT, PLAYERS TEXT, ";
 	create += "CO_OP TEXT, RELEASE_DATE TEXT, TGDB_ID TEXT, TGDB_RATING TEXT, ";
 	create += "IMAGE_FRONT TEXT, IMAGE_BACK TEXT, IMAGE_SCREEN TEXT, IMAGE_LOGO TEXT);";

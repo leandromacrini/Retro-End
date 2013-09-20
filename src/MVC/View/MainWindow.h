@@ -23,7 +23,8 @@ namespace RetroEnd
 
 			bool init(int width, int height);
 			bool isRunning();
-			void update();
+			void update(int deltaTime);
+			void render();
 
 		private:
 

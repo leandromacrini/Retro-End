@@ -8,6 +8,7 @@
 ///////////////////////////////////////////
 #include "globals.h"
 
+#include "MVC/Controller/SettingsController.h"
 #include "MVC/Controller/GamingController.h"
 #include "MVC/Controller/ScraperController.h"
 #include "MVC/Controller/InputController.h"
@@ -40,10 +41,12 @@ void onStart()
 	LOG(LogLevel::Info,  "***** WELCOME TO RETRO-END *****\n\n");
 
 	//start any other controllers
-	Controller::RenderController::getInstance().start();
+	//the order is mandatory
+	Controller::SettingsController::getInstance().start();
 	Controller::InputController::getInstance().start();
 	Controller::ScraperController::getInstance().start();
 	Controller::GamingController::getInstance().start();
+	Controller::RenderController::getInstance().start();
 
 }
 
@@ -55,8 +58,12 @@ void onExit()
 	#endif
 
 	//stop any other controllers
+	Controller::SettingsController::getInstance().stop();
+	Controller::InputController::getInstance().stop();
 	Controller::ScraperController::getInstance().stop();
-
+	Controller::GamingController::getInstance().stop();
+	Controller::RenderController::getInstance().stop();
+	
 	LOG(LogLevel::Info,  "/n/n***** RETRO-END IS CLOSING *****");
 
 	//stop log controller
@@ -71,28 +78,14 @@ int main(int argc, char* argv[])
 	//starts any controller
 	onStart();
 
-	//create the Main Screen Window
-	View::MainWindow window;
-
-	if(!window.init(800, 600))
-	{
-		LOG(LogLevel::Fatal, "Window failed to initialize!");
-		return 1;
-	}
-
-	bool run = true;
-
 	//loop until stop
-	while( run )
+	while( Controller::RenderController::getInstance().isRunning() )
 	{
 		//handle inputs
 		//Controller::InputController::getInstance().update();
 
 		//update the main window
-		//Controller::RenderController::getInstance().update();
-
-		//check if can continue
-		//run = Controller::RenderController::getInstance().isRunning();
+		Controller::RenderController::getInstance().update();
 	}
 
 	//stops any controller

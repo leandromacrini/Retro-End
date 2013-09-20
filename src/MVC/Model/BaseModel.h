@@ -7,6 +7,8 @@
 #ifndef _BASEMODEL_H_
 #define _BASEMODEL_H_
 
+#include <sqlite3.h>
+
 #include "../../globals.h"
 
 using namespace std;
