@@ -43,10 +43,10 @@ void onStart()
 	//start any other controllers
 	//the order is mandatory
 	Controller::SettingsController::getInstance().start();
-	Controller::InputController::getInstance().start();
-	Controller::ScraperController::getInstance().start();
 	Controller::GamingController::getInstance().start();
+	Controller::ScraperController::getInstance().start();
 	Controller::RenderController::getInstance().start();
+	Controller::InputController::getInstance().start();
 
 }
 

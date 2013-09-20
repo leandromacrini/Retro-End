@@ -80,6 +80,9 @@ void RenderController::start()
 	glOrtho(0, 800, 600, 0, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+	//create the main window
+	mainWindow = new View::MainWindow();
 }
 
 void RenderController::stop() {
