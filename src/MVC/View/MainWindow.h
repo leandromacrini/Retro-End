@@ -10,7 +10,7 @@
 #include "../../globals.h"
 
 #include "BaseView.h"
-#include "../Model/InputConfigModel.h"
+#include "../Model/InputConfig.h"
 
 using namespace std;
 
@@ -24,7 +24,7 @@ namespace RetroEnd
 			MainWindow();
 			~MainWindow();
 
-			bool input(Model::InputConfigModel* config, Model::Input input);
+			bool input(Model::InputConfig* config, Model::Input input);
 
 			bool isRunning();
 

@@ -1,10 +1,12 @@
 #include "BaseView.h"
 
+#include "../Controller/RenderController.h"
+
 using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
-BaseView::BaseView()
+BaseView::BaseView() : mParent(NULL), mOpacity(255), mPosition(Eigen::Vector3f::Zero()), mSize(Eigen::Vector2f::Zero()), mAnimation(NULL), mBackgroundColor(0x00000000)
 {
 
 }
@@ -14,23 +16,45 @@ BaseView::~BaseView()
 
 }
 
-void BaseView::update(int deltaTime)
+void BaseView::update(unsigned int deltaTime)
 {
+	//animation handling
+	if(mAnimation != NULL)
+	{
+		//Moving
+		if(mAnimation->moveOffset != NULL)
+		{
+			float deltaX = mAnimation->moveOffset->x() * deltaTime / ( mAnimation->millisDuration > 0? mAnimation->millisDuration : 1 );
+			float deltaY = mAnimation->moveOffset->y() * deltaTime / ( mAnimation->millisDuration > 0? mAnimation->millisDuration : 1 );
+
+			//last time?
+			if( abs(deltaX) > abs(mAnimation->moveOffset->x())) deltaX = mAnimation->moveOffset->x();
+			if( abs(deltaY) > abs(mAnimation->moveOffset->y())) deltaX = mAnimation->moveOffset->y();
+
+			*(mAnimation->moveOffset) -= Eigen::Vector3f(deltaX, deltaY, 0);
+			mPosition += Eigen::Vector3f(deltaX, deltaY, 0);
+		}
+
+		mAnimation->millisDuration -= deltaTime >= mAnimation->millisDuration ? mAnimation->millisDuration : deltaTime ;
+
+		//is animation completed?
+		if(mAnimation->millisDuration == 0)
+		{
+			//save callback
+			auto callback = mAnimation->endCallback;
+
+			//delete current animation so we can chain another animation in the callback
+			delete mAnimation;
+			mAnimation = NULL;
+
+			//call the end callback
+			callback();
+		}
+	}
+
 	for(unsigned int i = 0; i < getChildCount(); i++)
 	{
 		getChild(i)->update(deltaTime);
-	}
-}
-
-void BaseView::render(const Eigen::Affine3f& parentTrans)
-{
-	//trasform me
-	Eigen::Affine3f trans = parentTrans * getTransform();
-
-	//trasform children
-	for(unsigned int i = 0; i < getChildCount(); i++)
-	{
-		getChild(i)->render(trans);
 	}
 }
 
@@ -78,10 +102,19 @@ void BaseView::setOpacity(unsigned char opacity)
 	mOpacity = opacity;
 }
 
+unsigned int BaseView::getBackgroundColor() const
+{
+	return mBackgroundColor;
+}
+
+void BaseView::setBackgroundColor(unsigned int color)
+{
+	mBackgroundColor = color;
+}
+
 const Eigen::Affine3f BaseView::getTransform()
 {
 	mTransform.setIdentity();
-	mTransform.translate(mPosition);
 	return mTransform;
 }
 
@@ -133,18 +166,53 @@ BaseView* BaseView::getParent() const
 	return mParent;
 }
 
-void BaseView::animate(AnimationData data)
+void BaseView::animate(Animation* data)
 {
+	if(mAnimation != NULL) LOG(LogLevel::Warning, "Called animate on an animating component!");
 
+	mAnimation = data;
 }
 
-bool BaseView::input(InputConfigModel* config, Input input)
+bool BaseView::input(InputConfig* config, Input input)
 {
 	for(unsigned int i = 0; i < getChildCount(); i++)
 	{
-		if(getChild(i)->input(config, input));//TODO config, input))
+		if(getChild(i)->input(config, input))//TODO config, input))
 			return true;
 	}
 
 	return false;
+}
+
+Eigen::Vector3f BaseView::getAbsolutePosition()
+{
+	Eigen::Vector3f result = Eigen::Vector3f::Zero();
+
+	if(mParent)
+		result = mParent->getAbsolutePosition() + mPosition;
+	else
+		result = mPosition;
+
+	return result;
+}
+
+void BaseView::render(const Eigen::Affine3f& parentTrans)
+{
+	//trasform me
+	Eigen::Affine3f trans = parentTrans * getTransform();
+
+	//render me
+	RenderController::setMatrix(trans);
+	draw();
+
+	//trasform children
+	for(unsigned int i = 0; i < getChildCount(); i++)
+	{
+		getChild(i)->render(trans);
+	}
+}
+
+void BaseView::draw()
+{
+	RenderController::drawRect((int)getAbsolutePosition().x(), (int)getAbsolutePosition().y(), (int)mSize.x(), (int)mSize.y(), mBackgroundColor);
 }

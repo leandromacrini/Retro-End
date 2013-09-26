@@ -43,4 +43,4 @@ namespace RetroEnd
 	}
 }
 
-#endif _GAMINGCONTROLLER_H_
+#endif

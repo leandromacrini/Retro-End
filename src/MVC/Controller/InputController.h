@@ -16,7 +16,7 @@
 #include "LogController.h"
 #include "RenderController.h"
 
-#include "../Model/InputConfigModel.h"
+#include "../Model/InputConfig.h"
 
 using namespace std;
 using namespace RetroEnd;
@@ -48,6 +48,7 @@ namespace RetroEnd
 
 			void start();
 			void stop();
+			void update();
 
 			void loadConfig();
 			void writeConfig();
@@ -61,7 +62,7 @@ namespace RetroEnd
 
 			bool parseEvent(const SDL_Event& ev);
 
-			Model::InputConfigModel* getInputConfigByPlayer(int player);
+			Model::InputConfig* getInputConfigByPlayer(int player);
 
 			void startPolling();
 			void stopPolling();
@@ -72,15 +73,15 @@ namespace RetroEnd
 			static const int DEADZONE = 23000;
 
 			//non-InputManager classes shouldn't use this, as you can easily miss the keyboard
-			Model::InputConfigModel* getInputConfigByDevice(int device);
+			Model::InputConfig* getInputConfigByDevice(int device);
 
 			void loadDefaultConfig();
 
 			int mNumJoysticks;
 			int mNumPlayers;
 			SDL_Joystick** mJoysticks;
-			Model::InputConfigModel** mInputConfigs;
-			Model::InputConfigModel* mKeyboardInputConfig;
+			Model::InputConfig** mInputConfigs;
+			Model::InputConfig* mKeyboardInputConfig;
 			map<int, int>* mPrevAxisValues;
 
 			vector<InputDevice> inputDevices;
@@ -112,4 +113,4 @@ namespace RetroEnd
 	}
 }
 
-#endif _INPUTCONTROLLER_H_
+#endif

@@ -59,4 +59,4 @@ namespace RetroEnd
 	}
 }
 
-#endif _LOGCONTROLLER_H_
+#endif

@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	while( Controller::RenderController::getInstance().isRunning() )
 	{
 		//handle inputs
-		//Controller::InputController::getInstance().update();
+		Controller::InputController::getInstance().update();
 
 		//update the main window
 		Controller::RenderController::getInstance().update();

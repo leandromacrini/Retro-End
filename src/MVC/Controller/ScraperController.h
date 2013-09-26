@@ -49,4 +49,4 @@ namespace RetroEnd
 	}
 }
 
-#endif _SCRAPERCONTROLLER_H_
+#endif

@@ -54,4 +54,4 @@ namespace RetroEnd
 	}
 }
 
-#endif _SETTINGSCONTROLLER_H_
+#endif 

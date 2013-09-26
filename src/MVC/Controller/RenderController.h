@@ -55,11 +55,21 @@ namespace RetroEnd
 
 			void start();
 			void stop();
+			void exit();
 			void update();
 
 			bool isRunning();
+			
+			int getScreenWidth();
+			int getScreenHeight();
 
 			View::MainWindow* getCurrentWindow();
+
+			static void drawRect(int x, int y, int w, int h, unsigned int color);
+			static void setMatrix(float* mat);
+			static void setMatrix(const Eigen::Affine3f& transform);
+			static void setColor4bArray(GLubyte* array, unsigned int color);
+			static void buildGLColorArray(GLubyte* ptr, unsigned int color, unsigned int vertCount);
 		protected:
 
 		private:
@@ -74,7 +84,8 @@ namespace RetroEnd
 			//---Singleton---
 			RenderController mInstance();
 
-			RenderController() : mLastTime(0) {}; //private instance costructor for Singleton Controller
+			RenderController() : mLastTime(0) { }; //private instance costructor for Singleton Controller
+
 			RenderController(RenderController const&);// Don't Implement
 			void operator=(RenderController const&); // Don't implement
 			//---Singleton---
@@ -82,4 +93,4 @@ namespace RetroEnd
 	}
 }
 
-#endif _RENDERCONTROLLER_H_
+#endif

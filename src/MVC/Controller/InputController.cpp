@@ -29,13 +29,13 @@ void InputController::start()
 
 	mNumJoysticks = SDL_NumJoysticks();
 	mJoysticks = new SDL_Joystick*[mNumJoysticks];
-	mInputConfigs = new InputConfigModel*[mNumJoysticks];
+	mInputConfigs = new InputConfig*[mNumJoysticks];
 	mPrevAxisValues = new map<int, int>[mNumJoysticks];
 
 	for(int i = 0; i < mNumJoysticks; i++)
 	{
 		mJoysticks[i] = SDL_JoystickOpen(i);
-		mInputConfigs[i] = new InputConfigModel(i);
+		mInputConfigs[i] = new InputConfig(i);
 
 		for(int k = 0; k < SDL_JoystickNumAxes(mJoysticks[i]); k++)
 		{
@@ -43,7 +43,7 @@ void InputController::start()
 		}
 	}
 
-	mKeyboardInputConfig = new InputConfigModel(DEVICE_KEYBOARD);
+	mKeyboardInputConfig = new InputConfig(DEVICE_KEYBOARD);
 
 	SDL_JoystickEventState(SDL_ENABLE);
 
@@ -118,7 +118,7 @@ int InputController::getButtonCountByDevice(int id)
 int InputController::getNumPlayers() { return mNumPlayers; }
 void InputController::setNumPlayers(int num) { mNumPlayers = num; }
 
-InputConfigModel* InputController::getInputConfigByDevice(int device)
+InputConfig* InputController::getInputConfigByDevice(int device)
 {
 	if(device == DEVICE_KEYBOARD)
 		return mKeyboardInputConfig;
@@ -126,7 +126,7 @@ InputConfigModel* InputController::getInputConfigByDevice(int device)
 		return mInputConfigs[device];
 }
 
-InputConfigModel* InputController::getInputConfigByPlayer(int player)
+InputConfig* InputController::getInputConfigByPlayer(int player)
 {
 	if(mKeyboardInputConfig->getPlayerNum() == player)
 		return mKeyboardInputConfig;
@@ -138,7 +138,7 @@ InputConfigModel* InputController::getInputConfigByPlayer(int player)
 	}
 
 	LOG(LogLevel::Error, "Could not find input config for player number " + to_string(player) + "!")
-	return NULL;
+		return NULL;
 }
 
 bool InputController::parseEvent(const SDL_Event& ev)
@@ -294,7 +294,7 @@ void InputController::loadConfig()
 //allows the user to select to reconfigure in menus if this happens without having to delete es_input.cfg manually
 void InputController::loadDefaultConfig()
 {
-	InputConfigModel* cfg = getInputConfigByDevice(DEVICE_KEYBOARD);
+	InputConfig* cfg = getInputConfigByDevice(DEVICE_KEYBOARD);
 
 	mNumPlayers++;
 	cfg->setPlayerNum(0);
@@ -370,7 +370,7 @@ std::vector<InputDevice> InputController::getInputDevices() const
 
 	//retrieve all input devices from system
 #if defined (__APPLE__)
-    #error TODO: Not implemented for MacOS yet!!!
+#error TODO: Not implemented for MacOS yet!!!
 #elif defined(__linux__)
 	//open linux input devices file system
 	const std::string inputPath("/dev/input");
@@ -442,4 +442,27 @@ std::vector<InputDevice> InputController::getInputDevices() const
 #endif
 
 	return currentDevices;
+}
+
+void InputController::update()
+{
+	SDL_Event event;
+	while(SDL_PollEvent(&event))
+	{
+		switch(event.type)
+		{
+		case SDL_JOYHATMOTION:
+		case SDL_JOYBUTTONDOWN:
+		case SDL_JOYBUTTONUP:
+		case SDL_KEYDOWN:
+		case SDL_KEYUP:
+		case SDL_JOYAXISMOTION:
+		case SDL_USEREVENT:
+			parseEvent(event);
+			break;
+		case SDL_QUIT:
+			RenderController::getInstance().exit();
+			break;
+		}
+	}
 }

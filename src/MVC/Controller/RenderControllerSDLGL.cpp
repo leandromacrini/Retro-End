@@ -89,39 +89,9 @@ void RenderController::stop() {
 
 }
 
-bool RenderController::isRunning()
-{
-	return mRunning;
-}
-
-void RenderController::update()
-{
-	//compute the delta time with last update
-	int curTime = SDL_GetTicks();
-	int deltaTime = curTime - mLastTime;
-	mLastTime = curTime;
-
-	//cap deltaTime at 1000 
-	//TODO remove or undestard why
-	if(deltaTime > 1000 || deltaTime < 0) deltaTime = 1000;
-
-	//update the main window
-	mainWindow->update(deltaTime);
-	
-	//swap here so we can read the last screen state during updates (see ImageComponent::copyScreen())
-	swapBuffers(); 
-
-	//render the main window and all its child starting from Identity Matrix
-	mainWindow->render(Eigen::Affine3f::Identity());
-}
 
 void RenderController::swapBuffers()
 {
 	SDL_GL_SwapBuffers();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-View::MainWindow* RenderController::getCurrentWindow()
-{
-	return mainWindow;
 }
