@@ -25,9 +25,23 @@ void Image::setPath(string image)
 		if(mPath.empty() || ! ResourceController::fileExists(mPath))
 			mTexture.reset();
 		else
+		{
 			mTexture = TextureResource::get(mPath);
+
+			//update size if was Zero
+			if(mSize == Eigen::Vector2f::Zero()) setSize( (float)mTexture->getSize().x(), (float)mTexture->getSize().y());
+		}
 	}
 
+}
+
+void Image::setTiled (bool tiled)
+{
+	mTiled = tiled;
+}
+bool Image::getTiled ()
+{
+	return mTiled;
 }
 
 Eigen::Vector2i Image::getTextureSize() const
@@ -43,8 +57,7 @@ void Image::draw()
 	//draw the parent
 	BaseView::draw();
 
-	//the draw me
-	
+	//the draw me	
 	if(mTexture && getOpacity() > 0)
 	{
 		GLfloat points[12], texs[12];
@@ -55,10 +68,10 @@ void Image::draw()
 			float xCount = mSize.x() / getTextureSize().x();
 			float yCount = mSize.y() / getTextureSize().y();
 			
-			RenderController::buildGLColorArray(colors, (mColorShift >> 8 << 8) | (getOpacity()), 6);
-			buildImageArray(0, 0, points, texs, xCount, yCount);
+			RenderController::buildGLColorArray(colors, 0xFFFFFF00 | mOpacity, 6);
+			buildImageArray(getAbsolutePosition().x(), getAbsolutePosition().y(), points, texs, xCount, yCount);
 		}else{
-			RenderController::buildGLColorArray(colors, (mColorShift >> 8 << 8) | (getOpacity()), 6);
+			RenderController::buildGLColorArray(colors, 0xFFFFFF00 | mOpacity, 6);
 			buildImageArray(getAbsolutePosition().x(), getAbsolutePosition().y(), points, texs);
 		}
 

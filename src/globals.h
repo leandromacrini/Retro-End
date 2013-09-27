@@ -38,7 +38,7 @@ using namespace std;
 
 namespace RetroEnd
 {
-	const string DB_NAME = "retro.db";
+	const string DB_NAME = "data/retro.db";
 
 	const string APP_DIRECTORY = "retro-end";
 }

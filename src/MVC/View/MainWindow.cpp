@@ -1,6 +1,8 @@
 #include "MainWindow.h"
 
 #include "Image.h"
+#include "Sprite.h"
+#include "TextComponent.h"
 
 using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
@@ -9,57 +11,56 @@ using namespace RetroEnd::Controller;
 void goLeft(BaseView *);
 void goRight(BaseView *);
 
-void goLeft(BaseView * view)
+void showLogo(BaseView * view)
 {
+	Image* logo = new Image();
+	logo->setSize(RenderController::getInstance().getScreenWidth()/2, RenderController::getInstance().getScreenHeight() / 2);
+	logo->setPosition(RenderController::getInstance().getScreenWidth()/4, RenderController::getInstance().getScreenHeight() / 4 +200);
+	logo->setPath("data/logo white.png");
+	logo->setOpacity(0);
+	view->addChild(logo);
+
 	Animation* a = new Animation();
 
-	a->millisDuration = 500;
-	a->moveOffset = new Eigen::Vector3f(-100,0,0);
-	a->endCallback = [view] () { goRight( view ); };
+	a->millisDuration = 2000;
+	a->newOpacity = new unsigned char(255);
+	a->moveOffset = new Eigen::Vector3f( 0, -200, 0 );
+	a->endCallback = [view, logo] ()
+	{
+		Animation* a = new Animation();
+		a->millisDuration = 2000;
+		a->endCallback =  [view, logo] () { view->removeChild(logo); };
+		view->animate(a);
 
-	view->animate(a);
-}
+		//showConsoles(view);
+	};
 
-void goRight(BaseView * view)
-{
-	Animation* a = new Animation();
-
-	a->millisDuration = 500;
-	a->moveOffset = new Eigen::Vector3f(100,0,0);
-	a->endCallback = [view] () { goLeft( view ); };
-
-	view->animate(a);
+	logo->animate(a);
 }
 
 MainWindow::MainWindow()
 {
-	BaseView * view = new BaseView();
+	Image* background = new Image();
+	background->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
+	background->setPath("data/sfondo2.jpg");
+	this->addChild(background);
 
-	view->setPosition(100,100);
-	view->setSize(400,400);
-	view->setBackgroundColor(0x0000FFFF);
+	Sprite* yoshi = new Sprite();
+	yoshi->setPosition((float)RenderController::getInstance().getScreenWidth()-64, (float)RenderController::getInstance().getScreenHeight()-64);
+	yoshi->setSize(32, 32);
+	yoshi->setPath("data/yoshi.png");
+	yoshi->setLoop(true);
+	yoshi->start();
+	this->addChild(yoshi);
 
-	Image * child = new Image();
-	child->setPosition(0, 50);
-	child->setSize(100, 100);
-	child->setPath("face.png");
-	
-	view->addChild(child);
+	showLogo(this);
 
-	this->addChild(	view );
-
-	goLeft(view);
+	//showConsoles();
 }
 
 MainWindow::~MainWindow()
 {
 
-}
-
-bool MainWindow::isRunning()
-{
-
-	return true;
 }
 
 bool MainWindow::input(InputConfig* config, Input input)

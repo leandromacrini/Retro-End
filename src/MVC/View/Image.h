@@ -11,7 +11,6 @@
 
 #include "BaseView.h"
 #include "../Model/TextureResource.h"
-#include "../Model/InputConfig.h"
 
 using namespace std;
 
@@ -29,7 +28,7 @@ namespace RetroEnd
 			string& getPath ();
 
 			void	setTiled (bool tiled);
-			bool&	getTiled ();
+			bool	getTiled ();
 
 			//You can get the rendered size of the ImageComponent with getSize().
 			Eigen::Vector2i getTextureSize() const;
@@ -39,7 +38,6 @@ namespace RetroEnd
 		private:
 			string mPath;
 			bool mTiled;
-			unsigned int mColorShift;
 			shared_ptr<Model::TextureResource> mTexture;
 
 			void buildImageArray(float x, float y, GLfloat* points, GLfloat* texs, float percentageX = 1, float percentageY = 1); //writes 12 GLfloat points and 12 GLfloat texture coordinates to a given array at a given position

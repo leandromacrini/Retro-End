@@ -4,8 +4,7 @@
  * Pass the input only to the top level child
  */
 
-#ifndef _MAINWINDOW_H_
-#define _MAINWINDOW_H_
+#pragma once
 
 #include "../../globals.h"
 
@@ -26,12 +25,8 @@ namespace RetroEnd
 
 			bool input(Model::InputConfig* config, Model::Input input);
 
-			bool isRunning();
-
 		private:
 
 		};
 	}
 }
-
-#endif _MAINWINDOW_H_

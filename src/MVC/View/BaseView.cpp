@@ -22,7 +22,7 @@ void BaseView::update(unsigned int deltaTime)
 	if(mAnimation != NULL)
 	{
 		//Moving
-		if(mAnimation->moveOffset != NULL)
+		if(mAnimation->moveOffset)
 		{
 			float deltaX = mAnimation->moveOffset->x() * deltaTime / ( mAnimation->millisDuration > 0? mAnimation->millisDuration : 1 );
 			float deltaY = mAnimation->moveOffset->y() * deltaTime / ( mAnimation->millisDuration > 0? mAnimation->millisDuration : 1 );
@@ -33,6 +33,40 @@ void BaseView::update(unsigned int deltaTime)
 
 			*(mAnimation->moveOffset) -= Eigen::Vector3f(deltaX, deltaY, 0);
 			mPosition += Eigen::Vector3f(deltaX, deltaY, 0);
+		}
+
+		//fading
+		if(mAnimation->newOpacity && *mAnimation->newOpacity != mOpacity)
+		{
+			if(mAnimation->millisDuration == 0)
+			{
+				mOpacity =  *mAnimation->newOpacity;
+			}
+			else 
+			{
+				int deltaOpacity = (mOpacity - *mAnimation->newOpacity ) * (int)deltaTime / (int)( mAnimation->millisDuration > 0? mAnimation->millisDuration : 1 );
+
+				if(abs(deltaOpacity) > abs( mOpacity - *mAnimation->newOpacity ))
+					mOpacity = *mAnimation->newOpacity;
+				else
+					mOpacity -= deltaOpacity;
+			}
+		}
+
+		//scaling
+		if(mAnimation->newSize && *mAnimation->newSize != mSize)
+		{
+			if(mAnimation->millisDuration == 0)
+			{
+				mSize =  *mAnimation->newSize;
+			}
+			else
+			{
+				float deltaW = (mSize.x() - mAnimation->newSize->x()) * deltaTime / mAnimation->millisDuration;
+				float deltaH = (mSize.y() - mAnimation->newSize->y()) * deltaTime / mAnimation->millisDuration;
+
+				mSize -= Eigen::Vector2f(deltaW, deltaH);
+			}
 		}
 
 		mAnimation->millisDuration -= deltaTime >= mAnimation->millisDuration ? mAnimation->millisDuration : deltaTime ;
