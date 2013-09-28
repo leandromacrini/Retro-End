@@ -2,7 +2,11 @@
 
 #include "Image.h"
 #include "Sprite.h"
-#include "TextComponent.h"
+
+#include "../Controller/RenderController.h"
+
+#include "ConsoleView.h"
+
 
 using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
@@ -11,11 +15,19 @@ using namespace RetroEnd::Controller;
 void goLeft(BaseView *);
 void goRight(BaseView *);
 
+void showConsoles(BaseView * view)
+{
+	ConsoleView* consoles = new ConsoleView();
+	consoles->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
+	consoles->setPosition(0,0);
+	view->addChild(consoles);
+}
+
 void showLogo(BaseView * view)
 {
 	Image* logo = new Image();
-	logo->setSize(RenderController::getInstance().getScreenWidth()/2, RenderController::getInstance().getScreenHeight() / 2);
-	logo->setPosition(RenderController::getInstance().getScreenWidth()/4, RenderController::getInstance().getScreenHeight() / 4 +200);
+	logo->setSize((float)RenderController::getInstance().getScreenWidth()/2, (float)RenderController::getInstance().getScreenHeight() / 2);
+	logo->setPosition((float)RenderController::getInstance().getScreenWidth()/4, (float)RenderController::getInstance().getScreenHeight() / 4 +200);
 	logo->setPath("data/logo white.png");
 	logo->setOpacity(0);
 	view->addChild(logo);
@@ -29,10 +41,14 @@ void showLogo(BaseView * view)
 	{
 		Animation* a = new Animation();
 		a->millisDuration = 2000;
-		a->endCallback =  [view, logo] () { view->removeChild(logo); };
-		view->animate(a);
-
-		//showConsoles(view);
+		a->newOpacity = new unsigned char(0);
+		a->endCallback =  [view, logo] ()
+		{
+			view->removeChild(logo);
+			showConsoles(view);
+		};
+		
+		logo->animate(a);
 	};
 
 	logo->animate(a);
@@ -55,7 +71,7 @@ MainWindow::MainWindow()
 
 	showLogo(this);
 
-	//showConsoles();
+	//showConsoles(this);
 }
 
 MainWindow::~MainWindow()
@@ -65,6 +81,9 @@ MainWindow::~MainWindow()
 
 bool MainWindow::input(InputConfig* config, Input input)
 {
-
+	if(mChildren.size() > 0)
+	{
+		mChildren.at(mChildren.size() - 1)->input(config, input);
+	}
 	return true;
 }

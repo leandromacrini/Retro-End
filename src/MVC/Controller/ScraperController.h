@@ -1,18 +1,16 @@
-/* Base Model class
- *
- * Create the interface for access to any Model
- * Create the SQLite DB data layer
+/* Scraper Controller
+ * 
+ * Retrieve devices and games data from The Archive e The Games DB
  */
 
-#ifndef _SCRAPERCONTROLLER_H_
-#define _SCRAPERCONTROLLER_H_
+#pragma once
 
 #include <curl.h>
 
 #include "../../globals.h"
 
 #include "BaseController.h"
-#include "../Model/DeviceModel.h"
+#include "../Model/Device.h"
 #include "../Model/GameModel.h"
 
 using namespace std;
@@ -34,7 +32,7 @@ namespace RetroEnd
 			}
 
 			void ScrapeAllDevice();
-			void ScrapeAllGamesForDevice(Model::DeviceModel device);
+			void ScrapeAllGamesForDevice(Model::Device device);
 
 			void ScrapeGameByCRC(Model::GameModel game);
 
@@ -48,5 +46,3 @@ namespace RetroEnd
 		};
 	}
 }
-
-#endif

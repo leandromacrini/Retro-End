@@ -3,8 +3,7 @@
  * Handle the rendering of the Main Window over the local SDL implementation
  */
 
-#ifndef _RENDERCONTROLLER_H_
-#define _RENDERCONTROLLER_H_
+#pragma once
 
 //the Makefiles define these via command line
 //#define USE_OPENGL_ES
@@ -92,5 +91,3 @@ namespace RetroEnd
 		};
 	}
 }
-
-#endif

@@ -230,6 +230,21 @@ Eigen::Vector3f BaseView::getAbsolutePosition()
 	return result;
 }
 
+unsigned char BaseView::getAbsoluteOpacity()
+{
+	unsigned char result = 0;
+
+	//the absolute opacity is computed using my parent opacity as multiplier of my opacity
+	//myOpacity * myParentOpacity/255
+
+	if(mParent)
+		result = mOpacity * mParent->getAbsoluteOpacity()/255;
+	else
+		result = mOpacity;
+
+	return result;
+}
+
 void BaseView::render(const Eigen::Affine3f& parentTrans)
 {
 	//trasform me
@@ -248,5 +263,12 @@ void BaseView::render(const Eigen::Affine3f& parentTrans)
 
 void BaseView::draw()
 {
-	RenderController::drawRect((int)getAbsolutePosition().x(), (int)getAbsolutePosition().y(), (int)mSize.x(), (int)mSize.y(), mBackgroundColor);
+	//draw background rectangle
+	//at position + parent position
+	//of given size
+	RenderController::drawRect(
+		(int)getAbsolutePosition().x(), (int)getAbsolutePosition().y(),
+		(int)mSize.x(), (int)mSize.y(),
+		mBackgroundColor);
+		//(mBackgroundColor>>8<<8) | getAbsoluteOpacity());//TODO FIX THIS
 }

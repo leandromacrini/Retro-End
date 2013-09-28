@@ -3,8 +3,7 @@
 * Handle the inputs and generates the internal events
 */
 
-#ifndef _INPUTCONTROLLER_H_
-#define _INPUTCONTROLLER_H_
+#pragma once
 
 #include <map>
 #include <SDL.h>
@@ -112,5 +111,3 @@ namespace RetroEnd
 		};
 	}
 }
-
-#endif

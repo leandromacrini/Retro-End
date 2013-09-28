@@ -57,7 +57,8 @@ void Image::draw()
 	//draw the parent
 	BaseView::draw();
 
-	//the draw me	
+	//the draw me
+	//with opacity *= parent opacity (recursively)
 	if(mTexture && getOpacity() > 0)
 	{
 		GLfloat points[12], texs[12];
@@ -68,10 +69,10 @@ void Image::draw()
 			float xCount = mSize.x() / getTextureSize().x();
 			float yCount = mSize.y() / getTextureSize().y();
 			
-			RenderController::buildGLColorArray(colors, 0xFFFFFF00 | mOpacity, 6);
+			RenderController::buildGLColorArray(colors, 0xFFFFFF00 | getAbsoluteOpacity(), 6);
 			buildImageArray(getAbsolutePosition().x(), getAbsolutePosition().y(), points, texs, xCount, yCount);
 		}else{
-			RenderController::buildGLColorArray(colors, 0xFFFFFF00 | mOpacity, 6);
+			RenderController::buildGLColorArray(colors, 0xFFFFFF00 | getAbsoluteOpacity(), 6);
 			buildImageArray(getAbsolutePosition().x(), getAbsolutePosition().y(), points, texs);
 		}
 

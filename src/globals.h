@@ -16,6 +16,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <memory>
 
 //the Makefiles define these via command line
 //#define USE_OPENGL_ES

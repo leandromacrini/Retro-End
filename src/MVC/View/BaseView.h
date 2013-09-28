@@ -108,6 +108,7 @@ namespace RetroEnd
 			std::vector<BaseView*> mChildren;
 		
 			Eigen::Vector3f getAbsolutePosition();
+			unsigned char   getAbsoluteOpacity();
 		private:
 			Eigen::Affine3f mTransform;
 			View::Animation * mAnimation;

@@ -63,7 +63,7 @@ void ScraperController::ScrapeAllDevice()
 
 		pugi::xml_node platform = platDoc.child("Data").child("Platform");
 
-		Model::DeviceModel device;
+		Model::Device device;
 
 		device.name = platform.child("Platform").text().get();
 		device.description = platform.child("overview").text().get();
@@ -84,7 +84,7 @@ void ScraperController::ScrapeAllDevice()
 	}
 }
 
-void ScraperController::ScrapeAllGamesForDevice(Model::DeviceModel device)
+void ScraperController::ScrapeAllGamesForDevice(Model::Device device)
 {
 	std::cout << "Scraper is starting:\n";
 

@@ -2,15 +2,14 @@
  *
  */
 
-#ifndef _GAMINGCONTROLLER_H_
-#define _GAMINGCONTROLLER_H_
+#pragma once
 
 #include <curl.h>
 
 #include "../../globals.h"
 
 #include "BaseController.h"
-#include "../Model/DeviceModel.h"
+#include "../Model/Device.h"
 #include "../Model/GameModel.h"
 
 using namespace std;
@@ -42,5 +41,3 @@ namespace RetroEnd
 		};
 	}
 }
-
-#endif

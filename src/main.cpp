@@ -8,11 +8,14 @@
 ///////////////////////////////////////////
 #include "globals.h"
 
-#include "MVC/Controller/SettingsController.h"
+#include "MVC/Controller/AudioController.h"
 #include "MVC/Controller/GamingController.h"
-#include "MVC/Controller/ScraperController.h"
 #include "MVC/Controller/InputController.h"
+#include "MVC/Controller/LogController.h"
 #include "MVC/Controller/RenderController.h"
+#include "MVC/Controller/ResourceController.h"
+#include "MVC/Controller/ScraperController.h"
+#include "MVC/Controller/SettingsController.h"
 
 ///////////////////////////////////////////
 
@@ -47,7 +50,7 @@ void onStart()
 	Controller::ScraperController::getInstance().start();
 	Controller::RenderController::getInstance().start();
 	Controller::InputController::getInstance().start();
-
+	Controller::AudioController::getInstance().start();
 }
 
 //called on exit
@@ -59,9 +62,10 @@ void onExit()
 
 	//stop any other controllers
 	Controller::SettingsController::getInstance().stop();
-	Controller::InputController::getInstance().stop();
 	Controller::ScraperController::getInstance().stop();
 	Controller::GamingController::getInstance().stop();
+	Controller::AudioController::getInstance().stop();
+	Controller::InputController::getInstance().stop();
 	Controller::RenderController::getInstance().stop();
 	
 	LOG(LogLevel::Info,  "/n/n***** RETRO-END IS CLOSING *****");

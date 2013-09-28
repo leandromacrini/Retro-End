@@ -3,8 +3,7 @@
  * Contains all the application's settings
  */
 
-#ifndef _SETTINGSCONTROLLER_H_
-#define _SETTINGSCONTROLLER_H_
+#pragma once
 
 #include <sqlite3.h>
 
@@ -53,5 +52,3 @@ namespace RetroEnd
 		};
 	}
 }
-
-#endif 

@@ -23,7 +23,7 @@ namespace RetroEnd
 			MainWindow();
 			~MainWindow();
 
-			bool input(Model::InputConfig* config, Model::Input input);
+			bool input(Model::InputConfig* config, Model::Input input) override;
 
 		private:
 

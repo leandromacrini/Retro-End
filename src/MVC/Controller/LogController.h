@@ -3,8 +3,7 @@
  * Create the interface for access the Log system
  */
 
-#ifndef _LOGCONTROLLER_H_
-#define _LOGCONTROLLER_H_
+#pragma once
 
 #include "../../globals.h"
 
@@ -58,5 +57,3 @@ namespace RetroEnd
 		};
 	}
 }
-
-#endif
