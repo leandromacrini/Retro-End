@@ -15,6 +15,15 @@
 using namespace std;
 
 using namespace RetroEnd;
+using namespace RetroEnd::Model;
+
+namespace RetroEnd
+{
+	namespace Model
+	{
+		class Sound;
+	}
+}
 
 namespace RetroEnd
 {
@@ -33,15 +42,17 @@ namespace RetroEnd
 			void start();
 			void stop();
 
-			void registerSound(shared_ptr<Model::Sound> & sound);
-			void unregisterSound(shared_ptr<Model::Sound> & sound);
+			shared_ptr<Sound> createSound(string file);
 
-			void playAllSounds();
-			void stopAllSounds();
-
-		protected:
+			friend class Sound;
 
 		private:
+			void registerSound(shared_ptr<Sound> & sound);
+			void unregisterSound(shared_ptr<Sound> & sound);
+
+			void startPlaySamples();
+			void stopPlaySamples();
+
 			static SDL_AudioSpec sAudioFormat;
 			static vector<shared_ptr<Model::Sound>> sSoundVector;
 

@@ -51,11 +51,38 @@ void LogController::log(LogLevel level, const string& message)
 		string output = "[ " + timeToString() + " - " + logLevelToString(level) + " ] - " + message + "\n";
 
 		//log to file
+		fprintf(mLogFile, "%s", output.c_str());
 
 		//if debug print to cout too
-		if(mReportingLevel == LogLevel::Debug)
+		if(mReportingLevel >= LogLevel::Debug)
 		{
 			std::cout << output;
 		}
 	}
+}
+
+void LogController::start()
+{
+	mLogFile = fopen("data/log/Retro-End.log", "w");
+
+	if(mLogFile == NULL)
+	{
+		LOG(LogLevel::Error,  "LogController start Error! Unable to open Retro-End.log file for write!");
+		return;
+	}
+	
+	LOG(LogLevel::Info,  "LogController started.");
+}
+
+void LogController::stop()
+{
+	fflush(mLogFile);
+	fclose(mLogFile);
+
+	LOG(LogLevel::Info,  "LogController stopped.");
+}
+
+void LogController::update()
+{
+	fflush(mLogFile);
 }

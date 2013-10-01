@@ -5,6 +5,8 @@
 #include <boost/crc.hpp>
 #include <sstream>
 
+#include "LogController.h"
+
 using namespace RetroEnd::Controller;
 
 #define BUFFERSIZE 1024*4 //4 kB
@@ -35,9 +37,8 @@ std::string DownloadUrlAsString(const std::string & url)
 
 void ScraperController::ScrapeAllDevice()
 {
-	std::cout << "Scraper is starting:\n";
+	LOG(LogLevel::Info,  "Scraper is starting retrieving all the devices available ...\n");
 
-	std::cout << "Get All supported platforms ...\n\n";
 	std::string data = DownloadUrlAsString("http://thegamesdb.net/api/GetPlatformsList.php");
 
 	pugi::xml_document doc;
@@ -53,7 +54,7 @@ void ScraperController::ScrapeAllDevice()
 		string tgdb_id = system.child("id").text().get();
 		string name = system.child("name").text().get();
 
-		std::cout << "getting info for:" + name + "\n";
+		LOG( LogLevel::Info, "Getting info for: " + name );
 
 		std::string platData = DownloadUrlAsString("http://thegamesdb.net/api/GetPlatform.php?id=" + tgdb_id);
 
@@ -80,21 +81,18 @@ void ScraperController::ScrapeAllDevice()
 		device.tgbdRating = platform.child("Rating").text().get();
 
 		device.save();
-		std::cout << name + " saved to db\n";
+		LOG(LogLevel::Info, name + " saved to db\n");
 	}
 }
 
-void ScraperController::ScrapeAllGamesForDevice(Model::Device device)
+void ScraperController::ScrapeAllGamesForDevice(Model::Device& device)
 {
-	std::cout << "Scraper is starting:\n";
+	LOG(LogLevel::Info, "Scraper is starting retrieving all the games info available for " + device.name + "\n");
 
-	std::cout << "Get All Games for "<<device.name<<"\n\n";
 	std::string data = DownloadUrlAsString("http://thegamesdb.net/api/GetPlatformGames.php?platform=" + device.tgbdId);
 
 	pugi::xml_document doc;
-
 	doc.load(data.c_str());
-
 	pugi::xml_node systemList = doc.child("Data");
 
 	for(pugi::xml_node system = systemList.child("Game"); system; system = system.next_sibling("Game"))
@@ -102,7 +100,7 @@ void ScraperController::ScrapeAllGamesForDevice(Model::Device device)
 		string tgdb_id = system.child("id").text().get();
 		string title = system.child("GameTitle").text().get();
 
-		std::cout << "getting info for:" + title;
+		std::cout << "Getting info for:" + title;
 
 		std::string platData = DownloadUrlAsString("http://thegamesdb.net/api/GetGame.php?id=" + tgdb_id);
 
@@ -112,7 +110,7 @@ void ScraperController::ScrapeAllGamesForDevice(Model::Device device)
 
 		pugi::xml_node platform = platDoc.child("Data").child("Game");
 
-		Model::GameModel game;
+		Model::Game game;
 
 		game.title = platform.child("GameTitle").text().get();
 		game.deviceId = device.id;
@@ -126,15 +124,15 @@ void ScraperController::ScrapeAllGamesForDevice(Model::Device device)
 
 		game.save();
 
-		std::cout << " -> saved to db\n";
+		LOG(LogLevel::Info, title + " saved to db\n");
 	}
 }
 
-void ScraperController::ScrapeGameByCRC(Model::GameModel game)
+void ScraperController::ScrapeGameByCRC(Model::Game& game, Model::Device& device)
 {
 	if(game.gameFile == "")
 	{
-		LOG(LogLevel::Error, "ScraperController ScrapeGameByCRC file not available");
+		LOG(LogLevel::Error, "ScraperController ScrapeGameByCRC file not available for " + game.title);
 	}
 
 	//CRC is supported only for "the archive db" (where there is less informations)
@@ -154,7 +152,7 @@ void ScraperController::ScrapeGameByCRC(Model::GameModel game)
 	}
 	else
 	{
-		LOG(LogLevel::Error, "ScraperController ScrapeGameByCRC failed to open file: " + game.gameFile);
+		LOG(LogLevel::Error, "ScraperController ScrapeGameByCRC unable to open file: " + game.gameFile);
 	}
 
 	std::stringstream stream;
@@ -162,5 +160,16 @@ void ScraperController::ScrapeGameByCRC(Model::GameModel game)
 
 	std::string data = DownloadUrlAsString("http://api.archive.vg/2.0/Game.getInfoByCRC/xml/7TTRM4MNTIKR2NNAGASURHJOZJ3QXQC5/"+stream.str());
 
-	int a = 1;
+	pugi::xml_document doc;
+	doc.load(data.c_str());
+	pugi::xml_node systemList = doc.child("OpenSearchDescription").child("games");
+
+	for(pugi::xml_node system = systemList.child("game"); system; system = system.next_sibling("game"))
+	{
+		string tgdb_id = system.child("id").text().get();
+		string title = system.child("title").text().get();
+
+		std::cout << "Getting info for:" + title;
+		//TODO read data from archive.db 
+	}
 }

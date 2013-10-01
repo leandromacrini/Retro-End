@@ -10,7 +10,7 @@
 
 #include "BaseController.h"
 #include "../Model/Device.h"
-#include "../Model/GameModel.h"
+#include "../Model/Game.h"
 
 using namespace std;
 

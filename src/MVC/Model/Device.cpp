@@ -114,9 +114,8 @@ void Device::init()
 		}
 		else
 		{
-			//TODO LOG ERRORS or disconnect here too
 			string message = sqlite3_errmsg(db);
-			LOG(Error, "Device init : " + message);
+			LOG(LogLevel::Warning, "Device init : " + message);
 		}
 	}
 
@@ -151,7 +150,6 @@ vector<Device> Device::getAllDevices()
 	}
 	else
 	{
-		//TODO LOG ERRORS or disconnect here too
 		string message = sqlite3_errmsg(db);
 		LOG(Error, "Device getAllDevices : " + message);
 	}
@@ -191,7 +189,6 @@ Device Device::getDeviceById(unsigned int id)
 	}
 	else
 	{
-		//TODO LOG ERRORS or disconnect here too
 		string message = sqlite3_errmsg(db);
 		LOG(Error, "Device getDeviceById : " + message);
 	}

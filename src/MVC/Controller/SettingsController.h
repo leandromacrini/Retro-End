@@ -33,7 +33,7 @@ namespace RetroEnd
 
 			bool	getProperty(string name, bool defaultValue   = false);
 			float	getProperty(string name, float defaultValue  = 0.0F);
-			string	getProperty(string name, string defaultValue ="");
+			string	getProperty(string name, string defaultValue = "");
 
 			void	setProperty(string name, bool value);
 			void	setProperty(string name, float value);

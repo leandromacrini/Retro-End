@@ -11,7 +11,7 @@
 
 #include "BaseController.h"
 #include "../Model/Device.h"
-#include "../Model/GameModel.h"
+#include "../Model/Game.h"
 
 using namespace std;
 
@@ -32,9 +32,9 @@ namespace RetroEnd
 			}
 
 			void ScrapeAllDevice();
-			void ScrapeAllGamesForDevice(Model::Device device);
+			void ScrapeAllGamesForDevice(Model::Device& device);
 
-			void ScrapeGameByCRC(Model::GameModel game);
+			void ScrapeGameByCRC(Model::Game& game, Model::Device& device);
 
 		protected:
 

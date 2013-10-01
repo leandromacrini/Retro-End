@@ -69,8 +69,6 @@ void BaseView::update(unsigned int deltaTime)
 			}
 		}
 
-		mAnimation->millisDuration -= deltaTime >= mAnimation->millisDuration ? mAnimation->millisDuration : deltaTime ;
-
 		//is animation completed?
 		if(mAnimation->millisDuration == 0)
 		{
@@ -80,10 +78,13 @@ void BaseView::update(unsigned int deltaTime)
 			//delete current animation so we can chain another animation in the callback
 			delete mAnimation;
 			mAnimation = NULL;
+			
 
 			//call the end callback
 			callback();
 		}
+
+		if(mAnimation) mAnimation->millisDuration -= deltaTime >= mAnimation->millisDuration ? mAnimation->millisDuration : deltaTime ;
 	}
 
 	for(unsigned int i = 0; i < getChildCount(); i++)
@@ -205,6 +206,11 @@ void BaseView::animate(Animation* data)
 	if(mAnimation != NULL) LOG(LogLevel::Warning, "Called animate on an animating component!");
 
 	mAnimation = data;
+}
+
+bool BaseView::isAnimating()
+{
+	return mAnimation != NULL;
 }
 
 bool BaseView::input(InputConfig* config, Input input)

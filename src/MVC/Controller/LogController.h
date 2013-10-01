@@ -7,6 +7,12 @@
 
 #include "../../globals.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <sstream>
+#include <iostream>
+
 #include "BaseController.h"
 
 using namespace std;
@@ -37,6 +43,10 @@ namespace RetroEnd
 				return instance;
 			}
 
+			void start();
+			void stop();
+			void update();
+
 			LogLevel getReportingLevel();
 			void setReportingLevel(LogLevel level);
 
@@ -46,11 +56,12 @@ namespace RetroEnd
 
 		private:
 			LogLevel mReportingLevel;
+			FILE* mLogFile;
 
 			//---Singleton---
 			LogController mInstance();
 
-			LogController() {}; //private instance costructor for Singleton Controller
+			LogController() : mLogFile(NULL), mReportingLevel(LogLevel::Info) {}; //private instance costructor for Singleton Controller
 			LogController(LogController const&);// Don't Implement
 			void operator=(LogController const&); // Don't implement
 			//---Singleton---

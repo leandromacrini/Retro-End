@@ -39,7 +39,7 @@ void onStart()
 {
 	//start log controller
 	Controller::LogController::getInstance().start(); //first
-	Controller::LogController::getInstance().setReportingLevel(LogLevel::Debug);
+	Controller::LogController::getInstance().setReportingLevel(LogLevel::Debug); //TODO by setting or command line
 
 	LOG(LogLevel::Info,  "***** WELCOME TO RETRO-END *****\n\n");
 
@@ -68,7 +68,7 @@ void onExit()
 	Controller::InputController::getInstance().stop();
 	Controller::RenderController::getInstance().stop();
 	
-	LOG(LogLevel::Info,  "/n/n***** RETRO-END IS CLOSING *****");
+	LOG(LogLevel::Info,  "\n\n***** RETRO-END IS CLOSING *****");
 
 	//stop log controller
 	Controller::LogController::getInstance().stop(); //last
@@ -79,17 +79,28 @@ int main(int argc, char* argv[])
 	//parse the arguments
 	if( ! parseArgs( argc, argv) ) return 0;
 
+	Model::Game game;
+	game.id = 1;
+	game.gameFile = "data/Sonic The Hedgehog (W) (REV00) [!].gen";
+	game.deviceId = 1;
+	Model::Device dev;
+
+	Controller::ScraperController::getInstance().ScrapeGameByCRC(game, dev);
+
 	//starts any controller
 	onStart();
 
 	//loop until stop
 	while( Controller::RenderController::getInstance().isRunning() )
 	{
-		//handle inputs
+		//parse and handle inputs
 		Controller::InputController::getInstance().update();
 
-		//update the main window
+		//update and render current window
 		Controller::RenderController::getInstance().update();
+
+		//update logs
+		Controller::LogController::getInstance().update();
 	}
 
 	//stops any controller

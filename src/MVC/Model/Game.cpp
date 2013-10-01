@@ -1,47 +1,47 @@
-#include "GameModel.h"
+#include "Game.h"
 
 using namespace RetroEnd::Model;
 using namespace std;
 
 // The Name of the table into the DB for this Model
-string GameModel::table = "games";
+string Game::table = "games";
 
 // Model Class Constructor
-GameModel::GameModel() : BaseModel()
+Game::Game() : BaseModel()
 {
 	deviceId = 0; //default value
 }
 
 // Model Class Constructor from DB record
-GameModel::GameModel( sqlite3_stmt* record ) : BaseModel()
+Game::Game( sqlite3_stmt* record ) : BaseModel()
 {
-	id = sqlite3_column_int(record, 0);
-	title = (char*)sqlite3_column_text(record,1);
-	deviceId = sqlite3_column_int(record,2);
+	id			= sqlite3_column_int(record, 0);
+	title		= (char*)sqlite3_column_text(record,1);
+	deviceId	= sqlite3_column_int(record,2);
 	description = (char*)sqlite3_column_text(record,3);
-	developer = (char*)sqlite3_column_text(record,4);
-	publisher = (char*)sqlite3_column_text(record,5);
-	ESRB = (char*)sqlite3_column_text(record,6);
-	players = (char*)sqlite3_column_text(record,7);
-	coOp = (char*)sqlite3_column_text(record,8);
+	developer	= (char*)sqlite3_column_text(record,4);
+	publisher	= (char*)sqlite3_column_text(record,5);
+	ESRB		= (char*)sqlite3_column_text(record,6);
+	players		= (char*)sqlite3_column_text(record,7);
+	coOp		= (char*)sqlite3_column_text(record,8);
 	releaseDate = (char*)sqlite3_column_text(record,9);
-	tgbdId = (char*)sqlite3_column_text(record,10);
-	tgbdRating = (char*)sqlite3_column_text(record,11);
-	imageFront = (char*)sqlite3_column_text(record,12);
-	imageBack = (char*)sqlite3_column_text(record,13);
-	imageScreen = (char*)sqlite3_column_text(record,14);
-	imageLogo = (char*)sqlite3_column_text(record,15);
-	gameFile = (char*)sqlite3_column_text(record, 16);
+	tgbdId		= (char*)sqlite3_column_text(record,10);
+	tgbdRating	= (char*)sqlite3_column_text(record,11);
+	imageFront	= (char*)sqlite3_column_text(record,12);
+	imageBack	= (char*)sqlite3_column_text(record,13);
+	imageScreen	= (char*)sqlite3_column_text(record,14);
+	imageLogo	= (char*)sqlite3_column_text(record,15);
+	gameFile	= (char*)sqlite3_column_text(record, 16);
 }
 
 // Model Class Distructor
-GameModel::~GameModel()
+Game::~Game()
 {
 
 }
 
 // Build the query for update the DB record
-string GameModel::getUpdateQuery()
+string Game::getUpdateQuery()
 {
 	string query = "UPDATE " + table + " SET";
 
@@ -68,13 +68,13 @@ string GameModel::getUpdateQuery()
 }
 
 // Build the query for delete the DB record
-string GameModel::getDeleteQuery()
+string Game::getDeleteQuery()
 {
 	return "DELETE FROM " + table + " WHERE id="+to_string( id )+";";
 }
 
 // Build the query for create the DB record
-string GameModel::getInsertQuery()
+string Game::getInsertQuery()
 {
 	string query = "INSERT into " + table + " (TITLE,DEVICE_ID,DESCRIPTION,DEVELOPER,PUBLISHER,ESRB,PLAYERS,CO_OP,RELEASE_DATE,TGDB_ID,TGDB_RATING,IMAGE_FRONT,IMAGE_BACK,IMAGE_SCREEN,IMAGE_LOGO, GAME_FILE)";
 	query += "values ('" + sqlEscape( title ) + "','" + to_string(deviceId) + "','" + sqlEscape( description ) + "','" + sqlEscape( developer ) + "','" + sqlEscape( publisher ) + "','" + sqlEscape( ESRB ) + "','" + sqlEscape( players ) + "','" + sqlEscape( coOp ) + "','" + sqlEscape( releaseDate ) + "','" + sqlEscape( tgbdId ) + "','" + sqlEscape( tgbdRating ) + "','" + sqlEscape( imageFront ) + "','" + sqlEscape( imageBack ) + "','" + sqlEscape( imageScreen ) + "','" + sqlEscape( imageLogo ) + "','" + sqlEscape( gameFile ) + "');";
@@ -83,7 +83,7 @@ string GameModel::getInsertQuery()
 
 // Build the query for create the table into the SQLite DB
 // Sould be called only on first run of the app
-void GameModel::init()
+void Game::init()
 {
 	//open db connection
 	sqlite3* db;
@@ -93,7 +93,7 @@ void GameModel::init()
 	vector<string> queries;
 
 	//THE CREATE PART - MUST BE ALWAYS RUN (if table already exists we simply have an error)
-	string create = "CREATE TABLE IF NOT EXISTS " + GameModel::table + " (";
+	string create = "CREATE TABLE IF NOT EXISTS " + Game::table + " (";
 	create += "ID INTEGER PRIMARY KEY, TITLE TEXT, DEVICE_ID INTEGER, DESCRIPTION TEXT, DEVELOPER TEXT, PUBLISHER TEXT, ESRB TEXT, PLAYERS TEXT, ";
 	create += "CO_OP TEXT, RELEASE_DATE TEXT, TGDB_ID TEXT, TGDB_RATING TEXT, ";
 	create += "IMAGE_FRONT TEXT, IMAGE_BACK TEXT, IMAGE_SCREEN TEXT, IMAGE_LOGO TEXT);";
@@ -101,7 +101,7 @@ void GameModel::init()
 
 	//THE UPDATE PART  - MUST BE ALWAYS RUN (if colums already exist we simply have an error)
 	//new colums bust be added in the update part so when the app is updated we can add those to the DB
-	queries.push_back( "ALTER TABLE " +GameModel::table + " ADD COLUMN GAME_FILE TEXT DEFAULT '';" );
+	queries.push_back( "ALTER TABLE " +Game::table + " ADD COLUMN GAME_FILE TEXT DEFAULT '';" );
 
 	for (std::vector<string>::iterator it = queries.begin() ; it != queries.end(); ++it) {
 		string query = *it;
@@ -114,9 +114,8 @@ void GameModel::init()
 		}
 		else
 		{
-			//TODO LOG ERRORS or disconnect here too
 			string message = sqlite3_errmsg(db);
-			LOG(Error, "GameModel init : " + message);
+			LOG(LogLevel::Warning, "Game init : " + message);
 		}
 	}
 
@@ -125,11 +124,11 @@ void GameModel::init()
 }
 
 // Static method for read all the items from DB
-vector<GameModel> GameModel::getAllGames()
+vector<Game> Game::getAllGames()
 {
-	vector<GameModel> games;
+	vector<Game> games;
 
-	string query = "SELECT * FROM " + GameModel::table;
+	string query = "SELECT * FROM " + Game::table;
 
 	sqlite3* db;
 
@@ -144,7 +143,7 @@ vector<GameModel> GameModel::getAllGames()
 		while (result == SQLITE_ROW)
 		{
 			//create and insert the new item
-			games.push_back(GameModel(statement));
+			games.push_back(Game(statement));
 
 			//go to  next record
 			result = sqlite3_step(statement);
@@ -154,9 +153,8 @@ vector<GameModel> GameModel::getAllGames()
 	}
 	else
 	{
-		//TODO LOG ERRORS or disconnect here too
 		string message = sqlite3_errmsg(db);
-		LOG(Error, "GameModel getAllGames : " + message);
+		LOG(Error, "Game getAllGames : " + message);
 	}
 
 	sqlite3_close(db);
@@ -165,11 +163,11 @@ vector<GameModel> GameModel::getAllGames()
 }
 
 // Static method for read an item specified by "id" from DB
-GameModel GameModel::getGameById(int id)
+Game Game::getGameById(int id)
 {
-	GameModel* game = NULL;
+	Game* game = NULL;
 
-	string query = "SELECT * FROM " + GameModel::table + " WHERE id = " + to_string(id);
+	string query = "SELECT * FROM " + Game::table + " WHERE id = " + to_string(id);
 
 	sqlite3* db;
 
@@ -183,20 +181,19 @@ GameModel GameModel::getGameById(int id)
 
 		if(result == SQLITE_ROW)
 		{
-			game = new GameModel(statement);
+			game = new Game(statement);
 		}
 		else
 		{
-			game = new GameModel();
+			game = new Game();
 		}
 		
 		sqlite3_finalize(statement);
 	}
 	else
 	{
-		//TODO LOG ERRORS or disconnect here too
 		string message = sqlite3_errmsg(db);
-		LOG(Error, "GameModel getGameById : " + message);
+		LOG(Error, "Game getGameById : " + message);
 	}
 
 	sqlite3_close(db);
@@ -205,11 +202,11 @@ GameModel GameModel::getGameById(int id)
 }
 
 // Static method for read all the items from DB for a specified Device
-vector<GameModel> GameModel::getGamesForDevice(int deviceId)
+vector<Game> Game::getGamesForDevice(int deviceId)
 {
-	vector<GameModel> games;
+	vector<Game> games;
 
-	string query = "SELECT * FROM " + GameModel::table + " WHERE DEVICE_ID = " + to_string(deviceId);
+	string query = "SELECT * FROM " + Game::table + " WHERE DEVICE_ID = " + to_string(deviceId);
 
 	sqlite3* db;
 
@@ -224,7 +221,7 @@ vector<GameModel> GameModel::getGamesForDevice(int deviceId)
 		while (result == SQLITE_ROW)
 		{
 			//create and insert the new item
-			games.push_back(GameModel(statement));
+			games.push_back(Game(statement));
 
 			//go to  next record
 			result = sqlite3_step(statement);
@@ -234,9 +231,8 @@ vector<GameModel> GameModel::getGamesForDevice(int deviceId)
 	}
 	else
 	{
-		//TODO LOG ERRORS or disconnect here too
 		string message = sqlite3_errmsg(db);
-		LOG(Error, "GameModel getGamesForDevice : " + message);
+		LOG(Error, "Game getGamesForDevice : " + message);
 	}
 
 	sqlite3_close(db);

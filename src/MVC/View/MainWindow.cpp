@@ -3,6 +3,7 @@
 #include "Image.h"
 #include "Sprite.h"
 
+#include "../Controller/AudioController.h"
 #include "../Controller/RenderController.h"
 
 #include "ConsoleView.h"
@@ -27,7 +28,7 @@ void showLogo(BaseView * view)
 {
 	Image* logo = new Image();
 	logo->setSize((float)RenderController::getInstance().getScreenWidth()/2, (float)RenderController::getInstance().getScreenHeight() / 2);
-	logo->setPosition((float)RenderController::getInstance().getScreenWidth()/4, (float)RenderController::getInstance().getScreenHeight() / 4 +200);
+	logo->setPosition((float)RenderController::getInstance().getScreenWidth()/4, (float)RenderController::getInstance().getScreenHeight() / 4);
 	logo->setPath("data/logo white.png");
 	logo->setOpacity(0);
 	view->addChild(logo);
@@ -35,19 +36,32 @@ void showLogo(BaseView * view)
 	Animation* a = new Animation();
 
 	a->millisDuration = 2000;
-	a->newOpacity = new unsigned char(255);
-	a->moveOffset = new Eigen::Vector3f( 0, -200, 0 );
 	a->endCallback = [view, logo] ()
 	{
+		shared_ptr<Sound> sound = AudioController::getInstance().createSound("data/sounds/splash.wav");
+		sound->play();
+
 		Animation* a = new Animation();
+
 		a->millisDuration = 2000;
-		a->newOpacity = new unsigned char(0);
-		a->endCallback =  [view, logo] ()
+		a->newOpacity = new unsigned char(255);
+		a->endCallback = [view, logo] ()
 		{
-			view->removeChild(logo);
-			showConsoles(view);
+			
+
+			Animation* a = new Animation();
+			a->millisDuration = 1000;
+			a->newSize = new Eigen::Vector2f((float)RenderController::getInstance().getScreenWidth()/5, (float)RenderController::getInstance().getScreenHeight() / 5);
+			a->moveOffset = new Eigen::Vector3f((float)RenderController::getInstance().getScreenWidth()/2, (float)-RenderController::getInstance().getScreenHeight() / 4, 0);
+			a->endCallback =  [view, logo] ()
+			{
+				//view->removeChild(logo);
+				showConsoles(view);
+			};
+
+			logo->animate(a);
 		};
-		
+
 		logo->animate(a);
 	};
 

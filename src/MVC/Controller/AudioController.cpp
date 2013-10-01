@@ -76,15 +76,18 @@ void AudioController::start()
 	if (SDL_OpenAudio(&sAudioFormat, NULL) < 0) {
 		LOG(LogLevel::Error, "AudioController Error - Unable to open SDL audio: " + string( SDL_GetError() ));
 	}
+
+	LOG(LogLevel::Info, "AudioController started.");
 }
 
 void AudioController::stop()
 {
 	//stop all playback
-	stopAllSounds();
+	stopPlaySamples();
 	//completely tear down SDL audio. else SDL hogs audio resources and emulators might fail to start...
 	SDL_CloseAudio();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+	LOG(LogLevel::Info, "AudioController stopped.");
 }
 
 void AudioController::registerSound(std::shared_ptr<Sound> & sound)
@@ -108,7 +111,7 @@ void AudioController::unregisterSound(std::shared_ptr<Sound> & sound)
 	LOG(LogLevel::Error, "AudioController Error - tried to unregister a sound that wasn't registered!");
 }
 
-void AudioController::playAllSounds()
+void AudioController::startPlaySamples()
 {
 	getInstance();
 
@@ -119,7 +122,7 @@ void AudioController::playAllSounds()
 	SDL_PauseAudio(0);
 }
 
-void AudioController::stopAllSounds()
+void AudioController::stopPlaySamples()
 {
 	//stop playing all Sounds
 	for(unsigned int i = 0; i < sSoundVector.size(); i++)
@@ -131,4 +134,13 @@ void AudioController::stopAllSounds()
 	}
 	//pause audio
 	SDL_PauseAudio(1);
+}
+
+shared_ptr<Model::Sound> AudioController::createSound(string file)
+{
+	shared_ptr<Sound> sound(new Sound(file));
+
+	registerSound(sound);
+
+	return sound;
 }

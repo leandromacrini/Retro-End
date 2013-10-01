@@ -16,9 +16,7 @@ ConsoleView::ConsoleView() : mAnimating(false), mContainer(new BaseView())
 	mOpacity = 0;
 
 	//create the moving sound
-	mMoveSound = shared_ptr<Sound>(new Sound);
-	mMoveSound->loadFile("data/sounds/GS25.wav");
-	AudioController::getInstance().registerSound(mMoveSound);
+	mMoveSound = shared_ptr<Sound>( AudioController::getInstance().createSound("data/sounds/GS25.wav"));
 
 	vector<Device> devices = Device::getAllDevices();
 
@@ -59,7 +57,7 @@ bool ConsoleView::input(Model::InputConfig* config, Model::Input input)
 	float itemSide = (float)RenderController::getInstance().getScreenWidth() / 3;
 
 	//TODO input from settings
-	if(input.id == SDLK_DOWN && input.value != 0)
+	if(input.id == SDLK_DOWN && input.value != 0 && ! mContainer->isAnimating() )
 	{
 		Animation* a = new Animation();
 		a->millisDuration = 500;
@@ -70,7 +68,7 @@ bool ConsoleView::input(Model::InputConfig* config, Model::Input input)
 		return true;
 	}
 
-	if(input.id == SDLK_UP && input.value != 0)
+	if(input.id == SDLK_UP && input.value != 0 && ! mContainer->isAnimating())
 	{
 		Animation* a = new Animation();
 		a->millisDuration = 500;

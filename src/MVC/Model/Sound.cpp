@@ -7,28 +7,14 @@ using namespace RetroEnd::Model;
 using namespace RetroEnd::Controller;
 
 Sound::Sound(const std::string & path) : mSampleData(NULL), mSamplePos(0), mSampleLength(0), playing(false)
-{
-	loadFile(path);
-}
+{	
+	if(path.empty())
+	{
+		LOG(LogLevel::Error, "Sound Error - Creating sound from empty path!");
+		throw "Invalid sound file!";
+	}
 
-Sound::~Sound()
-{
-	deinit();
-}
-
-void Sound::loadFile(const std::string & path)
-{
 	mPath = path;
-	init();
-}
-
-void Sound::init()
-{
-	if(mSampleData != NULL)
-		deinit();
-
-	if(mPath.empty())
-		return;
 
 	//load wav file via SDL
 	SDL_AudioSpec wave;
@@ -65,26 +51,18 @@ void Sound::init()
     SDL_FreeWAV(data);
 }
 
-void Sound::deinit()
+Sound::~Sound()
 {
-	playing = false;
-
-	if(mSampleData != NULL)
-	{
-		SDL_LockAudio();
-		delete[] mSampleData;
-		mSampleData = NULL;
-		mSampleLength = 0;
-		mSamplePos = 0;
-		SDL_UnlockAudio();
-	}
+	SDL_LockAudio();
+	delete[] mSampleData;
+	mSampleData = NULL;
+	mSampleLength = 0;
+	mSamplePos = 0;
+	SDL_UnlockAudio();
 }
 
 void Sound::play()
 {
-	if(mSampleData == NULL)
-		return;
-
 	//TODO (Maybe in the controller (controller has control -.-), object has "object" functionality -.-
 	//if(Settings::getInstance()->getBool("DISABLESOUNDS"))
 	//	return;
@@ -102,8 +80,9 @@ void Sound::play()
 		playing = true;
 	}
 	SDL_UnlockAudio();
+
 	//tell the AudioManager to start playing samples
-	AudioController::getInstance().playAllSounds();
+	AudioController::getInstance().startPlaySamples();
 }
 
 bool Sound::isPlaying() const
@@ -145,7 +124,7 @@ Uint32 Sound::getLength() const
 	return mSampleLength;
 }
 
-Uint32 Sound::getLengthMS() const
+Uint32 Sound::getLengthMillis() const
 {
 	//44100 samples per second, 2 channels (stereo)
 	//I have no idea why the *0.75 is necessary, but otherwise it's inaccurate

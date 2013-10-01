@@ -1,8 +1,8 @@
 /* Game Model class
 *
 */
-#ifndef _GAMEMODEL_H_
-#define _GAMEMODEL_H_
+
+#pragma once
 
 #include "../../globals.h"
 #include "../Controller/LogController.h"
@@ -12,13 +12,13 @@ namespace RetroEnd
 {
 	namespace Model
 	{
-		class GameModel : public BaseModel
+		class Game : public BaseModel
 		{
 		public:
-			GameModel();
-			GameModel( sqlite3_stmt* record );
+			Game();
+			Game( sqlite3_stmt* record );
 
-			~GameModel();
+			~Game();
 
 			//DB PROPERTIES
 			string title;
@@ -45,13 +45,13 @@ namespace RetroEnd
 			static string table;
 
 			//retrive all Game from DB
-			static vector<GameModel> getAllGames();
+			static vector<Game> getAllGames();
 
 			//retrive all Game from DB for a specified Device
-			static vector<GameModel> getGamesForDevice(int deviceId);
+			static vector<Game> getGamesForDevice(int deviceId);
 
 			//retrive the Game identified by "id" or NULL if not present
-			static GameModel getGameById(int id);
+			static Game getGameById(int id);
 
 			//create the table, 
 			static void init();
@@ -63,4 +63,3 @@ namespace RetroEnd
 	}
 
 }
-#endif _GAMEMODEL_H_

@@ -70,7 +70,7 @@ void SettingsController::start()
 {
 
 	LOG(LogLevel::Info, "SettingsController is creating and updating all the tables.");
-	LOG(LogLevel::Info, "Ignore any create or update error if new elements are already into the DB.");
+	LOG(LogLevel::Info, "Ignore any create or update error if tables or columns are already into DB.");
 
 	//open db connection
 	sqlite3* db;
@@ -129,18 +129,11 @@ float SettingsController::getProperty(string name, float defaultValue)
 }
 
 
-string	SettingsController::getProperty(string name, string defaultValue)
+string SettingsController::getProperty(string name, string defaultValue)
 {
-	string result = defaultValue;
-
 	string value = readValueFromDB(name);
 
-	if( ! value.empty() )
-	{
-		result = value;
-	}
-
-	return result;
+	return value.empty() ? defaultValue : value;
 }
 
 void SettingsController::setProperty(string name, bool value)

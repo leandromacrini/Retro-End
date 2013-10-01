@@ -90,6 +90,7 @@ namespace RetroEnd
 			const Eigen::Affine3f getTransform();
 
 			void animate(Animation* data);
+			bool isAnimating();
 
 		protected:
 
