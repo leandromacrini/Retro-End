@@ -1,15 +1,13 @@
-#ifndef _INPUTCONFIG_H_
-#define _INPUTCONFIG_H_
+#pragma once
+
+#include "../../globals.h"
 
 #include <map>
 #include <SDL.h>
 #include <sstream>
 #include <algorithm>
 #include <iostream>
-
 #include "../../LIB/pugiXML/pugixml.hpp"
-
-#include "../../globals.h"
 
 #include "../Controller/LogController.h"
 
@@ -122,4 +120,3 @@ namespace RetroEnd
 		};
 	}
 }
-#endif

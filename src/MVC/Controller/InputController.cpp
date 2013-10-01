@@ -5,8 +5,9 @@ using namespace RetroEnd::Model;
 
 namespace fs = boost::filesystem;
 
-// InputDevice
-
+/***************/
+/**InputDevice**/
+/***************/
 InputDevice::InputDevice(const string & deviceName, unsigned long vendorId, unsigned long productId)
 	: name(deviceName), vendor(vendorId), product(productId)
 {
@@ -18,8 +19,9 @@ bool InputDevice::operator==(const InputDevice & b) const
 	return (name == b.name && vendor == b.vendor && product == b.product);
 }
 
-// InputController
-
+/*******************/
+/**InputController**/
+/*******************/
 void InputController::start()
 {
 	//get current input devices from system

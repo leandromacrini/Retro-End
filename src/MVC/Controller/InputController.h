@@ -37,17 +37,23 @@ namespace RetroEnd
 		class InputController : public BaseController
 		{
 		public:
+
+
 			static InputController& getInstance()
 			{
 				static InputController instance;
 				return instance;
 			}
 
-			static const int SDL_USEREVENT_POLLDEVICES = SDL_USEREVENT + 100; //This event is issued when the input devices should be rescanned.
-
 			void start();
 			void stop();
 			void update();
+
+		protected:
+
+		private:
+			static const int DEADZONE = 23000;
+			static const int SDL_USEREVENT_POLLDEVICES = SDL_USEREVENT + 100; //This event is issued when the input devices should be rescanned.
 
 			void loadConfig();
 			void writeConfig();
@@ -65,11 +71,6 @@ namespace RetroEnd
 
 			void startPolling();
 			void stopPolling();
-
-		protected:
-
-		private:
-			static const int DEADZONE = 23000;
 
 			//non-InputManager classes shouldn't use this, as you can easily miss the keyboard
 			Model::InputConfig* getInputConfigByDevice(int device);
