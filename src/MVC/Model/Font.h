@@ -69,8 +69,12 @@ namespace RetroEnd
 
 			int getSize() const;
 
-			static std::string getDefaultPath();
+
+			static shared_ptr<Font> getDefaultFont();
 		private:
+			static std::string getDefaultPath();
+			static shared_ptr<Font> mDefaultFont;
+
 			static int getDpiX();
 			static int getDpiY();
 

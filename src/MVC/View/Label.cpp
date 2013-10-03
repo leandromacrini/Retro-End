@@ -56,7 +56,7 @@ std::shared_ptr<Font> Label::getFont() const
 	if(mFont)
 		return mFont;
 	else
-		return Font::get(Font::getDefaultPath(), FONT_SIZE_MEDIUM);
+		return Font::getDefaultFont();
 }
 
 void Label::draw()
@@ -65,7 +65,7 @@ void Label::draw()
 	BaseView::draw();
 
 	//the draw me
-	if(mFont && !mText.empty())
+	if(getFont() && !mText.empty())
 	{
 		Eigen::Vector3f pos3f = getAbsolutePosition();
 		Eigen::Vector2f pos2f(pos3f.x(), pos3f.y());
@@ -74,9 +74,9 @@ void Label::draw()
 		{
 			Eigen::Vector2f textSize = mFont->sizeWrappedText(mText, getSize().x());
 			Eigen::Vector2f pos((getSize().x() - textSize.x()) / 2, 0);
-			mFont->drawWrappedText(mText, pos2f+pos, getSize().x(), (mColor >> 8 << 8) | getOpacity());
+			getFont()->drawWrappedText(mText, pos2f+pos, getSize().x(), (mColor >> 8 << 8) | getOpacity());
 		}else{
-			mFont->drawWrappedText(mText, pos2f, getSize().x(), mColor >> 8 << 8  | getOpacity());
+			getFont()->drawWrappedText(mText, pos2f, getSize().x(), mColor >> 8 << 8  | getOpacity());
 		}
 	}
 }

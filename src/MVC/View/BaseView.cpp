@@ -29,7 +29,7 @@ void BaseView::update(unsigned int deltaTime)
 
 			//last time?
 			if( abs(deltaX) > abs(mAnimation->moveOffset->x())) deltaX = mAnimation->moveOffset->x();
-			if( abs(deltaY) > abs(mAnimation->moveOffset->y())) deltaX = mAnimation->moveOffset->y();
+			if( abs(deltaY) > abs(mAnimation->moveOffset->y())) deltaY = mAnimation->moveOffset->y();
 
 			*(mAnimation->moveOffset) -= Eigen::Vector3f(deltaX, deltaY, 0);
 			mPosition += Eigen::Vector3f(deltaX, deltaY, 0);
@@ -217,7 +217,7 @@ bool BaseView::input(InputConfig* config, Input input)
 {
 	for(unsigned int i = 0; i < getChildCount(); i++)
 	{
-		if(getChild(i)->input(config, input))//TODO config, input))
+		if(getChild(i)->input(config, input))
 			return true;
 	}
 

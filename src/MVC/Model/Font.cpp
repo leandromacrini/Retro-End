@@ -65,6 +65,16 @@ string Font::getDefaultPath()
 	return "";
 }
 
+shared_ptr<Font> Font::mDefaultFont = NULL;
+
+shared_ptr<Font> Font::getDefaultFont()
+{
+	if(Font::mDefaultFont == NULL)
+		Font::mDefaultFont = Font::get(Font::getDefaultPath(), FONT_SIZE_MEDIUM);
+
+	return Font::mDefaultFont;
+}
+
 void Font::initLibrary()
 {
 	if(FT_Init_FreeType(&sLibrary))
@@ -327,9 +337,6 @@ int Font::getHeight() const
 {
 	return (int)(mMaxGlyphHeight * 1.5f * fontScale);
 }
-
-
-
 
 void Font::drawCenteredText(string text, float xOffset, float y, unsigned int color)
 {
