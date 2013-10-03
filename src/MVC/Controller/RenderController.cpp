@@ -98,7 +98,7 @@ void RenderController::update()
 	mainWindow->render(Eigen::Affine3f::Identity());
 }
 
-View::MainWindow* RenderController::getCurrentWindow()
+View::BaseView* RenderController::getCurrentWindow()
 {
 	return mainWindow;
 }

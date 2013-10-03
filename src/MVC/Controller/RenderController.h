@@ -35,6 +35,7 @@
 #include "BaseController.h"
 #include "LogController.h"
 #include "../View/MainWindow.h"
+#include "../View/TestWindow.h"
 
 using namespace std;
 using namespace RetroEnd;
@@ -62,7 +63,7 @@ namespace RetroEnd
 			int getScreenWidth();
 			int getScreenHeight();
 
-			View::MainWindow* getCurrentWindow();
+			View::BaseView* getCurrentWindow();
 
 			static void drawRect(int x, int y, int w, int h, unsigned int color);
 			static void setMatrix(float* mat);
@@ -75,7 +76,7 @@ namespace RetroEnd
 			bool mRunning;
 			int mLastTime;
 			SDL_Surface* mSdlScreen;
-			View::MainWindow* mainWindow;
+			View::BaseView* mainWindow;
 
 			bool createSurface();
 			void swapBuffers();

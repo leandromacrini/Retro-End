@@ -82,7 +82,8 @@ void RenderController::start()
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	//create the main window
-	mainWindow = new View::MainWindow();
+	mainWindow = new View::TestWindow();
+	//mainWindow = new View::MainWindow();//TODO reset to MAIN WINDOW
 }
 
 void RenderController::stop() {

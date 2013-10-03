@@ -1,9 +1,10 @@
 #include "BaseModel.h"
 
 #include <boost/algorithm/string.hpp>
-
+#include "../Controller/LogController.h"
 
 using namespace RetroEnd::Model;
+using namespace RetroEnd::Controller;
 
 BaseModel::BaseModel() : id(0)
 {
@@ -43,9 +44,8 @@ void BaseModel::save()
 	}
 	else
 	{
-		//TODO LOG ERRORS or disconnect here too
 		string message = sqlite3_errmsg(mDB);
-		cout << "BaseModel save error -> " << message;
+		LOG(Error, "BaseModel save error : " + message);
 	}
 
 	//close db concction
@@ -74,9 +74,8 @@ void BaseModel::remove()
 	}
 	else
 	{
-		//TODO LOG ERRORS or disconnect here too
 		string message = sqlite3_errmsg(mDB);
-		cout << "BaseModel remove error -> " << message;
+		LOG(Error, "BaseModel remove error : " + message);
 	}
 
 	//close db concction

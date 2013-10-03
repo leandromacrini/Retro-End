@@ -57,7 +57,7 @@ void onStart()
 void onExit()
 {
 	#ifdef _RPI_
-		bcm_host_deinit(); //TODO MOVE ???
+		bcm_host_deinit();
 	#endif
 
 	//stop any other controllers

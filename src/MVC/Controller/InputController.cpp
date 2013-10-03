@@ -1,4 +1,6 @@
 #include "InputController.h"
+#include "SettingsController.h"
+#include "LogController.h"
 
 using namespace RetroEnd::Controller;
 using namespace RetroEnd::Model;
@@ -145,7 +147,7 @@ InputConfig* InputController::getInputConfigByPlayer(int player)
 
 bool InputController::parseEvent(const SDL_Event& ev)
 {
-	View::MainWindow* mWindow = RenderController::getInstance().getCurrentWindow();
+	View::BaseView* mWindow = RenderController::getInstance().getCurrentWindow();
 
 	bool causedEvent = false;
 	switch(ev.type)
@@ -217,38 +219,33 @@ bool InputController::parseEvent(const SDL_Event& ev)
 
 void InputController::loadConfig()
 {
-	if(!mJoysticks)
-	{
-		LOG(LogLevel::Error, "ERROR - cannot load InputController config without being initialized!");
-	}
+	//if there are no joysticks we have nothing to do
+	if(mNumJoysticks == 0) return;
 
-	string path = getConfigPath();
-	if(!fs::exists(path))
-		return;
-
-	pugi::xml_document doc;
-	pugi::xml_parse_result res = doc.load_file(path.c_str());
-
-	if(!res)
-	{
-		string message = res.description();
-		LOG(LogLevel::Error, "Error loading input config: " + message);
-		return;
-	}
+	//in the DB we save a key-value pair for each device we have configured
+	//the key is the device name
+	//the value is the XML based configuration
 
 	mNumPlayers = 0;
 
-	bool* configuredDevice = new bool[mNumJoysticks];
 	for(int i = 0; i < mNumJoysticks; i++)
 	{
 		mInputConfigs[i]->setPlayerNum(-1);
-		configuredDevice[i] = false;
-	}
+		string name = SDL_JoystickName(i);
 
-	pugi::xml_node root = doc.child("inputList");
+		std::string config = SettingsController::getInstance().getProperty(name, string("MIAO"));
 
-	for(pugi::xml_node node = root.child("inputConfig"); node; node = node.next_sibling("inputConfig"))
-	{
+		if(config.empty())
+		{
+			LOG(LogLevel::Warning, "Could not find configuration for joystick named \"" + name + "\"! Skipping it.\n");
+			continue;
+		}
+		
+		pugi::xml_document doc;
+		pugi::xml_parse_result res = doc.load(config.c_str());
+
+		pugi::xml_node node = doc.child("inputConfig");
+
 		string type = node.attribute("type").as_string();
 
 		if(type == "keyboard")
@@ -257,31 +254,14 @@ void InputController::loadConfig()
 			mNumPlayers++;
 		}else if(type == "joystick")
 		{
-			bool found = false;
-			string devName = node.attribute("deviceName").as_string();
-			for(int i = 0; i < mNumJoysticks; i++)
-			{
-				if(!configuredDevice[i] && SDL_JoystickName(i) == devName)
-				{
-					mInputConfigs[i]->loadFromXML(node, mNumPlayers);
-					mNumPlayers++;
-					found = true;
-					configuredDevice[i] = true;
-					break;
-				}
-			}
+			mInputConfigs[i]->loadFromXML(node, mNumPlayers);
+			mNumPlayers++;
+			break;
 
-			if(!found)
-			{
-				LOG(LogLevel::Warning, "Could not find unconfigured joystick named \"" + devName + "\"! Skipping it.\n");
-				continue;
-			}
 		}else{
 			LOG(LogLevel::Warning, "Device type \"" + type + "\" unknown!\n");
 		}
 	}
-
-	delete[] configuredDevice;
 
 	if(mNumPlayers == 0)
 	{

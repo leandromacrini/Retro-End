@@ -31,13 +31,13 @@ namespace RetroEnd
 			void start();
 			void stop();
 
-			bool	getProperty(string name, bool defaultValue   = false);
-			float	getProperty(string name, float defaultValue  = 0.0F);
-			string	getProperty(string name, string defaultValue = "");
+			bool	getProperty(const string& name, bool defaultValue);
+			float	getProperty(const string& name, float defaultValue);
+			string	getProperty(const string& name, const string& defaultValue);
 
-			void	setProperty(string name, bool value);
-			void	setProperty(string name, float value);
-			void	setProperty(string name, string value);
+			void	setProperty(const string& name, bool value);
+			void	setProperty(const string& name, float value);
+			void	setProperty(const string& name, const string& value);
 
 		protected:
 
