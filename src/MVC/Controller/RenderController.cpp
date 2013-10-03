@@ -4,9 +4,8 @@
 
 using namespace RetroEnd::Controller;
 
-void RenderController::pushClipRect(Eigen::Vector2i pos, Eigen::Vector2i dim)
+void RenderController::pushClipRect(Eigen::Vector4i box)
 {
-	Eigen::Vector4i box(pos.x(), pos.y(), dim.x(), dim.y());
 	if(box[2] == 0)
 		box[2] = RenderController::getScreenWidth() - box.x();
 	if(box[3] == 0)
@@ -66,6 +65,8 @@ void RenderController::buildGLColorArray(GLubyte* ptr, unsigned int color, unsig
 
 void RenderController::drawRect(int x, int y, int w, int h, unsigned int color)
 {
+	if(w == 0 || h == 0) throw "Invalid argument!";
+
 #ifdef USE_OPENGL_ES
 	GLshort points[12];
 #else

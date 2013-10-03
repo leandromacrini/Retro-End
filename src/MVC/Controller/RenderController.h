@@ -68,7 +68,7 @@ namespace RetroEnd
 
 			View::BaseView* getCurrentWindow();
 
-			void pushClipRect(Eigen::Vector2i pos, Eigen::Vector2i dim);
+			void pushClipRect(Eigen::Vector4i box);
 			void popClipRect();
 
 			static void drawRect(int x, int y, int w, int h, unsigned int color);

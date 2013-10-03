@@ -10,7 +10,7 @@ BaseView::BaseView() :
 	mParent(NULL),
 	mOpacity(255),
 	mPosition(Eigen::Vector3f::Zero()),
-	mSize(Eigen::Vector2f::Zero()),
+	mSize(Eigen::Vector2f(1,1)), //SIZE MUST NEVER BE ZERO WHEN RENDERED
 	mAnimation(NULL),
 	mBackgroundColor(0x00000000),
 	mSelectedBackgroundColor(0x00000000),
@@ -277,6 +277,27 @@ unsigned char BaseView::getAbsoluteOpacity()
 	return result;
 }
 
+Eigen::Vector4i BaseView::getAbsoluteClipRect()
+{
+	if(mParent != NULL)
+	{
+		Eigen::Vector2f psize = mParent->mSize;
+		Eigen::Vector3f ppstn = mParent->getAbsolutePosition();
+		Eigen::Vector4i pclip = mParent->getAbsoluteClipRect();
+		
+		return Eigen::Vector4i(
+			max((int)ppstn.x(),pclip.x()),
+			max((int)ppstn.y(),pclip.y()),
+			min((int)(psize.x() - ppstn.x()),(int)(pclip.z() - pclip.x())),
+			min((int)(psize.y() - ppstn.y()),(int)(pclip.w() - pclip.x()))
+		);
+	}
+	else
+	{
+		return Eigen::Vector4i(0,0,(int)mSize.x(),(int)mSize.y());
+	}
+}
+
 void BaseView::render(const Eigen::Affine3f& parentTrans)
 {
 	//trasform me
@@ -285,19 +306,20 @@ void BaseView::render(const Eigen::Affine3f& parentTrans)
 	//render me
 	RenderController::setMatrix(trans);
 
-	//my parent is my clip rectangle, i can't draw out of that
+	//my parent's clip rectangle is my clip rectangle, i can't draw out of that
 	if(mParent != NULL)
 	{
-		Eigen::Vector3f ppos = mParent->getAbsolutePosition();
-		RenderController::getInstance().pushClipRect(Eigen::Vector2i((int)ppos.x(),(int)ppos.y()), Eigen::Vector2i((int)mParent->mSize.x(), (int)mParent->mSize.y()));
-	
+		RenderController::getInstance().pushClipRect(getAbsoluteClipRect());
 	}
+
+	//this is the draw function that should be overridden by children class
 	draw();
 
+	//remove clip rectangle if needed
 	if(mParent != NULL)
 		RenderController::getInstance().popClipRect();
 
-	//trasform children
+	//render children
 	for(unsigned int i = 0; i < getChildCount(); i++)
 	{
 		getChild(i)->render(trans);

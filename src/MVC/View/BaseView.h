@@ -122,6 +122,7 @@ namespace RetroEnd
 		
 			Eigen::Vector3f getAbsolutePosition();
 			unsigned char   getAbsoluteOpacity();
+			Eigen::Vector4i getAbsoluteClipRect();
 		private:
 			Eigen::Affine3f mTransform;
 			View::Animation * mAnimation;
