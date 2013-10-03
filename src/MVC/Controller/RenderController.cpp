@@ -1,6 +1,47 @@
 #include "RenderController.h"
 
+#include "LogController.h"
+
 using namespace RetroEnd::Controller;
+
+void RenderController::pushClipRect(Eigen::Vector2i pos, Eigen::Vector2i dim)
+{
+	Eigen::Vector4i box(pos.x(), pos.y(), dim.x(), dim.y());
+	if(box[2] == 0)
+		box[2] = RenderController::getScreenWidth() - box.x();
+	if(box[3] == 0)
+		box[3] = RenderController::getScreenHeight() - box.y();
+
+	//TODO - make sure the box fits within clipStack.top(), and clip further accordingly!
+
+	//glScissor starts at the bottom left of the window
+	//so (0, 0, 1, 1) is the bottom left pixel
+	//everything else uses y+ = down, so flip it to be consistent
+	//rect.pos.y = Renderer::getScreenHeight() - rect.pos.y - rect.size.y;
+	box[1] = RenderController::getScreenHeight() - box.y() - box[3];
+
+	clipStack.push(box);
+	glScissor(box[0], box[1], box[2], box[3]);
+	glEnable(GL_SCISSOR_TEST);
+}
+
+void RenderController::popClipRect()
+{
+	if(clipStack.empty())
+	{
+		LOG(LogLevel::Warning, "Tried to popClipRect while the stack was empty!");
+		return;
+	}
+
+	clipStack.pop();
+	if(clipStack.empty())
+	{
+		glDisable(GL_SCISSOR_TEST);
+	}else{
+		Eigen::Vector4i top = clipStack.top();
+		glScissor(top[0], top[1], top[2], top[3]);
+	}
+}
 
 void RenderController::setColor4bArray(GLubyte* array, unsigned int color)
 {

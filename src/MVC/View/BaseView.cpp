@@ -6,7 +6,15 @@ using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
-BaseView::BaseView() : mParent(NULL), mOpacity(255), mPosition(Eigen::Vector3f::Zero()), mSize(Eigen::Vector2f::Zero()), mAnimation(NULL), mBackgroundColor(0x00000000)
+BaseView::BaseView() : 
+	mParent(NULL),
+	mOpacity(255),
+	mPosition(Eigen::Vector3f::Zero()),
+	mSize(Eigen::Vector2f::Zero()),
+	mAnimation(NULL),
+	mBackgroundColor(0x00000000),
+	mSelectedBackgroundColor(0x00000000),
+	mSelected(false)
 {
 
 }
@@ -147,6 +155,24 @@ void BaseView::setBackgroundColor(unsigned int color)
 	mBackgroundColor = color;
 }
 
+unsigned int BaseView::getSelectedBackgroundColor() const
+{
+	return mSelectedBackgroundColor;
+}
+
+void BaseView::setSelectedBackgroundColor(unsigned int color)
+{
+	mSelectedBackgroundColor = color;
+}
+void BaseView::setSelected(bool selected)
+{
+	mSelected = selected;
+}
+bool BaseView::getSelected() const
+{
+	return mSelected;
+}
+
 const Eigen::Affine3f BaseView::getTransform()
 {
 	mTransform.setIdentity();
@@ -258,7 +284,18 @@ void BaseView::render(const Eigen::Affine3f& parentTrans)
 
 	//render me
 	RenderController::setMatrix(trans);
+
+	//my parent is my clip rectangle, i can't draw out of that
+	if(mParent != NULL)
+	{
+		Eigen::Vector3f ppos = mParent->getAbsolutePosition();
+		RenderController::getInstance().pushClipRect(Eigen::Vector2i((int)ppos.x(),(int)ppos.y()), Eigen::Vector2i((int)mParent->mSize.x(), (int)mParent->mSize.y()));
+	
+	}
 	draw();
+
+	if(mParent != NULL)
+		RenderController::getInstance().popClipRect();
 
 	//trasform children
 	for(unsigned int i = 0; i < getChildCount(); i++)
@@ -275,6 +312,6 @@ void BaseView::draw()
 	RenderController::drawRect(
 		(int)getAbsolutePosition().x(), (int)getAbsolutePosition().y(),
 		(int)mSize.x(), (int)mSize.y(),
-		mBackgroundColor);
+		mSelected? mSelectedBackgroundColor : mBackgroundColor);
 		//(mBackgroundColor>>8<<8) | getAbsoluteOpacity());//TODO FIX THIS
 }

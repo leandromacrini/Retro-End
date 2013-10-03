@@ -76,7 +76,10 @@ namespace RetroEnd
 			void setOpacity(unsigned char opacity);
 
 			unsigned int getBackgroundColor() const;
-			void setBackgroundColor(unsigned int opacity);
+			void setBackgroundColor(unsigned int color);
+
+			unsigned int getSelectedBackgroundColor() const;
+			void setSelectedBackgroundColor(unsigned int color);
 
 			void setParent(BaseView* parent);
 			BaseView* getParent() const;
@@ -92,19 +95,28 @@ namespace RetroEnd
 			void animate(Animation* data);
 			bool isAnimating();
 
+			void setSelected(bool selected);
+			bool getSelected() const;
+
 		protected:
 
-		
+			//the Parent View
 			BaseView* mParent;
 			
+			//the view opacity
 			unsigned char mOpacity;
 			
 			//position is relative to the parent component
 			Eigen::Vector3f mPosition;
 			
+			//float size of the view
 			Eigen::Vector2f mSize;
 
+			//a bool that indicate if the view is actually selected
+			bool mSelected;
+
 			unsigned int mBackgroundColor;
+			unsigned int mSelectedBackgroundColor;
 
 			std::vector<BaseView*> mChildren;
 		

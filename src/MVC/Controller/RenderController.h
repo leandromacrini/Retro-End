@@ -26,16 +26,19 @@
 #include <Windows.h>
 #endif
 
+#include "../../globals.h"
+
 #include GLHEADER
 
 #include <SDL.h>
-
-#include "../../globals.h"
+#include <Eigen/Dense>
+#include <stack>
 
 #include "BaseController.h"
 #include "LogController.h"
 #include "../View/MainWindow.h"
 #include "../View/TestWindow.h"
+
 
 using namespace std;
 using namespace RetroEnd;
@@ -65,6 +68,9 @@ namespace RetroEnd
 
 			View::BaseView* getCurrentWindow();
 
+			void pushClipRect(Eigen::Vector2i pos, Eigen::Vector2i dim);
+			void popClipRect();
+
 			static void drawRect(int x, int y, int w, int h, unsigned int color);
 			static void setMatrix(float* mat);
 			static void setMatrix(const Eigen::Affine3f& transform);
@@ -77,6 +83,7 @@ namespace RetroEnd
 			int mLastTime;
 			SDL_Surface* mSdlScreen;
 			View::BaseView* mainWindow;
+			std::stack<Eigen::Vector4i> clipStack;
 
 			bool createSurface();
 			void swapBuffers();
