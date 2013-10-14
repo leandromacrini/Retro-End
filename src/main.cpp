@@ -106,5 +106,5 @@ int main(int argc, char* argv[])
 	//stops any controller
 	onExit();
 
-	return 0;
+	return EXIT_SUCCESS;
 }

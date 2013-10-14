@@ -26,13 +26,6 @@ void Label::onSizeChanged()
 	calculateExtent();
 }
 
-void Label::setFont(std::shared_ptr<Font> font)
-{
-	mFont = font;
-
-	calculateExtent();
-}
-
 void Label::setColor(unsigned int color)
 {
 	mColor = color;
@@ -49,6 +42,13 @@ void Label::setText(const std::string& text)
 void Label::setCentered(bool center)
 {
 	mCentered = center;
+}
+
+void Label::setFont(std::shared_ptr<Font> font)
+{
+	mFont = font;
+
+	calculateExtent();
 }
 
 std::shared_ptr<Font> Label::getFont() const

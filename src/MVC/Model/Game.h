@@ -40,6 +40,7 @@ namespace RetroEnd
 			string imageLogo;
 
 			string gameFile;
+			string fileCRC;
 
 			//table name
 			static string table;

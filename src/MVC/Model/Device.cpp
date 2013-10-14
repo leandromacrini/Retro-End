@@ -115,7 +115,8 @@ void Device::init()
 		else
 		{
 			string message = sqlite3_errmsg(db);
-			LOG(LogLevel::Warning, "Device init : " + message);
+			if( strncmp(message.c_str(), "duplicate column", strlen("duplicate column")) != 0)
+				LOG(LogLevel::Warning, "Device init : " + message);
 		}
 	}
 

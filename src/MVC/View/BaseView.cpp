@@ -281,20 +281,18 @@ Eigen::Vector4i BaseView::getAbsoluteClipRect()
 {
 	if(mParent != NULL)
 	{
-		Eigen::Vector2f psize = mParent->mSize;
-		Eigen::Vector3f ppstn = mParent->getAbsolutePosition();
 		Eigen::Vector4i pclip = mParent->getAbsoluteClipRect();
 		
 		return Eigen::Vector4i(
-			max((int)ppstn.x(),pclip.x()),
-			max((int)ppstn.y(),pclip.y()),
-			min((int)(psize.x() - ppstn.x()),(int)(pclip.z() - pclip.x())),
-			min((int)(psize.y() - ppstn.y()),(int)(pclip.w() - pclip.x()))
+			max((int)pclip.x(), (int)getAbsolutePosition().x()),
+			max((int)pclip.y(), (int)getAbsolutePosition().y()),
+			min((int)pclip.z(), (int)mSize.x()),
+			min((int)pclip.w(), (int)mSize.y())
 		);
 	}
 	else
 	{
-		return Eigen::Vector4i(0,0,(int)mSize.x(),(int)mSize.y());
+		return Eigen::Vector4i((int)getAbsolutePosition().x(),(int)getAbsolutePosition().x(),(int)mSize.x(),(int)mSize.y());
 	}
 }
 

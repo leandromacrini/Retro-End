@@ -10,7 +10,7 @@
 #include "../Controller/RenderController.h"
 
 #define FONT_SIZE_SMALL ((unsigned int)(0.035f * RenderController::getInstance().getScreenHeight()))
-#define FONT_SIZE_MEDIUM ((unsigned int)(0.045f * RenderController::getInstance().getScreenHeight()))
+#define FONT_SIZE_MEDIUM ((unsigned int)(0.05f * RenderController::getInstance().getScreenHeight()))
 #define FONT_SIZE_LARGE ((unsigned int)(0.1f * RenderController::getInstance().getScreenHeight()))
 
 //A TrueType Font renderer that uses FreeType and OpenGL.

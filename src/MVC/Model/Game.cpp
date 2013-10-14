@@ -31,7 +31,8 @@ Game::Game( sqlite3_stmt* record ) : BaseModel()
 	imageBack	= (char*)sqlite3_column_text(record,13);
 	imageScreen	= (char*)sqlite3_column_text(record,14);
 	imageLogo	= (char*)sqlite3_column_text(record,15);
-	gameFile	= (char*)sqlite3_column_text(record, 16);
+	gameFile	= (char*)sqlite3_column_text(record,16);
+	fileCRC		= (char*)sqlite3_column_text(record,17);
 }
 
 // Model Class Distructor
@@ -61,6 +62,7 @@ string Game::getUpdateQuery()
 	query += " IMAGE_SCREEN = '"+	sqlEscape( imageScreen )+"',";
 	query += " IMAGE_LOGO = '"	+	sqlEscape( imageLogo )+"',";
 	query += " GAME_FILE = '"	+	sqlEscape( gameFile )+"' ";
+	query += " FILE_CRC = '"	+	sqlEscape( fileCRC )+"' ";
 
 	query += " WHERE id="+to_string( id )+";";
 
@@ -76,8 +78,8 @@ string Game::getDeleteQuery()
 // Build the query for create the DB record
 string Game::getInsertQuery()
 {
-	string query = "INSERT into " + table + " (TITLE,DEVICE_ID,DESCRIPTION,DEVELOPER,PUBLISHER,ESRB,PLAYERS,CO_OP,RELEASE_DATE,TGDB_ID,TGDB_RATING,IMAGE_FRONT,IMAGE_BACK,IMAGE_SCREEN,IMAGE_LOGO, GAME_FILE)";
-	query += "values ('" + sqlEscape( title ) + "','" + to_string(deviceId) + "','" + sqlEscape( description ) + "','" + sqlEscape( developer ) + "','" + sqlEscape( publisher ) + "','" + sqlEscape( ESRB ) + "','" + sqlEscape( players ) + "','" + sqlEscape( coOp ) + "','" + sqlEscape( releaseDate ) + "','" + sqlEscape( tgbdId ) + "','" + sqlEscape( tgbdRating ) + "','" + sqlEscape( imageFront ) + "','" + sqlEscape( imageBack ) + "','" + sqlEscape( imageScreen ) + "','" + sqlEscape( imageLogo ) + "','" + sqlEscape( gameFile ) + "');";
+	string query = "INSERT into " + table + " (TITLE,DEVICE_ID,DESCRIPTION,DEVELOPER,PUBLISHER,ESRB,PLAYERS,CO_OP,RELEASE_DATE,TGDB_ID,TGDB_RATING,IMAGE_FRONT,IMAGE_BACK,IMAGE_SCREEN,IMAGE_LOGO, GAME_FILE, FILE_CRC)";
+	query += "values ('" + sqlEscape( title ) + "','" + to_string(deviceId) + "','" + sqlEscape( description ) + "','" + sqlEscape( developer ) + "','" + sqlEscape( publisher ) + "','" + sqlEscape( ESRB ) + "','" + sqlEscape( players ) + "','" + sqlEscape( coOp ) + "','" + sqlEscape( releaseDate ) + "','" + sqlEscape( tgbdId ) + "','" + sqlEscape( tgbdRating ) + "','" + sqlEscape( imageFront ) + "','" + sqlEscape( imageBack ) + "','" + sqlEscape( imageScreen ) + "','" + sqlEscape( imageLogo ) + "','" + sqlEscape( gameFile ) + "','" + sqlEscape( fileCRC ) + "');";
 	return query;
 }
 
@@ -102,6 +104,7 @@ void Game::init()
 	//THE UPDATE PART  - MUST BE ALWAYS RUN (if colums already exist we simply have an error)
 	//new colums bust be added in the update part so when the app is updated we can add those to the DB
 	queries.push_back( "ALTER TABLE " +Game::table + " ADD COLUMN GAME_FILE TEXT DEFAULT '';" );
+	queries.push_back( "ALTER TABLE " +Game::table + " ADD COLUMN FILE_CRC TEXT DEFAULT '';" );
 
 	for (std::vector<string>::iterator it = queries.begin() ; it != queries.end(); ++it) {
 		string query = *it;
@@ -115,7 +118,10 @@ void Game::init()
 		else
 		{
 			string message = sqlite3_errmsg(db);
-			LOG(LogLevel::Warning, "Game init : " + message);
+
+			//IF COLUMN ALREADY AXISTS IS NOT AN ERROR
+			if( strncmp(message.c_str(), "duplicate column", strlen("duplicate column")) != 0)
+				LOG(LogLevel::Error, "Game init : " + message);
 		}
 	}
 
