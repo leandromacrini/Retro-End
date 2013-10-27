@@ -5,6 +5,9 @@
 #include "../Model/Sound.h"
 
 #include "BaseView.h"
+#include "Sprite.h"
+#include "Image.h"
+#include "Label.h"
 
 namespace RetroEnd
 {
@@ -20,7 +23,22 @@ namespace RetroEnd
 		private:
 			bool mAnimating;
 			BaseView* mContainer;
+			
 			shared_ptr<Model::Sound> mMoveSound;
+			shared_ptr<Model::Sound> mSelectSound;
+
+			BaseView* mInfoContainer;
+
+			Image* mLogo;
+			Image* mMediaIcon;
+			Image* mControllerIcon;
+			Image* mPlayersIcon;
+			
+			Label* mName;
+			Label* mDateCustomer;
+
+			Sprite* mLeftLegend;
+			Sprite* mRightLegend;
 		};
 
 	}

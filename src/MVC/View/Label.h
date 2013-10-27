@@ -13,23 +13,21 @@ namespace RetroEnd
 			Label(const std::string& text, std::shared_ptr<Model::Font> font, Eigen::Vector3f pos, Eigen::Vector2f size);
 
 			void setFont(std::shared_ptr<Model::Font> font);
+			std::shared_ptr<Model::Font> getFont() const;
 			void onSizeChanged() override;
 			void setText(const std::string& text);
 			void setColor(unsigned int color);
-			void setCentered(bool center); //Default is uncentered.
+			TextAlign HorizontalTextAlign;
 
 			void draw() override;
 
 		private:
-			std::shared_ptr<Model::Font> getFont() const;
-
 			void calculateExtent();
 
 			unsigned int mColor;
 			std::shared_ptr<Model::Font> mFont;
 			Eigen::Matrix<bool, 1, 2> mAutoCalcExtent;
 			std::string mText;
-			bool mCentered;
 		};
 	}
 

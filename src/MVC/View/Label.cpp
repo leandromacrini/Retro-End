@@ -7,17 +7,19 @@ using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
 Label::Label() : BaseView(), 
-	mFont(NULL), mColor(0x000000FF), mAutoCalcExtent(true, true), mCentered(false)
+	mFont(NULL), mColor(0x000000FF), mAutoCalcExtent(true, true)
 {
+	HorizontalTextAlign = TextAlign::Left;
 }
 
 Label::Label(const std::string& text, std::shared_ptr<Font> font, Eigen::Vector3f pos, Eigen::Vector2f size) : BaseView(), 
-	mFont(NULL), mColor(0x000000FF), mAutoCalcExtent(true, true), mCentered(false)
+	mFont(NULL), mColor(0x000000FF), mAutoCalcExtent(true, true)
 {
 	setText(text);
 	setFont(font);
 	setPosition(pos);
 	setSize(size);
+	HorizontalTextAlign = TextAlign::Left;
 }
 
 void Label::onSizeChanged()
@@ -37,11 +39,6 @@ void Label::setText(const std::string& text)
 	mText = text;
 
 	calculateExtent();
-}
-
-void Label::setCentered(bool center)
-{
-	mCentered = center;
 }
 
 void Label::setFont(std::shared_ptr<Font> font)
@@ -70,14 +67,24 @@ void Label::draw()
 		Eigen::Vector3f pos3f = getAbsolutePosition();
 		Eigen::Vector2f pos2f(pos3f.x(), pos3f.y());
 
-		if(mCentered)
+		//compute the text align offset
+		float xTextOffset = 0;
+		switch (HorizontalTextAlign)
 		{
-			Eigen::Vector2f textSize = mFont->sizeWrappedText(mText, getSize().x());
-			Eigen::Vector2f pos((getSize().x() - textSize.x()) / 2, 0);
-			getFont()->drawWrappedText(mText, pos2f+pos, getSize().x(), (mColor >> 8 << 8) | getOpacity());
-		}else{
-			getFont()->drawWrappedText(mText, pos2f, getSize().x(), mColor >> 8 << 8  | getOpacity());
+		case RetroEnd::View::Left:
+			xTextOffset = getAbsolutePosition().x();
+			break;
+		case RetroEnd::View::Center:
+			xTextOffset = pos2f.x() + ( ( mSize.x() - getFont()->sizeText(mText).x() ) / 2);
+			break;
+		case RetroEnd::View::Right:
+			xTextOffset = pos2f.x() + mSize.x() - getFont()->sizeText(mText).x();
+			break;
+		default:
+			break;
 		}
+		//draw text
+		getFont()->drawWrappedText(mText, Eigen::Vector2f(xTextOffset, pos2f.y()), mSize.x() , mColor >> 8 << 8  | getAbsoluteOpacity());
 	}
 }
 

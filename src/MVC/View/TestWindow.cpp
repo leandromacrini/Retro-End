@@ -13,6 +13,8 @@ using namespace RetroEnd::View;
 using namespace RetroEnd::Model;
 using namespace RetroEnd::Controller;
 
+ListView* myList;
+
 TestWindow::TestWindow()
 {
 	this->setSize((float)RenderController::getInstance().getScreenWidth(),(float) RenderController::getInstance().getScreenHeight());
@@ -29,34 +31,41 @@ TestWindow::TestWindow()
 
 	this->addChild(title);
 
-	ListView* list = new ListView();
+	myList = new ListView();
 
-	list->setPosition(100, 50);
-	list->setSize(500, 500);
-	list->setBackgroundColor(0x00FF00FF);
+	myList->setPosition(100, 50);
+	myList->setSize(500, 425);
+	myList->HorizontalTextAlign = TextAlign::Center;
+	myList->SelectedRowBackgroundColor = 0xFFFFFFFF;
 
-	list->addRow("PROVA 1");
-	list->addRow("PROVA 2");
-	list->addRow("PROVA 3");
-	list->addRow("PROVA 4");
-	list->addRow("PROVA 5");
-	list->addRow("PROVA 6");
-	list->addRow("PROVA 7");
-	list->addRow("PROVA 8");
-	list->addRow("PROVA 9");
-	list->addRow("PROVA 10");
-	list->addRow("PROVA 11");
-	list->addRow("PROVA 12");
-	list->addRow("PROVA 13");
-	this->addChild(list);
+	for(int i = 0 ; i < 100 ; i++)
+	{
+		myList->addRow("Titolo del gioco " + to_string(i));
+	}
+	
+	this->addChild(myList);
 
 }
 
 bool TestWindow::input(Model::InputConfig* config, Model::Input input)
 {
+	//TODO input from settings
+	if(input.id == SDLK_DOWN && input.value != 0 )
+	{
+		myList->setSelectedIndex( myList->getSelectedIndex() + 1 );
+		return true;
+	}
+
+	if(input.id == SDLK_UP && input.value != 0)
+	{
+		myList->setSelectedIndex( myList->getSelectedIndex() - 1 );
+		return true;
+	}
+
 	if(mChildren.size() > 0)
 	{
 		mChildren.at(mChildren.size() - 1)->input(config, input);
 	}
+
 	return true;
 }

@@ -60,7 +60,7 @@ namespace RetroEnd
 			void drawWrappedText(std::string text, const Eigen::Vector2f& offset, float xLen, unsigned int color);
 			Eigen::Vector2f sizeWrappedText(std::string text, float xLen) const;
 
-			void drawCenteredText(std::string text, float xOffset, float y, unsigned int color);
+			void drawScreenCenteredText(std::string text, float xOffset, float y, unsigned int color);
 
 			int getHeight() const;
 
@@ -68,7 +68,7 @@ namespace RetroEnd
 			void reload() override;
 
 			int getSize() const;
-
+			void setSize(int);
 
 			static shared_ptr<Font> getDefaultFont();
 		private:

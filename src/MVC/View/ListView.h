@@ -21,31 +21,22 @@ namespace RetroEnd
 {
 	namespace View
 	{
-		class ListViewItem
-		{
-		public:
-			ListViewItem() : title(NULL), subtitle(NULL), leftIMage(NULL), rightIMage(NULL), childView(NULL) { }
-
-			const char* title;
-			const char* subtitle;
-			Image* leftIMage;
-			Image* rightIMage;
-			BaseView* childView;
-		};
-
 		class ListView : public BaseView
 		{
 		public:
 			ListView();
 
 			// ROWS HANDLING
-			void addRow(ListViewItem& row, int index = -1);
-			void addRow(BaseView* row, int index = -1);
-			void addRow(const char* title, int index = -1);
+			void addRow(string title, int index = -1);
 
-			void removeRow(unsigned int index = 0);
+			void removeRow(int index = 0);
+
+			void removeAllRows();
 
 			unsigned int countRow();
+
+			void setSelectedIndex(int index);
+			unsigned int getSelectedIndex();
 
 			//ROW ITEM COLORS
 
@@ -62,17 +53,18 @@ namespace RetroEnd
 
 			//FONTS
 
-			void setFont(std::shared_ptr<Model::Font> font);
-			std::shared_ptr<Model::Font> getFont() const;
+			std::shared_ptr<Model::Font> ItemFont;
+
+			//SETTINGS
+			TextAlign HorizontalTextAlign;
 
 			//DRAW OVERRIDE
 
 			void draw() override;
 		private:
-			vector<ListViewItem> mItems;
-			std::shared_ptr<Model::Font> mFont;
-
-			int mSelectedRow;
+			vector<string> mItems;
+			
+			int mSelectedIndex;
 		};
 	}
 

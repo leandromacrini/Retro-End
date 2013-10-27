@@ -17,6 +17,7 @@ int Font::getDpiX() { return 96; }
 int Font::getDpiY() { return 96; }
 
 int Font::getSize() const { return mSize; }
+void Font::setSize(int size) { mSize = size; reload();}
 
 map< pair<string, int>, weak_ptr<Font> > Font::sFontMap;
 
@@ -25,10 +26,13 @@ string Font::getDefaultPath()
 	const int fontCount = 4;
 
 #ifdef WIN32
-	string fonts[] = {"DejaVuSerif.ttf",
+	string fonts[] = {
+		"Helvetica Bold.ttf",
+		"DejaVuSerif.ttf",
 		"Arial.ttf",
 		"Verdana.ttf",
-		"Tahoma.ttf" };
+		"Tahoma.ttf"
+	};
 
 	//build full font path
 	TCHAR winDir[MAX_PATH];
@@ -338,7 +342,7 @@ int Font::getHeight() const
 	return (int)(mMaxGlyphHeight * 1.5f * fontScale);
 }
 
-void Font::drawCenteredText(string text, float xOffset, float y, unsigned int color)
+void Font::drawScreenCenteredText(string text, float xOffset, float y, unsigned int color)
 {
 	Eigen::Vector2f pos = sizeText(text);
 	

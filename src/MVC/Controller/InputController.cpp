@@ -209,6 +209,7 @@ bool InputController::parseEvent(const SDL_Event& ev)
 				//TODO
 				//deinit();
 				//init();
+				onNewControllerDetected(0);
 			}
 			return true;
 		}

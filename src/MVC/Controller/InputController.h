@@ -11,6 +11,8 @@
 
 #include "../../globals.h"
 
+#include "../Model/Observer.h"
+
 #include "BaseController.h"
 #include "LogController.h"
 #include "RenderController.h"
@@ -48,6 +50,10 @@ namespace RetroEnd
 			void start();
 			void stop();
 			void update();
+
+			//EVENTS
+
+			Model::Observer<int> onNewControllerDetected;
 
 		protected:
 

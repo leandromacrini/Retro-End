@@ -20,6 +20,13 @@ namespace RetroEnd
 {
 	namespace View
 	{
+		enum TextAlign
+		{
+			Left,
+			Center,
+			Right
+		};
+
 		struct Animation
 		{
 		public:

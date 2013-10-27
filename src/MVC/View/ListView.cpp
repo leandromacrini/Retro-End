@@ -9,43 +9,46 @@ using namespace RetroEnd::Controller;
 ListView::ListView() : BaseView()
 {
 	TitleColor = 0xFFFFFFFF;
-	SelectedTitleColor = 0xFFFFFFFF;
+	SelectedTitleColor = 0x000000FF;
 	SubtitleColor = 0xFFFFFFFF;
-	SelectedSubtitleColor = 0xFFFFFFFF;
+	SelectedSubtitleColor = 0x000000FF;
 	RowBackgroundColor = 0x00000000;
-	SelectedRowBackgroundColor = 0xFF0000FF;
-	mFont = NULL;
+	SelectedRowBackgroundColor = 0x00000000;
+	ItemFont = NULL;
 	RowHeight = 50;
-	mSelectedRow = 0;
+	mSelectedIndex = 0;
+	HorizontalTextAlign = TextAlign::Left;
 }
 
 // ROWS HANDLING
-void ListView::addRow(ListViewItem& row, int index)
+void ListView::addRow(string title, int index)
 {
 	if(index > -1)
-		mItems.insert(mItems.begin() + index, row);
+		mItems.insert(mItems.begin() + index, title);
 	else
-		mItems.push_back(row);
-}
-void ListView::addRow(BaseView* row, int index)
-{
-	ListViewItem& item = ListViewItem();
-	item.childView = row;
+		mItems.push_back(title);
 
-	addRow(item, index);
-
-}
-void ListView::addRow(const char* title, int index)
-{
-	ListViewItem& item = ListViewItem();
-	item.title = title;
-
-	addRow(item, index);
+	if(mSelectedIndex <= index && mSelectedIndex != 0)
+	{
+		mSelectedIndex++;
+	}
 }
 
-void ListView::removeRow(unsigned int index)
+
+void ListView::removeRow(int index)
 {
 	mItems.erase(mItems.begin() + index);
+
+	if(mSelectedIndex >= index && mSelectedIndex != 0)
+	{
+		mSelectedIndex--;
+	}
+}
+
+void ListView::removeAllRows()
+{
+	mItems.clear();
+	mSelectedIndex = 0;
 }
 
 unsigned int ListView::countRow()
@@ -53,26 +56,75 @@ unsigned int ListView::countRow()
 	return mItems.size();
 }
 
-void ListView::setFont(shared_ptr<Font> font)
+void ListView::setSelectedIndex(int index)
 {
-	mFont = font;
-}
-shared_ptr<Font> ListView::getFont() const
-{
-	if(mFont)
-		return mFont;
+	if(index >= (int) mItems.size())
+		mSelectedIndex = 0;
+	else if (index < 0)
+		mSelectedIndex = mItems.size() - 1;
 	else
-		return Font::getDefaultFont();
+		mSelectedIndex = index;
 }
 
+unsigned int ListView::getSelectedIndex()
+{
+	return mSelectedIndex;
+}
+
+int firstRow = 0;
+int lastRow  = 0;
 void ListView::draw()
 {
+	if( ! ItemFont ) ItemFont = Font::getDefaultFont();
+
 	BaseView::draw();
 
-	for(unsigned int i = 0; i < mItems.size(); i++)
-	{
-		ListViewItem& item = mItems.at(i);
+	if(mItems.size() == 0) return;
 
-		getFont()->drawCenteredText(item.title, 0, getAbsolutePosition().y() + i*RowHeight, TitleColor);
+	//compute the number of visible rows
+	int visibleRows = (int) mSize.y() / RowHeight;
+
+	//first and last visible row
+	if(lastRow == 0)
+		lastRow = firstRow + visibleRows - 1; 
+
+	//if selected row is not complete visible move shown rows
+	while(mSelectedIndex > lastRow)  { firstRow++; lastRow ++; }
+	while(mSelectedIndex < firstRow) { firstRow--; lastRow --; }
+
+
+	for(int i = 0; i < (int)mItems.size(); i++)
+	{
+		//draw only visible rows (partial rows too -> from firstRow-1 TO lastRow+1)
+		if(firstRow != 0 && i < firstRow-1) continue;
+		if(i > lastRow +1) continue;
+
+		float rowYPosition = (float) i - firstRow;
+
+		//compute the text align offset
+		float xTextOffset = 0;
+		switch (HorizontalTextAlign)
+		{
+		case RetroEnd::View::Left:
+			xTextOffset = getAbsolutePosition().x();
+			break;
+		case RetroEnd::View::Center:
+			xTextOffset = getAbsolutePosition().x() + ( ( mSize.x() - ItemFont->sizeText(mItems.at(i)).x() ) / 2);
+			break;
+		case RetroEnd::View::Right:
+			xTextOffset = getAbsolutePosition().x() + mSize.x() - ItemFont->sizeText(mItems.at(i)).x();
+			break;
+		default:
+			break;
+		}
+
+		//draw background
+		RenderController::drawRect(
+			(int)getAbsolutePosition().x(), (int)(getAbsolutePosition().y() + rowYPosition*RowHeight), (int)mSize.x(), RowHeight,
+			i == mSelectedIndex? SelectedRowBackgroundColor : RowBackgroundColor
+		);
+		//draw text
+		ItemFont->drawText(mItems.at(i), Eigen::Vector2f(xTextOffset, getAbsolutePosition().y() + rowYPosition*RowHeight),
+			i == mSelectedIndex? SelectedTitleColor : TitleColor);
 	}
 }
