@@ -49,7 +49,29 @@ Eigen::Vector2i Image::getTextureSize() const
 	if(mTexture)
 		return mTexture->getSize();
 	else
-		return Eigen::Vector2i(0, 0);
+		return Eigen::Vector2i::Zero();
+}
+
+void Image::resizeByWidth(float width)
+{
+	Eigen::Vector2i tSize = getTextureSize();
+
+	if( tSize == Eigen::Vector2i::Zero()) throw "Invalid Operation, a texture is needed!";
+
+	float height = width * tSize.y() / tSize.x();
+
+	setSize(width, height);
+}
+
+void Image::resizeByHeight(float height)
+{
+	Eigen::Vector2i tSize = getTextureSize();
+
+	if( tSize == Eigen::Vector2i::Zero()) throw "Invalid Operation, a texture is needed!";
+
+	float width = (int)(height * tSize.x() / tSize.y());
+
+	setSize(width, height);
 }
 
 void Image::draw()

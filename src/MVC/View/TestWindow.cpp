@@ -21,7 +21,7 @@ TestWindow::TestWindow()
 	
 	Image* background = new Image();
 	background->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
-	background->setPath("data/sfondo2.jpg");
+	background->setPath("data/images/sfondo2.jpg");
 	this->addChild(background);
 
 	Label* title = new Label();

@@ -9,6 +9,7 @@ using namespace RetroEnd::Controller;
 Sprite::Sprite() : mCurrentFrame(0), mFrameDuration(100), mTimeElapsedFromLastFrame(0), mFrameCount(0), mActive(false), mLoop(true)
 {
 
+	FrameHeight = 0;
 }
 
 string& Sprite::getPath()
@@ -37,6 +38,16 @@ bool Sprite::getLoop()
 	return mLoop;
 }
 
+void Sprite::setFrameDuration(int rate)
+{
+	mFrameDuration = rate;
+}
+
+int Sprite::getFrameDuration()
+{
+	return mFrameDuration;
+}
+
 void Sprite::setPath(string image)
 {
 	if(mPath != image)
@@ -50,7 +61,7 @@ void Sprite::setPath(string image)
 			mTexture = TextureResource::get(mPath);
 
 			//compute the frame count and size
-			mFrameCount = mTexture->getSize().y() / mTexture->getSize().x();
+			mFrameCount = mTexture->getSize().y() / (FrameHeight==0? mTexture->getSize().x() : FrameHeight);
 		}
 	}
 
@@ -58,7 +69,8 @@ void Sprite::setPath(string image)
 
 void Sprite::update(unsigned int deltaTime)
 {
-	//first update me
+	BaseView::update(deltaTime);
+
 	if(mActive)
 	{
 		mTimeElapsedFromLastFrame+= deltaTime;
@@ -86,8 +98,6 @@ void Sprite::update(unsigned int deltaTime)
 		}
 
 	}
-	//then update children (bad father!!)
-	BaseView::update(deltaTime);
 }
 
 void Sprite::draw()

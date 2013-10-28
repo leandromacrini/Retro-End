@@ -17,6 +17,7 @@ BaseView::BaseView() :
 	mSelected(false)
 {
 
+	Visible = true;
 }
 
 BaseView::~BaseView()
@@ -279,25 +280,40 @@ unsigned char BaseView::getAbsoluteOpacity()
 
 Eigen::Vector4i BaseView::getAbsoluteClipRect()
 {
+	Eigen::Vector3f abs = getAbsolutePosition();
+
 	if(mParent != NULL)
 	{
 		Eigen::Vector4i pclip = mParent->getAbsoluteClipRect();
 		
-		return Eigen::Vector4i(
-			max((int)pclip.x(), (int)getAbsolutePosition().x()),
-			max((int)pclip.y(), (int)getAbsolutePosition().y()),
-			min((int)pclip.z(), (int)mSize.x()),
-			min((int)pclip.w(), (int)mSize.y())
-		);
+		int leftclip = max((int)pclip.x(), (int)abs.x());
+		int topclip  = max((int)pclip.y(), (int)abs.y());
+
+		int rightclip  = min((int)pclip.x() + pclip.z(), (int)(abs.x() + mSize.x()));
+		int bottomclip = min((int)pclip.y() + pclip.w(), (int)(abs.y() + mSize.y()));
+
+		int widthclip = 0;
+		int heightclip = 0;
+
+		if(rightclip > leftclip) widthclip = rightclip - leftclip;
+		if(bottomclip > topclip) heightclip = bottomclip - topclip;
+
+		Eigen::Vector4i result = Eigen::Vector4i(leftclip, topclip, widthclip, heightclip);
+
+		return result;
 	}
 	else
 	{
-		return Eigen::Vector4i((int)getAbsolutePosition().x(),(int)getAbsolutePosition().x(),(int)mSize.x(),(int)mSize.y());
+		Eigen::Vector4i result = Eigen::Vector4i((int)abs.x(),(int)abs.y(),(int)mSize.x(),(int)mSize.y());
+
+		return result;
 	}
 }
 
 void BaseView::render(const Eigen::Affine3f& parentTrans)
 {
+	if( ! Visible ) return;
+
 	//trasform me
 	Eigen::Affine3f trans = parentTrans * getTransform();
 

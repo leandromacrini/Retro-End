@@ -1,7 +1,9 @@
 #pragma once
 
 #include "BaseView.h"
+
 #include "../Model/Font.h"
+
 namespace RetroEnd
 {
 	namespace View
@@ -10,14 +12,20 @@ namespace RetroEnd
 		{
 		public:
 			Label();
-			Label(const std::string& text, std::shared_ptr<Model::Font> font, Eigen::Vector3f pos, Eigen::Vector2f size);
 
 			void setFont(std::shared_ptr<Model::Font> font);
 			std::shared_ptr<Model::Font> getFont() const;
 			void onSizeChanged() override;
 			void setText(const std::string& text);
 			void setColor(unsigned int color);
+			
 			TextAlign HorizontalTextAlign;
+			
+			bool WrapText;
+
+			bool ShadowVisible;
+			int ShadowColor;
+			Eigen::Vector2i ShadowOffset;
 
 			void draw() override;
 

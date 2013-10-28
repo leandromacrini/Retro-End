@@ -6,12 +6,6 @@ using namespace RetroEnd::Controller;
 
 void RenderController::pushClipRect(Eigen::Vector4i box)
 {
-	if(box[2] == 0)
-		box[2] = RenderController::getScreenWidth() - box.x();
-	if(box[3] == 0)
-		box[3] = RenderController::getScreenHeight() - box.y();
-
-	//TODO - make sure the box fits within clipStack.top(), and clip further accordingly!
 
 	//glScissor starts at the bottom left of the window
 	//so (0, 0, 1, 1) is the bottom left pixel

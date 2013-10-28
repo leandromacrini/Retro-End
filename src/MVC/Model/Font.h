@@ -70,6 +70,8 @@ namespace RetroEnd
 			int getSize() const;
 			void setSize(int);
 
+			const string& getPath() ;
+
 			static shared_ptr<Font> getDefaultFont();
 		private:
 			static std::string getDefaultPath();
@@ -96,7 +98,7 @@ namespace RetroEnd
 			float fontScale; //!<Font scale factor. It is > 1.0 if the font would be to big for the texture
 
 			int mSize;
-			const std::string mPath;
+			const string mPath;
 		};
 
 		class TextCache

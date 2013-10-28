@@ -18,6 +18,7 @@ int Font::getDpiY() { return 96; }
 
 int Font::getSize() const { return mSize; }
 void Font::setSize(int size) { mSize = size; reload();}
+const string& Font::getPath() { return mPath; }
 
 map< pair<string, int>, weak_ptr<Font> > Font::sFontMap;
 

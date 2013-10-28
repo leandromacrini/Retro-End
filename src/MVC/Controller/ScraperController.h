@@ -32,7 +32,7 @@ namespace RetroEnd
 			}
 
 			void ScrapeAllDevice();
-			void ScrapeAllGamesForDevice(Model::Device& device);
+			void ScrapeAllGamesForDevice(Model::Device& device, bool downloadImages = true, int maxCount = 999999999);
 
 			void ScrapeGameByCRC(Model::Game& game, Model::Device& device);
 

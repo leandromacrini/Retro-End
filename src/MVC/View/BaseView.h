@@ -105,6 +105,8 @@ namespace RetroEnd
 			void setSelected(bool selected);
 			bool getSelected() const;
 
+			bool Visible;
+
 		protected:
 
 			//the Parent View

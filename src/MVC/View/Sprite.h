@@ -24,6 +24,8 @@ namespace RetroEnd
 			 Sprite	();
 			~Sprite	();
 
+			int FrameHeight; //if equal 0 use the file width as frame height
+
 			void	setPath (string image);
 			string& getPath ();
 

@@ -8,10 +8,9 @@
 
 #include "../../globals.h"
 
-#include "BaseView.h"
 #include "../Model/InputConfig.h"
 
-using namespace std;
+#include "BaseView.h"
 
 namespace RetroEnd
 {
@@ -26,7 +25,7 @@ namespace RetroEnd
 			bool input(Model::InputConfig* config, Model::Input input) override;
 
 		private:
-
+			
 		};
 	}
 }

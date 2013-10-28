@@ -9,7 +9,7 @@
 #include "../Controller/InputController.h"
 
 #include "ConsoleView.h"
-
+#include "GamesView.h"
 
 using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
@@ -132,6 +132,15 @@ MainWindow::MainWindow()
 	ConsoleView* consoles = new ConsoleView(); //pre load images
 	showConsoles(this, consoles);
 
+	consoles->onOpenGamesList += [&] (Device device)
+	{
+		GamesView* games = new GamesView();
+		games->setSize(this->getSize());
+		games->setDevice(device);
+
+		this->addChild(games);
+	};
+
 	//subscribe to events
 
 	InputController::getInstance().onNewControllerDetected += [this](int e)
@@ -148,6 +157,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::input(InputConfig* config, Input input)
 {
+	//set input only to the last view added
 	if(mChildren.size() > 0)
 	{
 		mChildren.at(mChildren.size() - 1)->input(config, input);

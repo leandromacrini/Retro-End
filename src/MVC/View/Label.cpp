@@ -10,16 +10,12 @@ Label::Label() : BaseView(),
 	mFont(NULL), mColor(0x000000FF), mAutoCalcExtent(true, true)
 {
 	HorizontalTextAlign = TextAlign::Left;
-}
 
-Label::Label(const std::string& text, std::shared_ptr<Font> font, Eigen::Vector3f pos, Eigen::Vector2f size) : BaseView(), 
-	mFont(NULL), mColor(0x000000FF), mAutoCalcExtent(true, true)
-{
-	setText(text);
-	setFont(font);
-	setPosition(pos);
-	setSize(size);
-	HorizontalTextAlign = TextAlign::Left;
+	ShadowVisible = false;
+	ShadowColor   = 0x000000AA;
+	ShadowOffset  = Eigen::Vector2i(2,2);
+
+	WrapText = false;
 }
 
 void Label::onSizeChanged()
@@ -83,8 +79,26 @@ void Label::draw()
 		default:
 			break;
 		}
-		//draw text
-		getFont()->drawWrappedText(mText, Eigen::Vector2f(xTextOffset, pos2f.y()), mSize.x() , mColor >> 8 << 8  | getAbsoluteOpacity());
+
+		unsigned char opacity = getAbsoluteOpacity();
+
+		if(opacity > 0)
+		{
+			//draw shadow if enabled
+			if(ShadowVisible)
+			{
+				//TODO Shadow Global Opacity ?
+				if(WrapText)
+					getFont()->drawWrappedText(mText, Eigen::Vector2f(xTextOffset + ShadowOffset.x(), pos2f.y() + ShadowOffset.y()), mSize.x() , ShadowColor >> 8 << 8  | opacity);
+				else
+					getFont()->drawText(mText, Eigen::Vector2f(xTextOffset + ShadowOffset.x(), pos2f.y() + ShadowOffset.y()), ShadowColor >> 8 << 8  | opacity);
+			}
+			//draw text
+			if(WrapText)
+				getFont()->drawWrappedText(mText, Eigen::Vector2f(xTextOffset, pos2f.y()), mSize.x() , mColor >> 8 << 8  | opacity);
+			else
+				getFont()->drawText(mText, Eigen::Vector2f(xTextOffset, pos2f.y()), mColor >> 8 << 8  | opacity);
+		}
 	}
 }
 

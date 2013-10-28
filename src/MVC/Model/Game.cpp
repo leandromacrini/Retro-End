@@ -212,7 +212,7 @@ vector<Game> Game::getGamesForDevice(int deviceId)
 {
 	vector<Game> games;
 
-	string query = "SELECT * FROM " + Game::table + " WHERE DEVICE_ID = " + to_string(deviceId);
+	string query = "SELECT * FROM " + Game::table + " WHERE DEVICE_ID = " + to_string(deviceId) + " ORDER BY TITLE ";
 
 	sqlite3* db;
 

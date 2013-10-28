@@ -30,6 +30,9 @@ namespace RetroEnd
 			void	setTiled (bool tiled);
 			bool	getTiled ();
 
+			void resizeByWidth(float width);
+			void resizeByHeight(float height);
+
 			//You can get the rendered size of the ImageComponent with getSize().
 			Eigen::Vector2i getTextureSize() const;
 
