@@ -204,12 +204,23 @@ bool InputController::parseEvent(const SDL_Event& ev)
 			//compare device lists to see if devices were added/deleted
 			if (currentDevices != inputDevices) {
 				LOG(LogLevel::Info, "Device configuration changed!");
-				inputDevices = currentDevices;
 				//deinit and reinit InputController
 				//TODO
 				//deinit();
 				//init();
-				onNewControllerDetected(0);
+
+				if(currentDevices.size() > inputDevices.size())
+				{
+					onNewControllerDetected(0);
+					RenderController::getInstance().pushPopupMessage("New controller detected!", "data/images/controller_on.png");
+				}
+				else
+				{
+					onControllerRemoved(0);
+					RenderController::getInstance().pushPopupMessage("Controller removed!", "data/images/controller_off.png");
+				}
+
+				inputDevices = currentDevices;
 			}
 			return true;
 		}

@@ -63,6 +63,7 @@ namespace RetroEnd
 			void draw() override;
 		private:
 			vector<string> mItems;
+			Image* mPointer;
 			
 			int mSelectedIndex;
 		};

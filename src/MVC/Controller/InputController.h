@@ -54,6 +54,7 @@ namespace RetroEnd
 			//EVENTS
 
 			Model::Observer<int> onNewControllerDetected;
+			Model::Observer<int> onControllerRemoved;
 
 		protected:
 

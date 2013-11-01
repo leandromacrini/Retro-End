@@ -89,15 +89,15 @@ void Label::draw()
 			{
 				//TODO Shadow Global Opacity ?
 				if(WrapText)
-					getFont()->drawWrappedText(mText, Eigen::Vector2f(xTextOffset + ShadowOffset.x(), pos2f.y() + ShadowOffset.y()), mSize.x() , ShadowColor >> 8 << 8  | opacity);
+					getFont()->drawWrappedText(mText, Eigen::Vector2f(xTextOffset + ShadowOffset.x(), pos2f.y() + ShadowOffset.y()), mSize.x() , ShadowColor >> 8 << 8  | getAbsoluteOpacity());
 				else
-					getFont()->drawText(mText, Eigen::Vector2f(xTextOffset + ShadowOffset.x(), pos2f.y() + ShadowOffset.y()), ShadowColor >> 8 << 8  | opacity);
+					getFont()->drawText(mText, Eigen::Vector2f(xTextOffset + ShadowOffset.x(), pos2f.y() + ShadowOffset.y()), ShadowColor >> 8 << 8  | getAbsoluteOpacity());
 			}
 			//draw text
 			if(WrapText)
-				getFont()->drawWrappedText(mText, Eigen::Vector2f(xTextOffset, pos2f.y()), mSize.x() , mColor >> 8 << 8  | opacity);
+				getFont()->drawWrappedText(mText, Eigen::Vector2f(xTextOffset, pos2f.y()), mSize.x() , mColor >> 8 << 8  | getAbsoluteOpacity());
 			else
-				getFont()->drawText(mText, Eigen::Vector2f(xTextOffset, pos2f.y()), mColor >> 8 << 8  | opacity);
+				getFont()->drawText(mText, Eigen::Vector2f(xTextOffset, pos2f.y()), mColor >> 8 << 8  | getAbsoluteOpacity());
 		}
 	}
 }

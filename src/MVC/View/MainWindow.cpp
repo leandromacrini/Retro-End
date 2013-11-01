@@ -1,6 +1,5 @@
 #include "MainWindow.h"
 
-#include "Image.h"
 #include "Label.h"
 #include "Sprite.h"
 
@@ -29,10 +28,19 @@ void showLogo(BaseView * view)
 {
 	ConsoleView* consoles = new ConsoleView(); //pre load images
 
+	consoles->onOpenGamesList += [view] (Device device)
+	{
+		GamesView* games = new GamesView();
+		games->setSize(view->getSize());
+		games->setDevice(device);
+
+		view->addChild(games);
+	};
+
 	Image* logo = new Image();
 	logo->setSize((float)RenderController::getInstance().getScreenWidth()/2, (float)RenderController::getInstance().getScreenHeight() / 2);
 	logo->setPosition((float)RenderController::getInstance().getScreenWidth()/4, (float)RenderController::getInstance().getScreenHeight() / 4);
-	logo->setPath("data/logo white.png");
+	logo->setPath("data/logo black.png");
 	logo->setOpacity(0);
 	view->addChild(logo);
 
@@ -69,53 +77,14 @@ void showLogo(BaseView * view)
 	logo->animate(a);
 }
 
-void showInput(BaseView * view)
-{
-	Label* l = new Label();
-	l->setText("Nuovo controller rilevato");
-	l->setColor(0xFFFFFFFF);
-	l->setPosition(
-		RenderController::getInstance().getScreenWidth() - l->getFont()->sizeText("Nuovo controller rilevato").x(),
-		(float) RenderController::getInstance().getScreenHeight());
-
-	view->addChild(l);
-
-	Animation* a = new Animation();
-
-	a->millisDuration = 500;
-	a->moveOffset = new Eigen::Vector3f(0, -100,0);
-	a->endCallback = [view, l] ()
-	{
-		Animation* a = new Animation();
-
-		a->millisDuration = 500;
-		a->endCallback = [view, l] ()
-		{
-			Animation* a = new Animation();
-
-			a->millisDuration = 500;
-			a->moveOffset = new Eigen::Vector3f(0, 100,0);
-			a->endCallback = [view, l] ()
-			{
-				view->removeChild(l);
-			};
-
-			l->animate(a);
-		};
-
-		l->animate(a);
-	};
-
-	l->animate(a);
-}
-
 MainWindow::MainWindow()
 {
+
 	this->setSize((float)RenderController::getInstance().getScreenWidth(),(float) RenderController::getInstance().getScreenHeight());
 
 	Image* background = new Image();
 	background->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
-	background->setPath("data/images/bg_pattern.png");
+	background->setPath("data/images/bg_bn.png");
 	background->setTiled(true);
 	this->addChild(background);
 
@@ -127,27 +96,7 @@ MainWindow::MainWindow()
 	yoshi->start();
 	this->addChild(yoshi);
 
-	//showLogo(this);
-
-	ConsoleView* consoles = new ConsoleView(); //pre load images
-	showConsoles(this, consoles);
-
-	consoles->onOpenGamesList += [&] (Device device)
-	{
-		GamesView* games = new GamesView();
-		games->setSize(this->getSize());
-		games->setDevice(device);
-
-		this->addChild(games);
-	};
-
-	//subscribe to events
-
-	InputController::getInstance().onNewControllerDetected += [this](int e)
-	{
-		showInput(this);
-	};
-
+	showLogo(this);
 }
 
 MainWindow::~MainWindow()
@@ -157,6 +106,12 @@ MainWindow::~MainWindow()
 
 bool MainWindow::input(InputConfig* config, Input input)
 {
+	if(input.id == SDLK_p && input.value != 0 )
+	{
+		RenderController::getInstance().pushPopupMessage("Miao testo lungo testo lungo!", "data/images/message.png");
+		return true;
+	}
+
 	//set input only to the last view added
 	if(mChildren.size() > 0)
 	{

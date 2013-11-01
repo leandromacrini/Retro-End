@@ -6,11 +6,14 @@
 
 #pragma once
 
+#include <queue>
+
 #include "../../globals.h"
 
 #include "../Model/InputConfig.h"
 
 #include "BaseView.h"
+#include "Image.h"
 
 namespace RetroEnd
 {
@@ -23,9 +26,6 @@ namespace RetroEnd
 			~MainWindow();
 
 			bool input(Model::InputConfig* config, Model::Input input) override;
-
-		private:
-			
 		};
 	}
 }

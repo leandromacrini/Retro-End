@@ -69,7 +69,7 @@ void Image::resizeByHeight(float height)
 
 	if( tSize == Eigen::Vector2i::Zero()) throw "Invalid Operation, a texture is needed!";
 
-	float width = (int)(height * tSize.x() / tSize.y());
+	float width = height * tSize.x() / tSize.y();
 
 	setSize(width, height);
 }

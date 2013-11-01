@@ -78,28 +78,18 @@ std::string DownloadUrlAsFile(const std::string & url, const std::string & path)
 	//resize on width or height
 	unsigned int Twidth = FreeImage_GetWidth(image);
 	unsigned int Theight = FreeImage_GetHeight(image);
+
+	int maxImageSide = (int)( H/3*2 );
+	int Mheight = maxImageSide;
+	int Mwidth  = maxImageSide;
+
 	if( Twidth > Theight)
-	{
-		float imageMargin  = H/6;
-		int maxImageSide = (int)(W/2 - imageMargin*2);
-
-		int Mheight = (int)(Theight * maxImageSide / Twidth);
-		
-		FIBITMAP* resized = FreeImage_Rescale(image, maxImageSide, Mheight, FILTER_BICUBIC);
-
-		FreeImage_Save(f, resized, file.c_str(), BMP_DEFAULT);
-	}
+		Mheight = (int)(Theight * maxImageSide / Twidth);
 	else
-	{
-		float imageMargin  = H/6;
-		int maxImageSide = (int)(H - imageMargin*2);
+		Mwidth = (int)(Twidth * maxImageSide / Theight);
 
-		int Mwidth = (int)(Twidth * maxImageSide / Theight);
-
-		FIBITMAP* resized = FreeImage_Rescale(image, Mwidth, maxImageSide, FILTER_BICUBIC);
-
-		FreeImage_Save(f, resized, file.c_str(), BMP_DEFAULT);
-	}
+	FIBITMAP* resized = FreeImage_Rescale(image, Mwidth, Mheight, FILTER_BICUBIC);
+	FreeImage_Save(f, resized, file.c_str(), BMP_DEFAULT);
 
 	return file;
 }
@@ -215,6 +205,7 @@ void ScraperController::ScrapeAllGamesForDevice(Model::Device& device, bool down
 					game.imageBack = DownloadUrlAsFile( url, "data/game screens/back" );
 
 			}
+			/*
 			for(pugi::xml_node image = gameData.child("Images").child("clearlogo"); image; image = image.next_sibling())
 			{
 				string url = baseurl;
@@ -223,7 +214,7 @@ void ScraperController::ScrapeAllGamesForDevice(Model::Device& device, bool down
 				game.imageLogo = DownloadUrlAsFile(url, "data/game screens/logo" );
 				break;
 			}
-
+			*/
 			//download screenshots
 			for(pugi::xml_node image = gameData.child("Images").child("screenshot"); image; image = image.next_sibling())
 			{

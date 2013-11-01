@@ -2,6 +2,11 @@
 
 #include "LogController.h"
 
+#include "../View/Label.h"
+#include "../View/Image.h"
+
+using namespace RetroEnd::Model;
+using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
 void RenderController::pushClipRect(Eigen::Vector4i box)
@@ -126,12 +131,14 @@ void RenderController::update()
 
 	//update the main window
 	mainWindow->update(deltaTime);
+	if(mPopupView) mPopupView->update(deltaTime);
 
 	//swap here so we can read the last screen state during updates (see ImageComponent::copyScreen())
 	swapBuffers(); 
 
 	//render the main window and all its child starting from Identity Matrix
 	mainWindow->render(Eigen::Affine3f::Identity());
+	if(mPopupView) mPopupView->render(Eigen::Affine3f::Identity());
 }
 
 View::BaseView* RenderController::getCurrentWindow()
@@ -152,4 +159,104 @@ int RenderController::getScreenWidth()
 int RenderController::getScreenHeight()
 {
 	return mSdlScreen->h;
+}
+
+
+void RenderController::pushPopupMessage(string message, string icon)
+{
+	//init popup view
+	if(mPopupView == NULL)
+	{
+		mPopupView = new View::BaseView();
+		mPopupView->setSize(getScreenWidth(), getScreenWidth());
+		mShowingPopupMessage = false;
+	}
+
+	PopupMessage* popup = new PopupMessage(message, icon);
+
+	mPopupMessages.push(popup);
+
+	//start show messages if not already showing
+	if( ! mShowingPopupMessage ) showPopupMessages();
+}
+
+void RenderController::showPopupMessages()
+{
+	if(mPopupMessages.empty())
+	{
+		mShowingPopupMessage = false;
+		return;
+	}
+
+	PopupMessage* popup = mPopupMessages.front();
+
+	mShowingPopupMessage = true;
+
+	float H = (float)RenderController::getInstance().getScreenHeight();
+	float W = (float)RenderController::getInstance().getScreenWidth();
+
+	//DRAW MESSAGE
+	BaseView* container = new BaseView();
+	container->setSize( W/2, H/6 );
+	container->setPosition( W/4, H/18);
+	container->setOpacity(0);
+
+	Label* text = new Label();
+	text->setFont(Font::get("data/fonts/pixeljosh6.ttf", FONT_SIZE_SMALL));
+	text->setColor(0xFFFFFFFF);
+	text->ShadowColor = 0x000000FF;
+	text->ShadowVisible = true;
+	text->setText(popup->Message);
+
+	int leftMargin = 0;
+
+	if(popup->Icon != "")
+	{
+		Image* icon = new Image();
+		icon->setPath(popup->Icon);
+		icon->setSize(H/6, H/6);
+		icon->setPosition( (W/2 - text->getSize().x())/2 - H/6, 0);
+		container->addChild(icon);
+
+		leftMargin = H/6;
+	}
+	
+	text->setPosition((W/2 - text->getSize().x())/2, (H/6 - text->getSize().y())/2);
+	container->addChild(text);
+
+	mPopupView->addChild(container);
+
+	#pragma region Animation
+
+	//ANIMATE MESSAGE
+	Animation* a = new Animation();
+	a->millisDuration = 500;
+	a->newOpacity = new unsigned char(255);
+	a->endCallback = [this, container] ()
+	{
+		Animation* b = new Animation();
+		b->millisDuration = 1000;
+		b->endCallback = [this, container] ()
+		{
+			Animation* c = new Animation();
+			c->millisDuration = 500;
+			c->newOpacity = new unsigned char(0);
+			c->endCallback = [this, container] ()
+			{
+				//remove old popup
+				mPopupMessages.pop();
+
+				mPopupView->removeChild(container);
+
+				//go to next message
+				showPopupMessages();
+			};
+			container->animate(c);
+		};
+		container->animate(b);
+	};
+
+	container->animate(a);
+
+	#pragma endregion
 }

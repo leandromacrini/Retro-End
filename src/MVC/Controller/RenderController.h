@@ -36,6 +36,8 @@
 
 #include "BaseController.h"
 #include "LogController.h"
+
+#include "../View/BaseView.h"
 #include "../View/MainWindow.h"
 #include "../View/TestWindow.h"
 
@@ -47,6 +49,15 @@ namespace RetroEnd
 {
 	namespace Controller
 	{
+		class PopupMessage
+		{
+		public:
+			PopupMessage(string message, string icon) : Message(message), Icon(icon) { }
+
+			string Message;
+			string Icon;
+		};
+
 		class RenderController : public BaseController
 		{
 		public:
@@ -76,13 +87,19 @@ namespace RetroEnd
 			static void setMatrix(const Eigen::Affine3f& transform);
 			static void setColor4bArray(GLubyte* array, unsigned int color);
 			static void buildGLColorArray(GLubyte* ptr, unsigned int color, unsigned int vertCount);
-		protected:
+		
+			void pushPopupMessage(string message, string icon = "");
 
 		private:
+			queue<PopupMessage*> mPopupMessages;
+			void showPopupMessages();
+			bool mShowingPopupMessage;
+
 			bool mRunning;
 			int mLastTime;
 			SDL_Surface* mSdlScreen;
 			View::BaseView* mainWindow;
+			View::BaseView* mPopupView;
 			std::stack<Eigen::Vector4i> clipStack;
 
 			bool createSurface();
@@ -91,7 +108,7 @@ namespace RetroEnd
 			//---Singleton---
 			RenderController mInstance();
 
-			RenderController() : mLastTime(0) { }; //private instance costructor for Singleton Controller
+			RenderController() : mLastTime(0), mPopupView(NULL) { }; //private instance costructor for Singleton Controller
 
 			RenderController(RenderController const&);// Don't Implement
 			void operator=(RenderController const&); // Don't implement

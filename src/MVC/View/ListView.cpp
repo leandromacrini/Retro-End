@@ -9,15 +9,20 @@ using namespace RetroEnd::Controller;
 ListView::ListView() : BaseView()
 {
 	TitleColor = 0xFFFFFFFF;
-	SelectedTitleColor = 0x000000FF;
+	SelectedTitleColor = 0xFFFFFFFF;
 	SubtitleColor = 0xFFFFFFFF;
-	SelectedSubtitleColor = 0x000000FF;
+	SelectedSubtitleColor = 0xFFFFFFFF;
 	RowBackgroundColor = 0x00000000;
 	SelectedRowBackgroundColor = 0x00000000;
 	ItemFont = NULL;
 	RowHeight = 50;
 	mSelectedIndex = 0;
 	HorizontalTextAlign = TextAlign::Left;
+
+	mPointer = new Image();
+	mPointer->setPath("data/consoles/nes-pointer.png");
+	mPointer->Visible = false;
+	this->addChild(mPointer);
 }
 
 // ROWS HANDLING
@@ -92,6 +97,8 @@ void ListView::draw()
 	while(mSelectedIndex > lastRow)  { firstRow++; lastRow ++; }
 	while(mSelectedIndex < firstRow) { firstRow--; lastRow --; }
 
+	//hide pointer
+	mPointer->Visible = false;
 
 	for(int i = 0; i < (int)mItems.size(); i++)
 	{
@@ -106,7 +113,7 @@ void ListView::draw()
 		switch (HorizontalTextAlign)
 		{
 		case RetroEnd::View::Left:
-			xTextOffset = getAbsolutePosition().x();
+			xTextOffset = getAbsolutePosition().x() + RowHeight;
 			break;
 		case RetroEnd::View::Center:
 			xTextOffset = getAbsolutePosition().x() + ( ( mSize.x() - ItemFont->sizeText(mItems.at(i)).x() ) / 2);
@@ -126,5 +133,13 @@ void ListView::draw()
 		//draw text
 		ItemFont->drawText(mItems.at(i), Eigen::Vector2f(xTextOffset, getAbsolutePosition().y() + rowYPosition*RowHeight),
 			i == mSelectedIndex? SelectedTitleColor : TitleColor);
+
+		//draw pointer
+		if(mSelectedIndex == i)
+		{
+			mPointer->setSize((float)RowHeight,(float)RowHeight);
+			mPointer->Visible = true;
+			mPointer->setPosition(xTextOffset - RowHeight - getAbsolutePosition().x(), RowHeight * rowYPosition);
+		}
 	}
 }

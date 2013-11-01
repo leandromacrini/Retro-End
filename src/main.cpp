@@ -76,17 +76,6 @@ void onExit()
 
 int main(int argc, char* argv[])
 {
-	//parse the arguments
-	if( ! parseArgs( argc, argv) ) return 0;
-
-	Model::Game game;
-	game.id = 1;
-	game.gameFile = "data/Sonic The Hedgehog (W) (REV00) [!].gen";
-	game.deviceId = 1;
-	Model::Device dev;
-
-	Controller::ScraperController::getInstance().ScrapeGameByCRC(game, dev);
-
 	//starts any controller
 	onStart();
 

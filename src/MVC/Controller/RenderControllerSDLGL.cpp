@@ -47,6 +47,7 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	//SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1); //vsync
+	//mSdlScreen = SDL_SetVideoMode(1920, 1080, 16, SDL_OPENGL | SDL_FULLSCREEN);
 	mSdlScreen = SDL_SetVideoMode(1280, 720, 16, SDL_OPENGL);
 
 	if(mSdlScreen == NULL)
