@@ -2,19 +2,22 @@
 
 #include "BaseView.h"
 #include "Image.h"
+
 #include "../Model/Font.h"
+#include "../Model/Game.h"
+#include "../Model/TextureResource.h"
 
 namespace RetroEnd
 {
 	namespace View
 	{
-		class ListView : public BaseView
+		class GameListView : public BaseView
 		{
 		public:
-			ListView();
+			GameListView();
 
 			// ROWS HANDLING
-			void addRow(string title, int index = -1);
+			void addRow(Model::Game game, int index = -1);
 
 			void removeRow(int index = 0);
 
@@ -25,13 +28,12 @@ namespace RetroEnd
 			void setSelectedIndex(int index);
 			unsigned int getSelectedIndex();
 
-			//ROW ITEM COLORS
+			//POINTER
+			void setPointerPath(string& path);
 
+			//ROW ITEM COLORS
 			unsigned int TitleColor;
 			unsigned int SelectedTitleColor;
-
-			unsigned int SubtitleColor;
-			unsigned int SelectedSubtitleColor;
 
 			unsigned int RowBackgroundColor;
 			unsigned int SelectedRowBackgroundColor;
@@ -39,21 +41,28 @@ namespace RetroEnd
 			unsigned int RowHeight;
 
 			//FONTS
-
 			std::shared_ptr<Model::Font> ItemFont;
 
 			//SETTINGS
 			TextAlign HorizontalTextAlign;
 
 			//DRAW OVERRIDE
-
 			void draw() override;
 		private:
 			int firstRow;
 			int lastRow;
-			vector<string> mItems;
-			
 			int mSelectedIndex;
+
+			vector<Model::Game> mItems;
+			Image* mPointer;
+
+			shared_ptr<Model::TextureResource> mTex1player;
+			shared_ptr<Model::TextureResource> mTex2player;
+			shared_ptr<Model::TextureResource> mTex3player;
+			shared_ptr<Model::TextureResource> mTex4player;
+			shared_ptr<Model::TextureResource> mTexCoOp;
+
+			void drawGameIcon( shared_ptr<Model::TextureResource> texture, float posX, float posY, int side, unsigned int opacity);
 		};
 	}
 

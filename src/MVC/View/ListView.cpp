@@ -19,10 +19,8 @@ ListView::ListView() : BaseView()
 	mSelectedIndex = 0;
 	HorizontalTextAlign = TextAlign::Left;
 
-	mPointer = new Image();
-	mPointer->setPath("data/consoles/nes-pointer.png");
-	mPointer->Visible = false;
-	this->addChild(mPointer);
+	firstRow = 0;
+	lastRow = 0;
 }
 
 // ROWS HANDLING
@@ -76,8 +74,6 @@ unsigned int ListView::getSelectedIndex()
 	return mSelectedIndex;
 }
 
-int firstRow = 0;
-int lastRow  = 0;
 void ListView::draw()
 {
 	if( ! ItemFont ) ItemFont = Font::getDefaultFont();
@@ -97,9 +93,6 @@ void ListView::draw()
 	while(mSelectedIndex > lastRow)  { firstRow++; lastRow ++; }
 	while(mSelectedIndex < firstRow) { firstRow--; lastRow --; }
 
-	//hide pointer
-	mPointer->Visible = false;
-
 	for(int i = 0; i < (int)mItems.size(); i++)
 	{
 		//draw only visible rows (partial rows too -> from firstRow-1 TO lastRow+1)
@@ -109,37 +102,44 @@ void ListView::draw()
 		float rowYPosition = (float) i - firstRow;
 
 		//compute the text align offset
-		float xTextOffset = 0;
+		int xTextOffset = 0;
 		switch (HorizontalTextAlign)
 		{
 		case RetroEnd::View::Left:
-			xTextOffset = getAbsolutePosition().x() + RowHeight;
+			xTextOffset = (int)getAbsolutePosition().x();
 			break;
 		case RetroEnd::View::Center:
-			xTextOffset = getAbsolutePosition().x() + ( ( mSize.x() - ItemFont->sizeText(mItems.at(i)).x() ) / 2);
+			xTextOffset = (int)(getAbsolutePosition().x() + ( ( mSize.x() - ItemFont->sizeText(mItems.at(i)).x() ) / 2));
 			break;
 		case RetroEnd::View::Right:
-			xTextOffset = getAbsolutePosition().x() + mSize.x() - ItemFont->sizeText(mItems.at(i)).x();
+			xTextOffset = (int)(getAbsolutePosition().x() + mSize.x() - ItemFont->sizeText(mItems.at(i)).x());
 			break;
 		default:
 			break;
 		}
 
-		//draw background
-		RenderController::drawRect(
-			(int)getAbsolutePosition().x(), (int)(getAbsolutePosition().y() + rowYPosition*RowHeight), (int)mSize.x(), RowHeight,
-			i == mSelectedIndex? SelectedRowBackgroundColor : RowBackgroundColor
-		);
-		//draw text
-		ItemFont->drawText(mItems.at(i), Eigen::Vector2f(xTextOffset, getAbsolutePosition().y() + rowYPosition*RowHeight),
-			i == mSelectedIndex? SelectedTitleColor : TitleColor);
-
 		//draw pointer
 		if(mSelectedIndex == i)
 		{
-			mPointer->setSize((float)RowHeight,(float)RowHeight);
-			mPointer->Visible = true;
-			mPointer->setPosition(xTextOffset - RowHeight - getAbsolutePosition().x(), RowHeight * rowYPosition);
+			//draw background
+			RenderController::drawRect(
+				(int)getAbsolutePosition().x(), (int)(getAbsolutePosition().y() + rowYPosition*RowHeight), (int)mSize.x(), RowHeight,
+				SelectedRowBackgroundColor
+			);
 		}
+		else
+		{
+			//draw background
+			RenderController::drawRect(
+				(int)getAbsolutePosition().x(), (int)(getAbsolutePosition().y() + rowYPosition*RowHeight), (int)mSize.x(), RowHeight,
+				RowBackgroundColor
+			);
+		}
+		
+		//draw text
+		ItemFont->drawText(mItems.at(i), Eigen::Vector2f(
+			xTextOffset,
+			getAbsolutePosition().y() + (rowYPosition)*RowHeight + (RowHeight - ItemFont->sizeText(mItems.at(i)).y())/2),
+			i == mSelectedIndex? SelectedTitleColor : TitleColor);
 	}
 }
