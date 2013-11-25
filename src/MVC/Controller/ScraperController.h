@@ -6,6 +6,7 @@
 #pragma once
 
 #include <curl.h>
+#include "../../LIB/pugiXML/pugixml.hpp"
 
 #include "../../globals.h"
 
@@ -35,6 +36,9 @@ namespace RetroEnd
 			void ScrapeAllGamesForDevice(Model::Device& device, bool downloadImages = true, int maxCount = 999999999);
 
 			void ScrapeGameByCRC(Model::Game& game, Model::Device& device);
+			
+			void SearchGameData(Model::Game& game, vector<string>& result);
+			void ScraperController::StoreGamedata( vector<pair<Model::Game, string>>* gameData );
 
 		protected:
 
