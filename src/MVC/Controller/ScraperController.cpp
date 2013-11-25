@@ -1,6 +1,5 @@
 #include "ScraperController.h"
 
-#include "../../LIB/pugiXML/pugixml.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/crc.hpp>
 #include <sstream>
@@ -10,6 +9,7 @@
 #include "LogController.h"
 #include "RenderController.h"
 
+using namespace RetroEnd::Model;
 using namespace RetroEnd::Controller;
 
 #define BUFFERSIZE 1024*4 //4 kB
@@ -32,6 +32,8 @@ std::string DownloadUrlAsString(const std::string & url)
 {
 	std::string body;
 
+	//CURLM* multi  = curl_multi_init( );
+
 	CURL *curl_handle;
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
@@ -39,6 +41,12 @@ std::string DownloadUrlAsString(const std::string & url)
 	curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "Retro-End Agent");
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, callback);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &body);
+	
+	int* i = new int(1);
+
+	//curl_multi_add_handle(multi, curl_handle);
+	//curl_multi_perform(multi, i);
+
 	curl_easy_perform(curl_handle); 
 	curl_easy_cleanup(curl_handle);
 
@@ -125,30 +133,31 @@ void ScraperController::ScrapeAllDevice()
 
 		Model::Device device;
 
-		device.name = platform.child("Platform").text().get();
-		device.description = platform.child("overview").text().get();
-		device.developer = platform.child("developer").text().get();
-		device.manufacturer = platform.child("manufacturer").text().get();
-		device.cpu = platform.child("cpu").text().get();
-		device.memory = platform.child("memory").text().get();
-		device.graphics = platform.child("graphics").text().get();
-		device.sound = platform.child("sound").text().get();
-		device.display = platform.child("display").text().get();
-		device.mediaType = platform.child("media").text().get();
-		device.maxControllers = platform.child("maxcontrollers").text().get();
-		device.tgbdId = platform.child("id").text().get();
-		device.tgbdRating = platform.child("Rating").text().get();
+		device.Name = platform.child("Platform").text().get();
+		device.Description = platform.child("overview").text().get();
+		device.Developer = platform.child("developer").text().get();
+		device.Manufacturer = platform.child("manufacturer").text().get();
+		device.Cpu = platform.child("cpu").text().get();
+		device.Memory = platform.child("memory").text().get();
+		device.Graphics = platform.child("graphics").text().get();
+		device.Sound = platform.child("sound").text().get();
+		device.Display = platform.child("display").text().get();
+		device.MediaType = platform.child("media").text().get();
+		device.MaxControllers = platform.child("maxcontrollers").text().get();
+		device.TGDBId = platform.child("id").text().get();
+		device.TGDBRating = platform.child("Rating").text().get();
 
 		device.save();
-		LOG(LogLevel::Info, name + " saved to db\n");
+		LOG(LogLevel::Info, name + " saved to db.");
 	}
 }
 
 void ScraperController::ScrapeAllGamesForDevice(Model::Device& device, bool downloadImages, int maxCount)
 {
-	LOG(LogLevel::Info, "Scraper is starting retrieving all the games info available for " + device.name + "\n");
 
-	std::string data = DownloadUrlAsString("http://thegamesdb.net/api/GetPlatformGames.php?platform=" + device.tgbdId);
+	LOG(LogLevel::Info, "ScraperController is starting retrieving all the games info available for " + device.Name + "\n");
+
+	std::string data = DownloadUrlAsString("http://thegamesdb.net/api/GetPlatformGames.php?platform=" + device.TGDBId);
 
 	pugi::xml_document doc;
 	doc.load(data.c_str());
@@ -163,7 +172,7 @@ void ScraperController::ScrapeAllGamesForDevice(Model::Device& device, bool down
 		string tgdb_id = system.child("id").text().get();
 		string title = system.child("GameTitle").text().get();
 
-		std::cout << "Getting info for:" + title;
+		LOG(LogLevel::Info, "ScraperController is getting info for: " + title);
 
 		std::string platData = DownloadUrlAsString("http://thegamesdb.net/api/GetGame.php?id=" + tgdb_id);
 
@@ -173,19 +182,8 @@ void ScraperController::ScrapeAllGamesForDevice(Model::Device& device, bool down
 
 		pugi::xml_node gameData = platDoc.child("Data").child("Game");
 
-		Model::Game game;
+		Model::Game game = Game(gameData, device.id);
 
-		game.title = gameData.child("GameTitle").text().get();
-		game.deviceId = device.id;
-		game.description = gameData.child("Overview").text().get();
-		game.ESRB = gameData.child("ESRB").text().get();
-		game.players = gameData.child("Players").text().get();
-		game.coOp = gameData.child("Co-op").text().get();
-		game.publisher = gameData.child("Publisher").text().get();
-		game.developer = gameData.child("Developer").text().get();
-		game.tgbdRating = gameData.child("Rating").text().get();
-		game.releaseDate = gameData.child("ReleaseDate").text().get();
-		game.tgbdId = tgdb_id;
 		if(downloadImages)
 		{
 			string baseurl = platDoc.child("Data").child("baseImgUrl").text().get();
@@ -198,11 +196,11 @@ void ScraperController::ScrapeAllGamesForDevice(Model::Device& device, bool down
 
 				int res = strcmp( image.attribute("side").value(), "front");
 				if( res == 0)
-					game.imageFront = DownloadUrlAsFile( url, "data/game screens/front" );
+					game.ImageFront = DownloadUrlAsFile( url, "data/game screens/front" );
 
 				res = strcmp( image.attribute("side").value(), "back");
 				if( res == 0)
-					game.imageBack = DownloadUrlAsFile( url, "data/game screens/back" );
+					game.ImageBack = DownloadUrlAsFile( url, "data/game screens/back" );
 
 			}
 			/*
@@ -221,27 +219,28 @@ void ScraperController::ScrapeAllGamesForDevice(Model::Device& device, bool down
 				string url = baseurl;
 				url += image.child("original").text().get();
 
-				game.imageScreen = DownloadUrlAsFile(url, "data/game screens/screens" );
+				game.ImageScreen = DownloadUrlAsFile(url, "data/game screens/screens" );
 				break;
 			}
 		}
 		game.save();
 
-		LOG(LogLevel::Info, title + " saved to db");
+		LOG(LogLevel::Info, "ScraperController " + title + " saved to DB");
 	}
 }
 
+//TODO deprecated (Remove?)
 void ScraperController::ScrapeGameByCRC(Model::Game& game, Model::Device& device)
 {
-	if(game.gameFile == "")
+	if(game.GameFile == "")
 	{
-		LOG(LogLevel::Error, "ScraperController ScrapeGameByCRC file not available for " + game.title);
+		LOG(LogLevel::Error, "ScraperController unable to calculate CRC! File is not available for " + game.Title);
 	}
 
 	//CRC is supported only for "the archive db" (where there is less informations)
 	boost::crc_32_type crc;
 
-	std::ifstream ifs(game.gameFile, std::ios_base::binary);
+	std::ifstream ifs(game.GameFile, std::ios_base::binary);
 
 	if( ifs )
 	{
@@ -255,7 +254,7 @@ void ScraperController::ScrapeGameByCRC(Model::Game& game, Model::Device& device
 	}
 	else
 	{
-		LOG(LogLevel::Error, "ScraperController ScrapeGameByCRC unable to open file: " + game.gameFile);
+		LOG(LogLevel::Error, "ScraperController ScrapeGameByCRC unable to open file: " + game.GameFile);
 	}
 
 	std::stringstream stream;
@@ -274,5 +273,120 @@ void ScraperController::ScrapeGameByCRC(Model::Game& game, Model::Device& device
 
 		std::cout << "Getting info for:" + title;
 		//TODO read data from archive.db 
+	}
+}
+
+//search a Game by name and device
+void ScraperController::SearchGameData(Game& game, vector<string>& result)
+{
+	LOG(LogLevel::Info, "ScraperController is searching info for: " + game.GameFile);
+	pugi::xml_document doc;
+
+	Device device = Device::getDeviceById((int)game.DeviceId);
+
+	string gameName = curl_escape(game.getCleanFileName().c_str(), 0);
+	string platformName = curl_escape(device.Name.c_str(), device.Name.length());
+
+	std::string gameData = DownloadUrlAsString("http://thegamesdb.net/api/GetGame.php?name=" + gameName + "&platform="+ platformName);
+	doc.load(gameData.c_str());
+
+	for(pugi::xml_node gameNode = doc.child("Data").child("Game"); gameNode; gameNode = gameNode.next_sibling("Game"))
+	{
+		stringstream ss;
+		gameNode.print(ss);
+
+		result.push_back(ss.str());
+	}
+
+	//TODO try to make this better
+	//this is an hack for megadrive and genesis that are separated on TGDB
+	//I really don't know why they did that!
+	if(device.Name == "Sega Mega Drive")
+	{
+		gameData = DownloadUrlAsString("http://thegamesdb.net/api/GetGame.php?name=" + gameName + "&platform=Sega%20Genesis");
+		pugi::xml_document genesisDoc;
+		genesisDoc.load(gameData.c_str());
+
+		for(pugi::xml_node gameNode = genesisDoc.child("Data").child("Game"); gameNode; gameNode = gameNode.next_sibling("Game"))
+		{
+			//check if already added to list
+			bool found = false;
+			for(pugi::xml_node alreadyPushedGN = doc.child("Data").child("Game"); alreadyPushedGN; alreadyPushedGN = alreadyPushedGN.next_sibling("Game"))
+			{
+				if( strcmp( gameNode.child("GameTitle").text().get() , alreadyPushedGN.child("GameTitle").text().get())  == 0)
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if(! found)
+			{
+				stringstream ss;
+				gameNode.print(ss);
+
+				result.push_back(ss.str());
+			}
+		}
+	}
+}
+
+void ScraperController::StoreGamedata( vector<pair<Model::Game, string>>* gameData )
+{
+	LOG(LogLevel::Info, "ScraperController is downloading images and saving games to DB");
+
+	//for each new game founded
+	for(auto it = gameData->begin(); it != gameData->end(); ++it)
+	{
+		Game tempGame = it->first;
+		string xml= it->second;
+
+		//if the user has choose a GameTitle we try to download image and create a complete Game record
+		if( ! xml.empty() )
+		{
+			pugi::xml_document gameDoc;
+			gameDoc.load(xml.c_str());
+
+			Game newGame = Game(gameDoc.child("Game"), tempGame.DeviceId);
+			newGame.GameFile = tempGame.GameFile;
+
+			string baseurl = "http://thegamesdb.net/banners/";
+
+			//download box arts
+			for(pugi::xml_node image = gameDoc.child("Game").child("Images").child("boxart"); image; image = image.next_sibling("boxart"))
+			{
+				string url = baseurl;
+				url += image.text().get();
+
+				int res = strcmp( image.attribute("side").value(), "front");
+				if( res == 0)
+					newGame.ImageFront = DownloadUrlAsFile( url, "data/game screens/front" );
+
+				res = strcmp( image.attribute("side").value(), "back");
+				if( res == 0)
+					newGame.ImageBack = DownloadUrlAsFile( url, "data/game screens/back" );
+
+			}
+			//download screenshots
+			for(pugi::xml_node image = gameDoc.child("Game").child("Images").child("screenshot"); image; image = image.next_sibling())
+			{
+				string url = baseurl;
+				url += image.child("original").text().get();
+
+				newGame.ImageScreen = DownloadUrlAsFile(url, "data/game screens/screens" );
+				break;
+			}
+
+			newGame.save();
+			LOG(LogLevel::Info, "ScraperController " + newGame.Title + " saved to DB");
+		}
+		//else we create a "GameTitle = GameFile" Game record
+		else
+		{
+			tempGame.Title = tempGame.GameFile;
+
+			tempGame.save();
+			LOG(LogLevel::Info, "ScraperController " + tempGame.Title + " saved to DB");
+		}
 	}
 }

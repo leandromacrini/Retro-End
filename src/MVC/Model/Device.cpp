@@ -1,7 +1,10 @@
 #include "Device.h"
 
-using namespace RetroEnd::Model;
 using namespace std;
+using namespace boost::filesystem;
+
+using namespace RetroEnd::Model;
+
 
 // The Name of the table into the DB for this Model
 string Device::table = "devices";
@@ -16,22 +19,23 @@ Device::Device() : BaseModel()
 Device::Device( sqlite3_stmt* record ) : BaseModel()
 {
 	id = sqlite3_column_int(record, 0);
-	name = (char*)sqlite3_column_text(record,1);
-	description = (char*)sqlite3_column_text(record,2);
-	developer = (char*)sqlite3_column_text(record,3);
-	manufacturer = (char*)sqlite3_column_text(record,4);
-	cpu = (char*)sqlite3_column_text(record,5);
-	memory = (char*)sqlite3_column_text(record,6);
-	graphics = (char*)sqlite3_column_text(record,7);
-	sound = (char*)sqlite3_column_text(record,8);
-	display = (char*)sqlite3_column_text(record,9);
-	mediaType = (char*)sqlite3_column_text(record,10);
-	maxControllers = (char*)sqlite3_column_text(record,11);
-	releaseDate = (char*)sqlite3_column_text(record,12);
-	tgbdId = (char*)sqlite3_column_text(record,13);
-	tgbdRating = (char*)sqlite3_column_text(record,14);
-	imageConsole = (char*)sqlite3_column_text(record,15);
-	imageLogo = (char*)sqlite3_column_text(record,16);
+	Name = (char*)sqlite3_column_text(record,1);
+	Description = (char*)sqlite3_column_text(record,2);
+	Developer = (char*)sqlite3_column_text(record,3);
+	Manufacturer = (char*)sqlite3_column_text(record,4);
+	Cpu = (char*)sqlite3_column_text(record,5);
+	Memory = (char*)sqlite3_column_text(record,6);
+	Graphics = (char*)sqlite3_column_text(record,7);
+	Sound = (char*)sqlite3_column_text(record,8);
+	Display = (char*)sqlite3_column_text(record,9);
+	MediaType = (char*)sqlite3_column_text(record,10);
+	MaxControllers = (char*)sqlite3_column_text(record,11);
+	ReleaseDate = (char*)sqlite3_column_text(record,12);
+	TGDBId = (char*)sqlite3_column_text(record,13);
+	TGDBRating = (char*)sqlite3_column_text(record,14);
+	ImageConsole = (char*)sqlite3_column_text(record,15);
+	ImageLogo = (char*)sqlite3_column_text(record,16);
+	LaunchCommand = (char*)sqlite3_column_text(record,17);
 }
 
 // Model Class Distructor
@@ -44,22 +48,23 @@ Device::~Device()
 string Device::getUpdateQuery()
 {
 	string query = "UPDATE " + table + " SET";
-	query += " NAME = '"		+	sqlEscape( name ) +"',";
-	query += " DESCRIPTION = '"	+	sqlEscape( description ) +"',";
-	query += " DEVELOPER = '"	+	sqlEscape( developer ) +"',";
-	query += " MANUFACTURER = '"+	sqlEscape( manufacturer ) +"',";
-	query += " CPU = '"			+	sqlEscape( cpu ) +"',";
-	query += " MEMORY = '"		+	sqlEscape( memory ) +"',";
-	query += " GRAPHICS = '"	+	sqlEscape( graphics ) +"',";
-	query += " SOUND = '"		+	sqlEscape( sound ) +"',";
-	query += " DISPLAY = '"		+	sqlEscape( display ) +"',";
-	query += " MEDIA_TYPE = '"	+	sqlEscape( mediaType ) +"',";
-	query += " MAX_CONTROLLERS = '"	+sqlEscape( maxControllers ) +"',";
-	query += " RELEASE_DATE = '"+	sqlEscape( releaseDate ) +"',";
-	query += " TGDB_ID = '"		+	sqlEscape( tgbdId ) +"',";
-	query += " TGDB_RATING = '"	+	sqlEscape( tgbdRating ) +"',";
-	query += " IMAGE_CONSOLE = '"+	sqlEscape( imageConsole ) +"',";
-	query += " IMAGE_LOGO = '"	+	sqlEscape( imageLogo ) +"'";
+	query += " NAME = '"		+	sqlEscape( Name ) +"',";
+	query += " DESCRIPTION = '"	+	sqlEscape( Description ) +"',";
+	query += " DEVELOPER = '"	+	sqlEscape( Developer ) +"',";
+	query += " MANUFACTURER = '"+	sqlEscape( Manufacturer ) +"',";
+	query += " CPU = '"			+	sqlEscape( Cpu ) +"',";
+	query += " MEMORY = '"		+	sqlEscape( Memory ) +"',";
+	query += " GRAPHICS = '"	+	sqlEscape( Graphics ) +"',";
+	query += " SOUND = '"		+	sqlEscape( Sound ) +"',";
+	query += " DISPLAY = '"		+	sqlEscape( Display ) +"',";
+	query += " MEDIA_TYPE = '"	+	sqlEscape( MediaType ) +"',";
+	query += " MAX_CONTROLLERS = '"+sqlEscape(MaxControllers ) +"',";
+	query += " RELEASE_DATE = '"+	sqlEscape( ReleaseDate ) +"',";
+	query += " TGDB_ID = '"		+	sqlEscape( TGDBId ) +"',";
+	query += " TGDB_RATING = '"	+	sqlEscape( TGDBRating ) +"',";
+	query += " IMAGE_CONSOLE = '"+	sqlEscape( ImageConsole ) +"',";
+	query += " IMAGE_LOGO = '"	+	sqlEscape( ImageLogo ) +"'";
+	query += " LAUNCH_COMMAND = '"+	sqlEscape( LaunchCommand ) +"'";
 		
 	query += " WHERE id="+to_string( id )+";";
 
@@ -75,8 +80,12 @@ string Device::getDeleteQuery()
 // Build the query for create the DB record
 string Device::getInsertQuery()
 {
-	string query = "INSERT into " + table + " (NAME,DESCRIPTION,DEVELOPER,MANUFACTURER,CPU,MEMORY,GRAPHICS,SOUND,DISPLAY,MEDIA_TYPE,MAX_CONTROLLERS,RELEASE_DATE,TGDB_ID,TGDB_RATING,IMAGE_CONSOLE,IMAGE_LOGO )";
-	query += "values ('" + sqlEscape( name ) + "','" + sqlEscape( description ) + "','" + sqlEscape( developer ) + "','" + sqlEscape( manufacturer ) + "','" + sqlEscape( cpu ) + "','" + sqlEscape( memory ) + "','" + sqlEscape( graphics ) + "','" + sqlEscape( sound ) + "','" + sqlEscape( display ) + "','" + sqlEscape( mediaType ) + "','" + sqlEscape( maxControllers ) + "','" + sqlEscape( releaseDate ) + "','" + sqlEscape( tgbdId ) + "','" + sqlEscape( tgbdRating ) + "','" + sqlEscape( imageConsole ) + "','" + sqlEscape( imageLogo ) + "');";
+	string query = "INSERT into " + table + " (NAME,DESCRIPTION,DEVELOPER,MANUFACTURER,CPU,MEMORY,GRAPHICS,SOUND,DISPLAY,MEDIA_TYPE,MAX_CONTROLLERS,RELEASE_DATE,TGDB_ID,TGDB_RATING,IMAGE_CONSOLE,IMAGE_LOGO,LAUNCH_COMMAND )";
+	query += "values ('" + sqlEscape( Name ) + "','" + sqlEscape( Description ) + "','" + sqlEscape( Developer ) +
+		"','" + sqlEscape( Manufacturer ) + "','" + sqlEscape( Cpu ) + "','" + sqlEscape( Memory ) + "','" + sqlEscape( Graphics ) +
+		"','" + sqlEscape( Sound ) + "','" + sqlEscape( Display ) + "','" + sqlEscape( MediaType ) + "','" + sqlEscape( MaxControllers ) +
+		"','" + sqlEscape( ReleaseDate ) + "','" + sqlEscape( TGDBId ) + "','" + sqlEscape( TGDBRating ) + "','" + sqlEscape( ImageConsole ) + "','" +
+		sqlEscape( ImageLogo ) + "','" + sqlEscape( LaunchCommand ) + "');";
 	return query;
 }
 
@@ -92,7 +101,7 @@ void Device::init()
 
 	vector<string> queries;
 
-	//THE CREATE PART - MUST BE ALWAYS RUN (if table already exists we simply have an error)
+	//THE CREATE PART - MUST BE ALWAYS RUN
 	string create = "CREATE TABLE IF NOT EXISTS " + Device::table + " (";
 	create += "ID INTEGER PRIMARY KEY, NAME TEXT, DESCRIPTION TEXT, DEVELOPER TEXT, MANUFACTURER TEXT, CPU TEXT, MEMORY TEXT, ";
 	create += "GRAPHICS TEXT, SOUND TEXT, DISPLAY TEXT, MEDIA_TYPE TEXT, MAX_CONTROLLERS TEXT, RELEASE_DATE TEXT, TGDB_ID TEXT, TGDB_RATING TEXT, ";
@@ -100,7 +109,8 @@ void Device::init()
 	queries.push_back(create);
 
 	//THE UPDATE PART  - MUST BE ALWAYS RUN (if colums already exist we simply have an error)
-	//new colums bust be added in the update part so when the app is updated we can add those to the DB
+	//new colums bust be added in the update part so when the app is updated we can add those to the DB without recreating the table
+	queries.push_back( "ALTER TABLE " +table + " ADD COLUMN LAUNCH_COMMAND TEXT DEFAULT '';" );
 	
 
 	for (std::vector<string>::iterator it = queries.begin() ; it != queries.end(); ++it) {
@@ -121,6 +131,13 @@ void Device::init()
 	}
 
 	sqlite3_close(db);
+
+	//create custom game directories if needed
+	vector<Device> devices = getAllDevices();
+	for (auto it = devices.begin() ; it != devices.end(); ++it)
+	{
+		if(! exists( it->getRomsPath() ) )	create_directory( it->getRomsPath() );
+	}
 }
 
 // Static method for read all the items from DB
@@ -128,7 +145,7 @@ vector<Device> Device::getAllDevices()
 {
 	vector<Device> devices;
 
-	string query = "SELECT * FROM " + Device::table;
+	string query = "SELECT * FROM " + Device::table + " ORDER BY RELEASE_DATE";
 
 	sqlite3* db;
 
@@ -161,7 +178,7 @@ vector<Device> Device::getAllDevices()
 }
 
 // Static method for read an item specified by "id" from DB
-Device Device::getDeviceById(unsigned int id)
+Device Device::getDeviceById(int id)
 {
 	Device* device = NULL;
 
@@ -197,4 +214,9 @@ Device Device::getDeviceById(unsigned int id)
 	sqlite3_close(db);
 
 	return *device;
+}
+
+string Device::getRomsPath()
+{
+	return "data/roms/" + Name;
 }

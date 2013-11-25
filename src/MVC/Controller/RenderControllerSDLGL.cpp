@@ -46,9 +46,13 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	//SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1); //vsync
-	//mSdlScreen = SDL_SetVideoMode(1920, 1080, 16, SDL_OPENGL | SDL_FULLSCREEN);
+	
+#ifndef _FULLSCREEN
 	mSdlScreen = SDL_SetVideoMode(1280, 720, 16, SDL_OPENGL);
+#else
+	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1); //vsync
+	mSdlScreen = SDL_SetVideoMode(1920, 1080, 16, SDL_OPENGL | SDL_FULLSCREEN);
+#endif
 
 	if(mSdlScreen == NULL)
 	{
@@ -83,8 +87,8 @@ void RenderController::start()
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	//create the main window
-	//mainWindow = new View::TestWindow();
-	mainWindow = new View::MainWindow();//TODO reset to MAIN WINDOW
+	mainWindow = new View::MainWindow();
+	mPopupView = NULL;
 }
 
 void RenderController::stop() {

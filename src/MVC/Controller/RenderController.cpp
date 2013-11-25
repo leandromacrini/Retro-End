@@ -64,7 +64,6 @@ void RenderController::buildGLColorArray(GLubyte* ptr, unsigned int color, unsig
 
 void RenderController::drawRect(int x, int y, int w, int h, unsigned int color)
 {
-	if(w == 0 || h == 0) throw "Invalid argument!";
 
 #ifdef USE_OPENGL_ES
 	GLshort points[12];
@@ -125,8 +124,7 @@ void RenderController::update()
 	int deltaTime = curTime - mLastTime;
 	mLastTime = curTime;
 
-	//cap deltaTime at 1000 
-	//TODO remove or undestard why
+	//cap deltaTime at 1000
 	if(deltaTime > 1000 || deltaTime < 0) deltaTime = 1000;
 
 	//update the main window
@@ -168,7 +166,7 @@ void RenderController::pushPopupMessage(string message, string icon)
 	if(mPopupView == NULL)
 	{
 		mPopupView = new View::BaseView();
-		mPopupView->setSize(getScreenWidth(), getScreenWidth());
+		mPopupView->setSize((float)getScreenWidth(), (float)getScreenWidth());
 		mShowingPopupMessage = false;
 	}
 
@@ -202,11 +200,12 @@ void RenderController::showPopupMessages()
 	container->setOpacity(0);
 
 	Label* text = new Label();
-	text->setFont(Font::get("data/fonts/pixeljosh6.ttf", FONT_SIZE_SMALL));
-	text->setColor(0xFFFFFFFF);
-	text->ShadowColor = 0x000000FF;
-	text->ShadowVisible = true;
+	text->setColor(0x000000FF);
+	text->setSize( W/2, 0 );
 	text->setText(popup->Message);
+	text->setPosition( 0, (H/6 - text->getSize().y()) / 2 );
+	text->WrapText = true;
+	text->HorizontalTextAlign = TextAlign::Center;
 
 	int leftMargin = 0;
 
@@ -215,18 +214,17 @@ void RenderController::showPopupMessages()
 		Image* icon = new Image();
 		icon->setPath(popup->Icon);
 		icon->setSize(H/6, H/6);
-		icon->setPosition( (W/2 - text->getSize().x())/2 - H/6, 0);
+		icon->setPosition( 0, 0);
 		container->addChild(icon);
 
-		leftMargin = H/6;
+		leftMargin = (int) H/6;
 	}
 	
-	text->setPosition((W/2 - text->getSize().x())/2, (H/6 - text->getSize().y())/2);
 	container->addChild(text);
 
 	mPopupView->addChild(container);
 
-	#pragma region Animation
+	#pragma region PopupAnimation
 
 	//ANIMATE MESSAGE
 	Animation* a = new Animation();

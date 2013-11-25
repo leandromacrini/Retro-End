@@ -1,19 +1,18 @@
+#pragma once
+
 /* Main Window class
  *
  * The Main parent of any GUI elements
  * Pass the input only to the top level child
  */
 
-#pragma once
-
 #include <queue>
 
 #include "../../globals.h"
 
-#include "../Model/InputConfig.h"
-
 #include "BaseView.h"
-#include "Image.h"
+
+#include "../Model/InputConfig.h"
 
 namespace RetroEnd
 {
@@ -25,7 +24,19 @@ namespace RetroEnd
 			MainWindow();
 			~MainWindow();
 
+			void showConsoles();
+			void showLogo();
+
+			void update(unsigned int deltaTime) override;
+
 			bool input(Model::InputConfig* config, Model::Input input) override;
+		private:
+			BaseView* mConsoleView;
+
+			//properties to handle async scrape
+			bool mScrapeComplete;
+			BaseView* mScrapeView;
+			void* mScrapeResult;
 		};
 	}
 }
