@@ -8,9 +8,13 @@
 
 #include "../../globals.h"
 
-#include "BaseController.h"
 #include "../Model/Device.h"
 #include "../Model/Game.h"
+#include "../Model/Observer.h"
+
+#include "BaseController.h"
+#include "RenderController.h"
+#include "LogController.h"
 
 using namespace std;
 
@@ -30,6 +34,14 @@ namespace RetroEnd
 				return instance;
 			}
 			void start();
+
+			void launchGame(Model::Device& device, Model::Game& game);
+			void checkNewGamesAvailability(vector<Model::Game>* result);
+
+			//EVENTS
+
+			Model::Observer<Model::Game&> onGameStart;
+			Model::Observer<Model::Game&> onGameEnd;
 
 		protected:
 
