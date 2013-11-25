@@ -6,12 +6,15 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <Eigen/Dense>
+
 #include "../Controller/ResourceController.h"
 #include "../Controller/RenderController.h"
 
-#define FONT_SIZE_SMALL ((unsigned int)(0.035f * RenderController::getInstance().getScreenHeight()))
+#include "../View/BaseView.h"
+
+#define FONT_SIZE_SMALL ((unsigned int) (0.03f * RenderController::getInstance().getScreenHeight()))
 #define FONT_SIZE_MEDIUM ((unsigned int)(0.05f * RenderController::getInstance().getScreenHeight()))
-#define FONT_SIZE_LARGE ((unsigned int)(0.1f * RenderController::getInstance().getScreenHeight()))
+#define FONT_SIZE_LARGE ((unsigned int) (0.07f * RenderController::getInstance().getScreenHeight()))
 
 //A TrueType Font renderer that uses FreeType and OpenGL.
 //The library is automatically initialized when it's needed.
@@ -54,13 +57,11 @@ namespace RetroEnd
 			void renderTextCache(TextCache* cache);
 
 			//Create a TextCache, render with it, then delete it.  Best used for short text or text that changes frequently.
-			void drawText(std::string text, const Eigen::Vector2f& offset, unsigned int color);
+			void drawText(std::string text, const Eigen::Vector2f& offset, unsigned int color, int maxLenght = 0);
 			Eigen::Vector2f sizeText(std::string text) const; //Sets the width and height of a given string to supplied pointers. A dimension is skipped if its pointer is NULL.
 
-			void drawWrappedText(std::string text, const Eigen::Vector2f& offset, float xLen, unsigned int color);
+			void drawWrappedText(std::string text, const Eigen::Vector2f& offset, float xLen, unsigned int color, View::TextAlign align = View::TextAlign::Left);
 			Eigen::Vector2f sizeWrappedText(std::string text, float xLen) const;
-
-			void drawScreenCenteredText(std::string text, float xOffset, float y, unsigned int color);
 
 			int getHeight() const;
 

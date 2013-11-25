@@ -60,21 +60,21 @@ void Label::draw()
 	//the draw me
 	if(getFont() && !mText.empty())
 	{
-		Eigen::Vector3f pos3f = getAbsolutePosition();
-		Eigen::Vector2f pos2f(pos3f.x(), pos3f.y());
+		Eigen::Vector3f absPos = getAbsolutePosition();
 
 		//compute the text align offset
-		float xTextOffset = 0;
+		int xTextOffset = 0; // this MUST be an INTEGER
+	
 		switch (HorizontalTextAlign)
 		{
 		case RetroEnd::View::Left:
-			xTextOffset = getAbsolutePosition().x();
+			xTextOffset = (int)absPos.x();
 			break;
 		case RetroEnd::View::Center:
-			xTextOffset = pos2f.x() + ( ( mSize.x() - getFont()->sizeText(mText).x() ) / 2);
+			xTextOffset = (int)(absPos.x() + ( ( mSize.x() - getFont()->sizeText(mText).x() ) / 2));
 			break;
 		case RetroEnd::View::Right:
-			xTextOffset = pos2f.x() + mSize.x() - getFont()->sizeText(mText).x();
+			xTextOffset = (int)(absPos.x() + mSize.x() - getFont()->sizeText(mText).x());
 			break;
 		default:
 			break;
@@ -89,15 +89,15 @@ void Label::draw()
 			{
 				//TODO Shadow Global Opacity ?
 				if(WrapText)
-					getFont()->drawWrappedText(mText, Eigen::Vector2f(xTextOffset + ShadowOffset.x(), pos2f.y() + ShadowOffset.y()), mSize.x() , ShadowColor >> 8 << 8  | getAbsoluteOpacity());
+					getFont()->drawWrappedText(mText, Eigen::Vector2f(absPos.x() + ShadowOffset.x(), absPos.y() + ShadowOffset.y()), mSize.x() , ShadowColor >> 8 << 8  | getAbsoluteOpacity(), HorizontalTextAlign);
 				else
-					getFont()->drawText(mText, Eigen::Vector2f(xTextOffset + ShadowOffset.x(), pos2f.y() + ShadowOffset.y()), ShadowColor >> 8 << 8  | getAbsoluteOpacity());
+					getFont()->drawText(mText, Eigen::Vector2f(xTextOffset + ShadowOffset.x(), absPos.y() + ShadowOffset.y()), ShadowColor >> 8 << 8  | getAbsoluteOpacity());
 			}
 			//draw text
 			if(WrapText)
-				getFont()->drawWrappedText(mText, Eigen::Vector2f(xTextOffset, pos2f.y()), mSize.x() , mColor >> 8 << 8  | getAbsoluteOpacity());
+				getFont()->drawWrappedText(mText, Eigen::Vector2f(absPos.x(), absPos.y()), mSize.x() , mColor >> 8 << 8  | getAbsoluteOpacity(), HorizontalTextAlign);
 			else
-				getFont()->drawText(mText, Eigen::Vector2f(xTextOffset, pos2f.y()), mColor >> 8 << 8  | getAbsoluteOpacity());
+				getFont()->drawText(mText, Eigen::Vector2f(xTextOffset, absPos.y()), mColor >> 8 << 8  | getAbsoluteOpacity());
 		}
 	}
 }

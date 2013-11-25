@@ -75,8 +75,9 @@ shared_ptr<Font> Font::mDefaultFont = NULL;
 shared_ptr<Font> Font::getDefaultFont()
 {
 	if(Font::mDefaultFont == NULL)
-		Font::mDefaultFont = Font::get(Font::getDefaultPath(), FONT_SIZE_MEDIUM);
-
+	{
+		Font::mDefaultFont = Font::get("data/fonts/eurof35.ttf", FONT_SIZE_MEDIUM);
+	}
 	return Font::mDefaultFont;
 }
 
@@ -273,9 +274,30 @@ void Font::buildAtlas(ResourceData data)
 }
 
 
-void Font::drawText(string text, const Eigen::Vector2f& offset, unsigned int color)
+void Font::drawText(string text, const Eigen::Vector2f& offset, unsigned int color, int maxLenght)
 {
-	TextCache* cache = buildTextCache(text, offset[0], offset[1], color);
+	string finalText = text;
+	
+	//if we fit, then ok write all text
+	if(maxLenght > 0 && sizeText(finalText).x() > maxLenght)
+	{
+		//else put some text + "..." until it fits
+		finalText = "";
+		for(unsigned int i = 0; i < text.length(); i++)
+		{
+			if( sizeText( finalText + text[i] + "..." ).x() < maxLenght )
+			{
+				finalText+=text[i];
+			}
+			else
+			{
+				break;
+			}
+		}
+		finalText += "...";
+	}
+
+	TextCache* cache = buildTextCache(finalText, offset[0], offset[1], color);
 	renderTextCache(cache);
 	delete cache;
 }
@@ -343,25 +365,14 @@ int Font::getHeight() const
 	return (int)(mMaxGlyphHeight * 1.5f * fontScale);
 }
 
-void Font::drawScreenCenteredText(string text, float xOffset, float y, unsigned int color)
-{
-	Eigen::Vector2f pos = sizeText(text);
-	
-	pos[0] = (RenderController::getInstance().getScreenWidth() - pos.x());
-	pos[0] = (pos.x() / 2) + (xOffset / 2);
-	pos[1] = y;
-
-	drawText(text, pos, color);
-}
-
 //this could probably be optimized
 //draws text and ensures it's never longer than xLen
-void Font::drawWrappedText(string text, const Eigen::Vector2f& offset, float xLen, unsigned int color)
+void Font::drawWrappedText(string text, const Eigen::Vector2f& offset, float xLen, unsigned int color, TextAlign align)
 {
 	float y = offset.y();
 
 	string line, word, temp;
-	Eigen::Vector2f textSize;
+	Eigen::Vector2f textSize, currentLineSize;
 	size_t space, newline;
 
 	while(text.length() > 0 || !line.empty()) //while there's text or we still have text to render
@@ -400,7 +411,23 @@ void Font::drawWrappedText(string text, const Eigen::Vector2f& offset, float xLe
 		{
 			//render line now
 			if(textSize.x() > 0) //make sure it's not blank
-				drawText(line, Eigen::Vector2f(offset.x(), y), color);
+			{
+				currentLineSize = sizeText(line);
+
+				switch (align)
+				{
+				case RetroEnd::View::Center:
+					drawText(line, Eigen::Vector2f((float)(int)(offset.x() + ((xLen - currentLineSize.x())/2)), y), color);
+					break;
+				case RetroEnd::View::Right:
+					drawText(line, Eigen::Vector2f((float)(int)(offset.x() + xLen - currentLineSize.x()), y), color);
+					break;
+				case RetroEnd::View::Left:
+				default:
+					drawText(line, Eigen::Vector2f((float)(int)(offset.x()), y), color);
+					break;
+				}
+			}
 
 			//increment y by height and some extra padding for the next line
 			y += textSize.y() + 4;
