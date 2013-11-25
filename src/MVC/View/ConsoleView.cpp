@@ -25,64 +25,53 @@ ConsoleView::ConsoleView() : mAnimating(false), mContainer(new BaseView()), mCur
 	float W = (float)RenderController::getInstance().getScreenWidth();
 
 	float containerW = W / 2;
-	float containerH = H / 3 * 2;
+	float containerH = H / 2;
 
-	std::shared_ptr<Font> font =  Font::get("data/fonts/pixeljosh6.ttf", FONT_SIZE_SMALL);
+	std::shared_ptr<Font> font =  Font::get("data/fonts/eurof35.ttf", FONT_SIZE_MEDIUM);
 
 	//info container
 	mInfoContainer = new BaseView();
-	mInfoContainer->setSize( containerW, containerH);
-	mInfoContainer->setPosition(containerW, H / 6);
+	mInfoContainer->setSize( containerW, containerH );
+	mInfoContainer->setPosition(containerW, (H - containerH) / 2);
 	this->addChild(mInfoContainer);
 
 	//selected console logo
-	mLogo = new Image();
-	mLogo->setPosition(0, 0);
-	mLogo->setSize(containerW, H / 3);
-	mInfoContainer->addChild(mLogo);
-
-	//selected console name
-	mName = new Label();
-	mName->setColor(0xFFFFFFFF);
-	mName->setSize((float)containerW, (float)FONT_SIZE_LARGE);
-	mName->setPosition(0, H / 3);
-	mName->setFont(font);
-	mName->HorizontalTextAlign = TextAlign::Center;
-	mName->ShadowVisible = true;
-	mInfoContainer->addChild(mName);
+	mLogo = new Image( );
+	mLogo->setPosition( 0, 0 );
+	mLogo->setSize( containerW, H / 6 );
+	mInfoContainer->addChild( mLogo );
 
 	//selected console date and manufacturer
 	mDateManufacturer = new Label();
-	mDateManufacturer->setColor(0xFFFFFFFF);
-	mDateManufacturer->setSize((float)containerW,  (float)FONT_SIZE_LARGE);
-	mDateManufacturer->setPosition(0, H / 3 + FONT_SIZE_MEDIUM);
-	mDateManufacturer->setFont(font);
+	mDateManufacturer->setColor( 0x000000FF );
+	mDateManufacturer->setSize( containerW, 0 );
+	mDateManufacturer->setFont( font );
+	mDateManufacturer->setPosition( 0, ( containerH - mDateManufacturer->getFont()->getSize()) / 2 );
 	mDateManufacturer->HorizontalTextAlign = TextAlign::Center;
-	mDateManufacturer->ShadowVisible = true;
-	mInfoContainer->addChild(mDateManufacturer);
+	mInfoContainer->addChild( mDateManufacturer );
 
 	//selected console info icons
-	float iconSide = containerW / 9;
+	float iconSide = W/10;
 
-	mMediaIcon = new Image();
-	mMediaIcon->setPath("data/images/icon.png");
-	mMediaIcon->setSize(iconSide,iconSide);
-	mMediaIcon->setPosition(iconSide*3, containerH - iconSide);
-	mInfoContainer->addChild(mMediaIcon);
+	mMediaIcon2 = new Image();
+	mMediaIcon2->setSize(iconSide,iconSide);
+	mMediaIcon2->setPosition((containerW - iconSide*4)/2 , containerH - iconSide);
+	mInfoContainer->addChild(mMediaIcon2);
 
-	mControllerIcon = new Image();
-	mControllerIcon = new Image();
-	mControllerIcon->setPath("data/images/icon.png");
-	mControllerIcon->setSize(iconSide,iconSide);
-	mControllerIcon->setPosition(iconSide*4, containerH - iconSide);
-	mInfoContainer->addChild(mControllerIcon);
+	mMediaIcon1 = new Image();
+	mMediaIcon1->setSize(iconSide,iconSide);
+	mMediaIcon1->setPosition((containerW - iconSide*4)/2 + iconSide, containerH - iconSide);
+	mInfoContainer->addChild(mMediaIcon1);
 
-	mPlayersIcon = new Image();
-	mPlayersIcon = new Image();
-	mPlayersIcon->setPath("data/images/icon.png");
-	mPlayersIcon->setSize(iconSide,iconSide);
-	mPlayersIcon->setPosition(iconSide*5, containerH - iconSide);
-	mInfoContainer->addChild(mPlayersIcon);
+	mControllerIcon1 = new Image();
+	mControllerIcon1->setSize(iconSide,iconSide);
+	mControllerIcon1->setPosition((containerW - iconSide*4)/2 + iconSide*2, containerH - iconSide);
+	mInfoContainer->addChild(mControllerIcon1);
+
+	mControllerIcon2 = new Image();
+	mControllerIcon2->setSize(iconSide,iconSide);
+	mControllerIcon2->setPosition((containerW - iconSide*4)/2 + iconSide*3, containerH - iconSide);
+	mInfoContainer->addChild(mControllerIcon2);
 
 	//draw available consoles
 	mDevices = Device::getAllDevices();
@@ -97,43 +86,31 @@ ConsoleView::ConsoleView() : mAnimating(false), mContainer(new BaseView()), mCur
 	{
 		Device device = mDevices[i];
 
-		if( ! device.imageConsole.empty() )
-		{
-			Image* image = new Image();
-			image->setSize(itemSide, itemSide);
-			image->setPath(device.imageConsole);
-			image->setPosition(0, (H-itemSide)/2 + H*i);
-			mContainer->addChild(image);
-		}
+		Image* image = new Image();
+		image->setSize(itemSide, itemSide);
+		if( boost::filesystem::exists("data/consoles/" + device.Name + "/device.png") )
+			image->setPath("data/consoles/" + device.Name + "/device.png");
+		else
+			image->setPath("data/images/blank_device.png");
+		image->setPosition(0, (H-itemSide)/2 + H*i);
+		mContainer->addChild(image);
 	}
-
-	//draw bottom legends
-	mLeftLegend = new Sprite();
-	mLeftLegend->FrameHeight = 180;
-	mLeftLegend->setPosition(0, H - H/6);
-	mLeftLegend->setSize(W/2, H/6);
-	mLeftLegend->setPath("data/images/left-legend.png");
-	mLeftLegend->setLoop(true);
-	mLeftLegend->setFrameDuration(500);
-	this->addChild(mLeftLegend);
-
-	mRightLegend = new Sprite();
-	mRightLegend->FrameHeight = 180;
-	mRightLegend->setPosition(W/2, H - H/6);
-	mRightLegend->setSize(W/2, H/6);
-	mRightLegend->setPath("data/images/right-legend.png");
-	mRightLegend->setLoop(true);
-	mRightLegend->setFrameDuration(500);
-	this->addChild(mRightLegend);
-
-	//mLeftLegend->start();
-	//mRightLegend->start();
 
 	//fade id
 	Animation* a = new Animation();
 	a->millisDuration = 2000;
 	a->newOpacity = new unsigned char(255);
 	this->animate(a);
+
+	Sprite* help = new Sprite();
+	help->setPosition(W/4, H* 19/20);
+	help->setSize(W/2, H/20);
+	help->FrameHeight = 54;
+	help->setPath("data/images/left-legend.png");
+	help->setLoop(true);
+	help->setFrameDuration( 1000 );
+	help->start();
+	this->addChild(help);
 
 	updateCurrentConsoleData();
 }
@@ -145,9 +122,12 @@ ConsoleView::~ConsoleView()
 
 void ConsoleView::updateCurrentConsoleData()
 {
-	mLogo->setPath(mDevices[mCurrentIndex].imageLogo);
-	mName->setText(mDevices[mCurrentIndex].name);
-	mDateManufacturer->setText(mDevices[mCurrentIndex].releaseDate + ", " + mDevices[mCurrentIndex].manufacturer);
+	mLogo->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/logo.png");
+	mDateManufacturer->setText(mDevices[mCurrentIndex].ReleaseDate + ", " + mDevices[mCurrentIndex].Manufacturer);
+	mMediaIcon1->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype1.png");
+	mMediaIcon2->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype2.png");
+	mControllerIcon1->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/controller1.png");
+	mControllerIcon2->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/controller2.png");
 }
 
 void ConsoleView::move(int direction)
@@ -182,8 +162,8 @@ void ConsoleView::move(int direction)
 	};
 
 	mInfoContainer->animate(b);
-	
-	
+
+
 	mMoveSound->play();
 }
 

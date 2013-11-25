@@ -4,6 +4,7 @@
 #include "../Controller/AudioController.h"
 #include "../Controller/InputController.h"
 #include "../Controller/ScraperController.h"
+#include "../Controller/GamingController.h"
 
 using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
@@ -11,9 +12,7 @@ using namespace RetroEnd::Controller;
 
 GamesView::GamesView()
 {
-	std::shared_ptr<Font> font =  Font::get("data/fonts/pixeljosh6.ttf", FONT_SIZE_SMALL);
-	std::shared_ptr<Font> bigfont =  Font::get("data/fonts/pixeljosh6.ttf", FONT_SIZE_MEDIUM);
-
+	//create sounds
 	mMoveSound = shared_ptr<Sound>( AudioController::getInstance().createSound("data/sounds/GS25.wav"));
 	mSelectSound  = shared_ptr<Sound>( AudioController::getInstance().createSound("data/sounds/GS42.wav"));
 
@@ -21,23 +20,40 @@ GamesView::GamesView()
 	float H = (float)RenderController::getInstance().getScreenHeight();
 	float W = (float)RenderController::getInstance().getScreenWidth();
 
+	std::shared_ptr<Font> bigfont =  Font::get("data/fonts/eurof35.ttf", FONT_SIZE_LARGE);
+
 	//instantiate graphics
 	mBackgroundImage = new Image();
 	mBackgroundImage->setSize( W, H );
-	mBackgroundImage->setPath("data/images/sfondo1.jpg");
+	mBackgroundImage->setPath("data/images/bg_bn.png");
+	mBackgroundImage->setTiled(true);
 	this->addChild( mBackgroundImage );
+
+	Image* shadow = new Image();
+	shadow->setSize( 94, H * 5/6 );
+	shadow->setPosition( W/2, H/6 );
+	shadow->setPath("data/images/shadow.png");
+	this->addChild( shadow );
+
+	Image* gameShadow = new Image();
+	gameShadow->setSize( W/2, H );
+	gameShadow->setPosition( 0, 0 );
+	gameShadow->setPath("data/images/radial.png");
+	this->addChild( gameShadow );
 
 	mDeviceLogo = new Image( );
 	mDeviceLogo->setPosition( W/2, 0 );
-	mDeviceLogo->setSize( W/2, H/3 );
+	mDeviceLogo->setSize( W/2, H/6 );
 	this->addChild( mDeviceLogo );
 
-	mGamesList = new ListView();
-	mGamesList->setPosition(W/2, H/3);
-	mGamesList->setSize(W/2, 2* H/3);
-	mGamesList->SelectedRowBackgroundColor = 0xFFFFFFFF;
+	mGamesList = new GameListView();
+	mGamesList->setPosition(W/2, H/6);
+	mGamesList->RowHeight = 64;
+	mGamesList->setSize(W/2, ((-1.0f + (int)(H * 5/6 / mGamesList->RowHeight)) * mGamesList->RowHeight));
 	mGamesList->HorizontalTextAlign = TextAlign::Left;
-	mGamesList->ItemFont = font;
+	mGamesList->TitleColor = 0x1D1D1D66;
+	mGamesList->SelectedTitleColor = 0x00000000FF;
+	mGamesList->SelectedRowBackgroundColor = 0x2B729533;
 	this->addChild( mGamesList );
 
 	mGameImage = new Image();
@@ -46,34 +62,31 @@ GamesView::GamesView()
 
 	//selected game date and manufacturer
 	mDateManufacturer = new Label();
-	mDateManufacturer->setColor(0xFFFFFFFF);
-	mDateManufacturer->setSize(W/2,  (float)FONT_SIZE_LARGE);
-	mDateManufacturer->setPosition(0, H - FONT_SIZE_LARGE);
-	mDateManufacturer->setFont(font);
-	mDateManufacturer->ShadowVisible = true;
+	mDateManufacturer->setColor(0x000000FF);
+	mDateManufacturer->setSize(W/2, 0);
+	mDateManufacturer->setFont(bigfont);
+	mDateManufacturer->setPosition(0, H/6/2 - bigfont->getSize()/2);
 	mDateManufacturer->HorizontalTextAlign = TextAlign::Center;
 	this->addChild(mDateManufacturer);
 
-	//game icons
-	mGameESRB = new Image();
-	mGameESRB->setPath("data/images/icon_ESRB_Ao.png");
-	mGameESRB->setPosition(W/2/5*1, (H/6 - H/7) / 2);
-	mGameESRB->resizeByHeight(H/7);
-	this->addChild(mGameESRB);
+	//selected game developer
+	mDeveloper = new Label();
+	mDeveloper->setColor(0x000000FF);
+	mDeveloper->setSize(W/2, 0);
+	mDeveloper->setPosition(0, H*5/6 + H/6/2 - bigfont->getSize()/2);
+	mDeveloper->setFont(bigfont);
+	mDeveloper->HorizontalTextAlign = TextAlign::Center;
+	this->addChild(mDeveloper);
 
-	mGamePlayers = new Image();
-	mGamePlayers->setPath("data/images/icon_player_4.png");
-	mGamePlayers->setPosition(W/2/5*2, (H/6 - H/7) / 2);
-	mGamePlayers->resizeByHeight(H/7);
-	this->addChild(mGamePlayers);
-
-	mGameCoOp = new Image();
-	mGameCoOp->setPath("data/images/icon_coop.png");
-	mGameCoOp->setPosition(W/2/5*3, (H/6 - H/7) / 2);
-	mGameCoOp->resizeByHeight(H/7);
-	this->addChild(mGameCoOp);
-
-	mGameRate = new Image();
+	Sprite* help = new Sprite();
+	help->setPosition(W/4, H* 19/20);
+	help->setSize(W/2, H/20);
+	help->FrameHeight = 54;
+	help->setPath("data/images/left-legend.png");
+	help->setLoop(true);
+	help->setFrameDuration( 1000 );
+	help->start();
+	this->addChild(help);
 }
 
 void GamesView::setDevice(Model::Device& device)
@@ -81,24 +94,25 @@ void GamesView::setDevice(Model::Device& device)
 	mDevice = device;
 
 	//set logo
-	mDeviceLogo->setPath(device.imageLogo);
+	mDeviceLogo->setPath("data/consoles/" + device.Name + "/logo.png");
 
 	//set games list
 	mGamesList->removeAllRows();
 
-	mGames = Game::getGamesForDevice((int)device.id);
+	mGamesList->setPointerPath("data/consoles/" + device.Name + "/pointer.png");
+
+	mGames = Game::getGamesForDevice(device.id);
 
 	if(mGames.size() == 0)
 	{
 		ScraperController::getInstance().ScrapeAllGamesForDevice(device, true, 20);
 
-		//ScraperController::getInstance().ScrapeAllGamesForDevice(device);
-		mGames = Game::getGamesForDevice((int)device.id);
+		mGames = Game::getGamesForDevice(device.id);
 	}
 
 	for (auto it(mGames.begin()); it != mGames.end(); ++it)
 	{
-		mGamesList->addRow(it->title);
+		mGamesList->addRow(*it);
 	}
 
 	updateCurrentGameData();
@@ -120,20 +134,17 @@ void GamesView::updateImageSizeAndPosition()
 		//resize on width or height
 		if(mGameImage->getTextureSize().x() > mGameImage->getTextureSize().y())
 		{
-			float imageMargin  = H/6;
-			float maxImageSide = W/2 - imageMargin*2;
+			float maxImageSide = H/3*2;
 
 			mGameImage->resizeByWidth(maxImageSide);
-			mGameImage->setPosition(imageMargin, imageMargin);
 		}
 		else
 		{
-			float imageMargin  = H/6;
-			float maxImageSide = H - imageMargin*2;
+			float maxImageSide = H/3*2;
 
 			mGameImage->resizeByHeight(maxImageSide);
-			mGameImage->setPosition((W/2 - mGameImage->getSize().x())/2, imageMargin);
 		}
+		mGameImage->setPosition((W/2 - mGameImage->getSize().x())/2, (H - mGameImage->getSize().y())/2);
 	}
 }
 
@@ -142,100 +153,24 @@ void GamesView::updateCurrentGameData()
 	Game game = mGames[mGamesList->getSelectedIndex()];
 	
 	//date and data text
-	string text = game.releaseDate;
 
-	if( ! game.developer.empty() )
-		text += (text.empty()? "" : ", ") + game.developer;
-
-	if( ! game.publisher.empty() )
-		text += (text.empty()? "" : " (") + game.publisher + (text.empty()? "" : ")");
-
-	mDateManufacturer->setText(text);
-
-	//icons
-	mGameCoOp->Visible = game.coOp == "Yes";
-
-	if(game.ESRB == "E - Everyone")
-	{
-		mGameESRB->Visible = true;
-		mGameESRB->setPath("data/images/icon_ESRB_E.png");
-	}
-	else if (game.ESRB == "E10+ - Everyone 10+")
-	{
-		mGameESRB->Visible = true;
-		mGameESRB->setPath("data/images/icon_ESRB_E10+.png");
-	}
-	else if (game.ESRB == "T - Teen")
-	{
-		mGameESRB->Visible = true;
-		mGameESRB->setPath("data/images/icon_ESRB_T.png");
-	}
-	else if (game.ESRB == "M - Mature")
-	{
-		mGameESRB->Visible = true;
-		mGameESRB->setPath("data/images/icon_ESRB_M.png");
-	}
-	else if (game.ESRB == "EC - Early Childhood")
-	{
-		mGameESRB->Visible = true;
-		mGameESRB->setPath("data/images/icon_ESRB_eC.png");
-	}
-	else if (game.ESRB == "AO - Adults Only") //TODO 
-	{
-		mGameESRB->Visible = true;
-		mGameESRB->setPath("data/images/icon_ESRB_Ao.png");
-	}
-	else if (game.ESRB == "RP - Rating Pending")
-	{
-		mGameESRB->Visible = true;
-		mGameESRB->setPath("data/images/icon_ESRB_RP.png");
-	}
-	else
-	{
-		mGameESRB->Visible = false;
-		mGameESRB->setPath("");
-	}
-
-	if(game.players == "1")
-	{
-		mGamePlayers->Visible = true;
-		mGamePlayers->setPath("data/images/icon_player_1.png");
-	}
-	else if(game.players == "2")
-	{
-		mGamePlayers->Visible = true;
-		mGamePlayers->setPath("data/images/icon_player_2.png");
-	}
-	else if(game.players == "3")
-	{
-		mGamePlayers->Visible = true;
-		mGamePlayers->setPath("data/images/icon_player_3.png");
-	}
-	else if(game.players == "4+")
-	{
-		mGamePlayers->Visible = true;
-		mGamePlayers->setPath("data/images/icon_player_4.png");
-	}
-	else
-	{
-		mGamePlayers->Visible = false;
-		mGamePlayers->setPath("");
-	}
+	mDeveloper->setText(game.Developer);
+	mDateManufacturer->setText(game.getReleaseYear() + game.Publisher);
 
 	//image size is computed on the longest side
 	//image must always fit inside his box
 	mGameImage->setPath("");
-	if( ! game.imageFront.empty() )
+	if( ! game.ImageFront.empty() )
 	{
-		mGameImage->setPath( game.imageFront );
+		mGameImage->setPath( game.ImageFront );
 	}
-	else if ( ! game.imageBack.empty() )
+	else if ( ! game.ImageBack.empty() )
 	{
-		mGameImage->setPath( game.imageBack );
+		mGameImage->setPath( game.ImageBack );
 	}
-	else if ( ! game.imageScreen.empty() )
+	else if ( ! game.ImageScreen.empty() )
 	{
-		mGameImage->setPath( game.imageScreen );
+		mGameImage->setPath( game.ImageScreen );
 	}
 	updateImageSizeAndPosition();
 
@@ -268,9 +203,34 @@ bool GamesView::input(Model::InputConfig* config, Model::Input input)
 		return true;
 	}
 
+	if(input.id == SDLK_LEFT && input.value != 0 )
+	{
+		move(- min(10,(int) mGamesList->getSelectedIndex()));
+		return true;
+	}
+
+	if(input.id == SDLK_RIGHT && input.value != 0)
+	{
+		move(min(10u, mGames.size() -1 - mGamesList->getSelectedIndex()));
+		return true;
+	}
+
 	if(input.id == SDLK_ESCAPE && input.value != 0)
 	{
 		mParent->removeChild(this);
+		return true;
+	}
+
+	if(input.id == SDLK_SPACE && input.value != 0)
+	{
+		onOpenGameInfo(mGames.at(mGamesList->getSelectedIndex()));
+		return true;
+	}
+
+	if(input.id == SDLK_RETURN && input.value != 0)
+	{
+		mSelectSound->play();
+		GamingController::getInstance().launchGame(mDevice, mGames.at(mGamesList->getSelectedIndex()));
 		return true;
 	}
 

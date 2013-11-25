@@ -2,6 +2,7 @@
 
 #include "../../globals.h"
 
+#include "../Model/Observer.h"
 #include "../Model/Sound.h"
 #include "../Model/Device.h"
 #include "../Model/Game.h"
@@ -10,7 +11,7 @@
 #include "Sprite.h"
 #include "Image.h"
 #include "Label.h"
-#include "ListView.h"
+#include "GameListView.h"
 
 namespace RetroEnd
 {
@@ -26,6 +27,8 @@ namespace RetroEnd
 
 			void move(int direction); // 1 Next | -1 Prev
 
+			Model::Observer<Model::Game> onOpenGameInfo; //open game info event
+
 			bool input(Model::InputConfig* config, Model::Input input) override;
 		private:
 			void updateCurrentGameData();
@@ -37,17 +40,14 @@ namespace RetroEnd
 			Model::Device mDevice;
 			vector<Model::Game> mGames;
 
-			ListView* mGamesList;
+			GameListView* mGamesList;
 			Image* mBackgroundImage;
 			Image* mDeviceLogo;
 			
 			Image* mGameImage;
-			Image* mGameESRB;
-			Image* mGameRate;
-			Image* mGamePlayers;
-			Image* mGameCoOp;
-			
+
 			Label* mDateManufacturer;
+			Label* mDeveloper;
 
 			Sprite* mLeftLegend;
 			Sprite* mRightLegend;

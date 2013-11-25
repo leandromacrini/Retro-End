@@ -5,8 +5,7 @@
 * Implements the rendering and update systems
 */
 
-#ifndef _BASEVIEW_H_
-#define _BASEVIEW_H_
+#pragma once
 
 #include <Eigen/Dense>
 
@@ -93,7 +92,7 @@ namespace RetroEnd
 
 			void addChild(BaseView* cmp);
 			void removeChild(BaseView* cmp);
-			void clearChildren();
+			void removeAllChildren();
 			unsigned int getChildCount() const;
 			BaseView* getChild(unsigned int i) const;
 
@@ -139,5 +138,3 @@ namespace RetroEnd
 		};
 	}
 }
-
-#endif _BASEVIEW_H_

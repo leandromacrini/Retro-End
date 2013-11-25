@@ -22,13 +22,13 @@ BaseView::BaseView() :
 
 BaseView::~BaseView()
 {
-
+	removeAllChildren();
 }
 
 void BaseView::update(unsigned int deltaTime)
 {
 	//animation handling
-	if(mAnimation != NULL)
+	if(mAnimation)
 	{
 		//Moving
 		if(mAnimation->moveOffset)
@@ -78,6 +78,8 @@ void BaseView::update(unsigned int deltaTime)
 			}
 		}
 
+		bool completed = false;
+
 		//is animation completed?
 		if(mAnimation->millisDuration == 0)
 		{
@@ -88,12 +90,12 @@ void BaseView::update(unsigned int deltaTime)
 			delete mAnimation;
 			mAnimation = NULL;
 			
-
 			//call the end callback
 			callback();
+			completed = true;
 		}
 
-		if(mAnimation) mAnimation->millisDuration -= deltaTime >= mAnimation->millisDuration ? mAnimation->millisDuration : deltaTime ;
+		if(!completed && mAnimation) mAnimation->millisDuration -= deltaTime >= mAnimation->millisDuration ? mAnimation->millisDuration : deltaTime ;
 	}
 
 	for(unsigned int i = 0; i < getChildCount(); i++)
@@ -190,22 +192,23 @@ void BaseView::addChild(BaseView* cmp)
 	cmp->setParent(this);
 }
 
+//this function remove the child from the vector and call delete on it
 void BaseView::removeChild(BaseView* cmp)
 {
-	for(auto i = mChildren.begin(); i != mChildren.end(); i++)
+	vector<BaseView*>::iterator it = find(mChildren.begin(), mChildren.end(), cmp);
+	if(it != mChildren.end())
 	{
-		if(*i == cmp)
-		{
-			cmp->setParent(NULL);
-			mChildren.erase(i);
-			return;
-		}
+		mChildren.erase(it);
+		delete cmp;
 	}
 }
 
-void BaseView::clearChildren()
+void BaseView::removeAllChildren()
 {
-	mChildren.clear();
+	while(mChildren.size() > 0)
+	{
+		removeChild(mChildren.at(0));
+	}
 }
 
 unsigned int BaseView::getChildCount() const

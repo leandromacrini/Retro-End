@@ -41,15 +41,12 @@ namespace RetroEnd
 			BaseView* mInfoContainer;
 
 			Image* mLogo;
-			Image* mMediaIcon;
-			Image* mControllerIcon;
-			Image* mPlayersIcon;
+			Image* mMediaIcon1;
+			Image* mMediaIcon2;
+			Image* mControllerIcon1;
+			Image* mControllerIcon2;
 			
-			Label* mName;
 			Label* mDateManufacturer;
-
-			Sprite* mLeftLegend;
-			Sprite* mRightLegend;
 		};
 
 	}
