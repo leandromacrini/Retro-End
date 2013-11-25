@@ -4,8 +4,14 @@
 
 #pragma once
 
+#include <regex>
+#include "../../LIB/pugiXML/pugixml.hpp"
+#include "boost/filesystem.hpp"
+
 #include "../../globals.h"
+
 #include "../Controller/LogController.h"
+
 #include "BaseModel.h"
 
 namespace RetroEnd
@@ -15,32 +21,44 @@ namespace RetroEnd
 		class Game : public BaseModel
 		{
 		public:
+			//empty creator
 			Game();
+
+			//creator from sqlite record
 			Game( sqlite3_stmt* record );
+
+			//creator from TGDB xml result
+			Game ( pugi::xml_node gameNode, sqlite3_int64 deviceId = -1);
 
 			~Game();
 
 			//DB PROPERTIES
-			string title;
-			sqlite3_int64 deviceId;
-			string releaseDate;
-			string description;
-			string developer;
-			string publisher;
+			string Title;
+			sqlite3_int64 DeviceId;
+			string ReleaseDate;
+			string Description;
+			string Developer;
+			string Publisher;
 			string ESRB;
-			string players;
-			string coOp;
+			string MaxPlayers;
+			string CoOp;
 			
-			string tgbdId;
-			string tgbdRating;
+			string TGDBId;
+			string TGDBRating;
 
-			string imageFront;
-			string imageBack;
-			string imageScreen;
-			string imageLogo;
+			string ImageFront;
+			string ImageBack;
+			string ImageScreen;
+			string ImageLogo;
 
-			string gameFile;
-			string fileCRC;
+			string GameFile;
+			string FileCRC;
+
+			int TimesPlayed;
+
+			//computed properties
+			string getReleaseYear();
+			string getCleanFileName();
 
 			//table name
 			static string table;
@@ -49,10 +67,10 @@ namespace RetroEnd
 			static vector<Game> getAllGames();
 
 			//retrive all Game from DB for a specified Device
-			static vector<Game> getGamesForDevice(int deviceId);
+			static vector<Game> getGamesForDevice(sqlite3_int64 deviceId);
 
 			//retrive the Game identified by "id" or NULL if not present
-			static Game getGameById(int id);
+			static Game getGameById(sqlite3_int64 id);
 
 			//create the table, 
 			static void init();

@@ -1,5 +1,7 @@
 #include "Game.h"
 
+namespace fs = boost::filesystem;
+
 using namespace RetroEnd::Model;
 using namespace std;
 
@@ -9,30 +11,48 @@ string Game::table = "games";
 // Model Class Constructor
 Game::Game() : BaseModel()
 {
-	deviceId = 0; //default value
+	DeviceId = 0; //default value
+	TimesPlayed = 0;
 }
 
 // Model Class Constructor from DB record
 Game::Game( sqlite3_stmt* record ) : BaseModel()
 {
 	id			= sqlite3_column_int(record, 0);
-	title		= (char*)sqlite3_column_text(record,1);
-	deviceId	= sqlite3_column_int(record,2);
-	description = (char*)sqlite3_column_text(record,3);
-	developer	= (char*)sqlite3_column_text(record,4);
-	publisher	= (char*)sqlite3_column_text(record,5);
+	Title		= (char*)sqlite3_column_text(record,1);
+	DeviceId	= sqlite3_column_int(record,2);
+	Description = (char*)sqlite3_column_text(record,3);
+	Developer	= (char*)sqlite3_column_text(record,4);
+	Publisher	= (char*)sqlite3_column_text(record,5);
 	ESRB		= (char*)sqlite3_column_text(record,6);
-	players		= (char*)sqlite3_column_text(record,7);
-	coOp		= (char*)sqlite3_column_text(record,8);
-	releaseDate = (char*)sqlite3_column_text(record,9);
-	tgbdId		= (char*)sqlite3_column_text(record,10);
-	tgbdRating	= (char*)sqlite3_column_text(record,11);
-	imageFront	= (char*)sqlite3_column_text(record,12);
-	imageBack	= (char*)sqlite3_column_text(record,13);
-	imageScreen	= (char*)sqlite3_column_text(record,14);
-	imageLogo	= (char*)sqlite3_column_text(record,15);
-	gameFile	= (char*)sqlite3_column_text(record,16);
-	fileCRC		= (char*)sqlite3_column_text(record,17);
+	MaxPlayers	= (char*)sqlite3_column_text(record,7);
+	CoOp		= (char*)sqlite3_column_text(record,8);
+	ReleaseDate = (char*)sqlite3_column_text(record,9);
+	TGDBId		= (char*)sqlite3_column_text(record,10);
+	TGDBRating	= (char*)sqlite3_column_text(record,11);
+	ImageFront	= (char*)sqlite3_column_text(record,12);
+	ImageBack	= (char*)sqlite3_column_text(record,13);
+	ImageScreen	= (char*)sqlite3_column_text(record,14);
+	ImageLogo	= (char*)sqlite3_column_text(record,15);
+	GameFile	= (char*)sqlite3_column_text(record,16);
+	FileCRC		= (char*)sqlite3_column_text(record,17);
+	TimesPlayed  = sqlite3_column_int(record, 18);
+}
+
+// Model Class Constructor from TGDB result
+Game::Game ( pugi::xml_node gameNode, sqlite3_int64 deviceId) : BaseModel()
+{
+	Title = gameNode.child("GameTitle").text().get();
+	DeviceId = deviceId;
+	Description = gameNode.child("Overview").text().get();
+	ESRB = gameNode.child("ESRB").text().get();
+	MaxPlayers = gameNode.child("Players").text().get();
+	CoOp = gameNode.child("Co-op").text().get();
+	Publisher = gameNode.child("Publisher").text().get();
+	Developer = gameNode.child("Developer").text().get();
+	TGDBRating = gameNode.child("Rating").text().get();
+	ReleaseDate = gameNode.child("ReleaseDate").text().get();
+	TGDBId = gameNode.child("Id").text().get();
 }
 
 // Model Class Distructor
@@ -46,23 +66,24 @@ string Game::getUpdateQuery()
 {
 	string query = "UPDATE " + table + " SET";
 
-	query += " DEVICE_ID = '"	+	to_string( deviceId )+"',";
-	query += " TITLE = '"		+	sqlEscape( title )+"',";
-	query += " DESCRIPTION = '"	+	sqlEscape( description )+"',";
-	query += " DEVELOPER = '"	+	sqlEscape( developer )+"',";
-	query += " PUBLISHER = '"	+	sqlEscape( publisher )+"',";
+	query += " DEVICE_ID = "	+	to_string( DeviceId )+",";
+	query += " TITLE = '"		+	sqlEscape( Title )+"',";
+	query += " DESCRIPTION = '"	+	sqlEscape( Description )+"',";
+	query += " DEVELOPER = '"	+	sqlEscape( Developer )+"',";
+	query += " PUBLISHER = '"	+	sqlEscape( Publisher )+"',";
 	query += " ESRB = '"		+	sqlEscape( ESRB )+"',";
-	query += " PLAYERS = '"		+	sqlEscape( players )+"',";
-	query += " CO_OP = '"		+	sqlEscape( coOp )+"',";
-	query += " RELEASE_DATE = '"+	sqlEscape( releaseDate )+"',";
-	query += " TGDB_ID = '"		+	sqlEscape( tgbdId )+"',";
-	query += " TGDB_RATING = '"	+	sqlEscape( tgbdRating )+"',";
-	query += " IMAGE_FRONT = '"	+	sqlEscape( imageFront )+"',";
-	query += " IMAGE_BACK = '"	+	sqlEscape( imageBack )+"',";
-	query += " IMAGE_SCREEN = '"+	sqlEscape( imageScreen )+"',";
-	query += " IMAGE_LOGO = '"	+	sqlEscape( imageLogo )+"',";
-	query += " GAME_FILE = '"	+	sqlEscape( gameFile )+"' ";
-	query += " FILE_CRC = '"	+	sqlEscape( fileCRC )+"' ";
+	query += " PLAYERS = '"		+	sqlEscape( MaxPlayers )+"',";
+	query += " CO_OP = '"		+	sqlEscape( CoOp )+"',";
+	query += " RELEASE_DATE = '"+	sqlEscape( ReleaseDate )+"',";
+	query += " TGDB_ID = '"		+	sqlEscape( TGDBId )+"',";
+	query += " TGDB_RATING = '"	+	sqlEscape( TGDBRating )+"',";
+	query += " IMAGE_FRONT = '"	+	sqlEscape( ImageFront )+"',";
+	query += " IMAGE_BACK = '"	+	sqlEscape( ImageBack )+"',";
+	query += " IMAGE_SCREEN = '"+	sqlEscape( ImageScreen )+"',";
+	query += " IMAGE_LOGO = '"	+	sqlEscape( ImageLogo )+"',";
+	query += " GAME_FILE = '"	+	sqlEscape( GameFile )+"' ,";
+	query += " FILE_CRC = '"	+	sqlEscape( FileCRC )+"' ,";
+	query += " TIMES_PLAYED = "	+	to_string( TimesPlayed );
 
 	query += " WHERE id="+to_string( id )+";";
 
@@ -78,8 +99,8 @@ string Game::getDeleteQuery()
 // Build the query for create the DB record
 string Game::getInsertQuery()
 {
-	string query = "INSERT into " + table + " (TITLE,DEVICE_ID,DESCRIPTION,DEVELOPER,PUBLISHER,ESRB,PLAYERS,CO_OP,RELEASE_DATE,TGDB_ID,TGDB_RATING,IMAGE_FRONT,IMAGE_BACK,IMAGE_SCREEN,IMAGE_LOGO, GAME_FILE, FILE_CRC)";
-	query += "values ('" + sqlEscape( title ) + "','" + to_string(deviceId) + "','" + sqlEscape( description ) + "','" + sqlEscape( developer ) + "','" + sqlEscape( publisher ) + "','" + sqlEscape( ESRB ) + "','" + sqlEscape( players ) + "','" + sqlEscape( coOp ) + "','" + sqlEscape( releaseDate ) + "','" + sqlEscape( tgbdId ) + "','" + sqlEscape( tgbdRating ) + "','" + sqlEscape( imageFront ) + "','" + sqlEscape( imageBack ) + "','" + sqlEscape( imageScreen ) + "','" + sqlEscape( imageLogo ) + "','" + sqlEscape( gameFile ) + "','" + sqlEscape( fileCRC ) + "');";
+	string query = "INSERT into " + table + " (TITLE,DEVICE_ID,DESCRIPTION,DEVELOPER,PUBLISHER,ESRB,PLAYERS,CO_OP,RELEASE_DATE,TGDB_ID,TGDB_RATING,IMAGE_FRONT,IMAGE_BACK,IMAGE_SCREEN,IMAGE_LOGO, GAME_FILE, FILE_CRC, TIMES_PLAYED)";
+	query += "values ('" + sqlEscape( Title ) + "','" + to_string(DeviceId) + "','" + sqlEscape( Description ) + "','" + sqlEscape( Developer ) + "','" + sqlEscape( Publisher ) + "','" + sqlEscape( ESRB ) + "','" + sqlEscape( MaxPlayers ) + "','" + sqlEscape( CoOp ) + "','" + sqlEscape( ReleaseDate ) + "','" + sqlEscape( TGDBId ) + "','" + sqlEscape( TGDBRating ) + "','" + sqlEscape( ImageFront ) + "','" + sqlEscape( ImageBack ) + "','" + sqlEscape( ImageScreen ) + "','" + sqlEscape( ImageLogo ) + "','" + sqlEscape( GameFile ) + "','" + sqlEscape( FileCRC ) + "', "+to_string(TimesPlayed)+");";
 	return query;
 }
 
@@ -105,6 +126,7 @@ void Game::init()
 	//new colums bust be added in the update part so when the app is updated we can add those to the DB
 	queries.push_back( "ALTER TABLE " +Game::table + " ADD COLUMN GAME_FILE TEXT DEFAULT '';" );
 	queries.push_back( "ALTER TABLE " +Game::table + " ADD COLUMN FILE_CRC TEXT DEFAULT '';" );
+	queries.push_back( "ALTER TABLE " +Game::table + " ADD COLUMN TIMES_PLAYED INTEGER DEFAULT 0;" );
 
 	for (std::vector<string>::iterator it = queries.begin() ; it != queries.end(); ++it) {
 		string query = *it;
@@ -169,7 +191,7 @@ vector<Game> Game::getAllGames()
 }
 
 // Static method for read an item specified by "id" from DB
-Game Game::getGameById(int id)
+Game Game::getGameById(sqlite3_int64 id)
 {
 	Game* game = NULL;
 
@@ -207,8 +229,32 @@ Game Game::getGameById(int id)
 	return *game;
 }
 
+string Game::getReleaseYear()
+{
+	if(ReleaseDate.empty())
+		return "";
+	else
+	{
+		return ReleaseDate.substr(ReleaseDate.find_last_of("/") + 1, string::npos) + ", ";
+	}
+}
+
+string Game::getCleanFileName()
+{
+	string result = GameFile;
+
+	regex rx1("\\(.+\\)");
+	regex rx2("\\[.+\\]");
+
+	result = tr1::regex_replace(result, rx1, "");
+	result = tr1::regex_replace(result, rx2, "");
+	result = result.substr(0, result.find_last_of('.'));
+	result = trim(result);
+	return result;
+}
+
 // Static method for read all the items from DB for a specified Device
-vector<Game> Game::getGamesForDevice(int deviceId)
+vector<Game> Game::getGamesForDevice(sqlite3_int64 deviceId)
 {
 	vector<Game> games;
 

@@ -7,6 +7,7 @@
 
 #include "../../globals.h"
 #include "../Controller/LogController.h"
+#include <boost/filesystem.hpp>
 
 #include "BaseModel.h"
 
@@ -23,24 +24,30 @@ namespace RetroEnd
 			~Device();
 
 			//DB PROPERTIES
-			string name;
-			string description;
-			string developer;
-			string manufacturer;
-			string cpu;
-			string memory;
-			string graphics;
-			string sound;
-			string display;
-			string mediaType;
-			string maxControllers;
-			string releaseDate;
+			string Name;
+			string Description;
+			string Developer;
+			string Manufacturer;
+			string Cpu;
+			string Memory;
+			string Graphics;
+			string Sound;
+			string Display;
+			string MediaType;
+			string MaxControllers;
+			string ReleaseDate;
 			
-			string tgbdId;
-			string tgbdRating;
+			string TGDBId;
+			string TGDBRating;
 
-			string imageConsole;
-			string imageLogo;
+			string ImageConsole;
+			string ImageLogo;
+			
+			string LaunchCommand;
+
+			//computed properties
+			string getReleaseYear();
+			string getRomsPath();
 
 			//table name
 			static string table;
@@ -49,7 +56,7 @@ namespace RetroEnd
 			static vector<Device> getAllDevices();
 
 			//retrive the Device identified by "id" (if any)
-			static Device getDeviceById(unsigned int id);
+			static Device getDeviceById(int id);
 
 			//create the table, 
 			static void init();
