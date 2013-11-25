@@ -43,6 +43,7 @@ namespace RetroEnd
 			void stop();
 
 			shared_ptr<Sound> createSound(string file);
+			bool SoundsEnabled;
 
 			friend class Sound;
 

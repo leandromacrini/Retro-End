@@ -77,6 +77,8 @@ void AudioController::start()
 		LOG(LogLevel::Error, "AudioController Error - Unable to open SDL audio: " + string( SDL_GetError() ));
 	}
 
+	SoundsEnabled = true;
+
 	LOG(LogLevel::Info, "AudioController started.");
 }
 

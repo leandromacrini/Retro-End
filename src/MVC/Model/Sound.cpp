@@ -63,9 +63,8 @@ Sound::~Sound()
 
 void Sound::play()
 {
-	//TODO (Maybe in the controller (controller has control -.-), object has "object" functionality -.-
-	//if(Settings::getInstance()->getBool("DISABLESOUNDS"))
-	//	return;
+	
+	if( ! AudioController::getInstance().SoundsEnabled ) return;
 
 	SDL_LockAudio();
 	if (playing)
