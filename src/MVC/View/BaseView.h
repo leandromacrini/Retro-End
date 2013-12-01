@@ -29,7 +29,7 @@ namespace RetroEnd
 		struct Animation
 		{
 		public:
-			Animation( ) : moveOffset(NULL), newSize(NULL), newOpacity(NULL), millisDuration(0), endCallback([](){}) {};
+			Animation( ) : moveOffset(NULL), newSize(NULL), newOpacity(NULL), millisDuration(0), millisDelay(0), endCallback([](){}), completed(false) {};
 			
 			//Optionals
 			Eigen::Vector3f* moveOffset;
@@ -39,8 +39,14 @@ namespace RetroEnd
 			//Animation duration in milliseconds
 			unsigned int millisDuration;
 
+			//millis to wait before start the animation
+			int millisDelay;
+
 			//The function that will be called when the animation ends (to chain animations)
 			function<void ()> endCallback; //this should default to nullptr but raspberry g++-4.7.x doesn't accept a nullptr as function
+
+			//
+			bool completed;
 		};
 
 		class BaseView
@@ -105,6 +111,8 @@ namespace RetroEnd
 			bool getSelected() const;
 
 			bool Visible;
+
+			int debugID;
 
 		protected:
 

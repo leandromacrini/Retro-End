@@ -4,6 +4,8 @@
 #include <fstream>
 #include <boost/filesystem.hpp>
 
+using namespace RetroEnd::Model;
+using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
 namespace fs = boost::filesystem;
@@ -45,6 +47,15 @@ bool ResourceController::fileExists(const std::string& path)
 {
 	return fs::exists(path);
 }
+
+void ResourceController::start()
+{
+	GamingController::getInstance().onGameEnd += [this](Game& game)
+	{
+		reloadAll();
+	};
+}
+
 
 void ResourceController::unloadAll()
 {

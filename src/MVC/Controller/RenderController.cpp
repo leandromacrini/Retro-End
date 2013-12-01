@@ -9,6 +9,16 @@ using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
+const string PopupMessageIconPath[] =
+{
+	"None",					//None
+	"popup_message.png",	//Info
+	"popup_warning.png",	//Warning
+	"popup_error.png",		//Error
+	"popup_controller_on.png",		//Controller_Added
+	"popup_controller_off.png"		//Controller_Removed
+};
+
 void RenderController::pushClipRect(Eigen::Vector4i box)
 {
 
@@ -160,7 +170,7 @@ int RenderController::getScreenHeight()
 }
 
 
-void RenderController::pushPopupMessage(string message, string icon)
+void RenderController::pushPopupMessage(string message, PopupMessageIcon icon)
 {
 	//init popup view
 	if(mPopupView == NULL)
@@ -198,28 +208,29 @@ void RenderController::showPopupMessages()
 	container->setSize( W/2, H/6 );
 	container->setPosition( W/4, H/18);
 	container->setOpacity(0);
+	container->setBackgroundColor(0x2B7295DD);
 
-	Label* text = new Label();
-	text->setColor(0x000000FF);
-	text->setSize( W/2, 0 );
-	text->setText(popup->Message);
-	text->setPosition( 0, (H/6 - text->getSize().y()) / 2 );
-	text->WrapText = true;
-	text->HorizontalTextAlign = TextAlign::Center;
+	float leftMargin = 0;
 
-	int leftMargin = 0;
-
-	if(popup->Icon != "")
+	if(popup->Icon != PopupMessageIcon::None)
 	{
 		Image* icon = new Image();
-		icon->setPath(popup->Icon);
+		icon->setPath("data/images/" + PopupMessageIconPath[popup->Icon]);
 		icon->setSize(H/6, H/6);
 		icon->setPosition( 0, 0);
 		container->addChild(icon);
 
-		leftMargin = (int) H/6;
+		leftMargin = H/6;
 	}
 	
+	Label* text = new Label();
+	text->setColor(0xFFFFFFFF);
+	text->setSize( W/2 - leftMargin, 0 );
+	text->setText(popup->Message);
+	text->setPosition( leftMargin, (H/6 - text->getSize().y()) / 2 );
+	text->WrapText = true;
+	text->HorizontalTextAlign = TextAlign::Center;
+
 	container->addChild(text);
 
 	mPopupView->addChild(container);
@@ -233,7 +244,7 @@ void RenderController::showPopupMessages()
 	a->endCallback = [this, container] ()
 	{
 		Animation* b = new Animation();
-		b->millisDuration = 1000;
+		b->millisDuration = 1500;
 		b->endCallback = [this, container] ()
 		{
 			Animation* c = new Animation();

@@ -178,7 +178,7 @@ vector<Device> Device::getAllDevices()
 }
 
 // Static method for read an item specified by "id" from DB
-Device Device::getDeviceById(int id)
+Device Device::getDeviceById(sqlite3_int64 id)
 {
 	Device* device = NULL;
 

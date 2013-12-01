@@ -100,7 +100,7 @@ void SettingsController::stop() {
 
 }
 
-bool SettingsController::getProperty(const string& name, bool defaultValue)
+bool SettingsController::getBoolProperty(const string& name, bool defaultValue)
 {
 	bool result = defaultValue;
 
@@ -114,7 +114,7 @@ bool SettingsController::getProperty(const string& name, bool defaultValue)
 	return result;
 }
 
-float SettingsController::getProperty(const string& name, float defaultValue)
+float SettingsController::getNumericProperty(const string& name, float defaultValue)
 {
 	float result = defaultValue;
 
@@ -129,24 +129,24 @@ float SettingsController::getProperty(const string& name, float defaultValue)
 }
 
 
-string SettingsController::getProperty(const string& name, const string& defaultValue)
+string SettingsController::getStringProperty(const string& name, const string& defaultValue)
 {
 	string value = readValueFromDB(name);
 
 	return value.empty() ? defaultValue : value;
 }
 
-void SettingsController::setProperty(const string& name, bool value)
+void SettingsController::setBoolProperty(const string& name, bool value)
 {
 	writeValueToDB(name, to_string(value));
 }
 
-void SettingsController::setProperty(const string& name, float value)
+void SettingsController::setNumericProperty(const string& name, float value)
 {
 	writeValueToDB(name, to_string(value));
 }
 
-void SettingsController::setProperty(const string& name, const string& value)
+void SettingsController::setStringProperty(const string& name, const string& value)
 {
 	writeValueToDB(name, value);
 }

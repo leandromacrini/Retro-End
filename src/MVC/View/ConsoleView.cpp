@@ -10,7 +10,7 @@ using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
-ConsoleView::ConsoleView() : mAnimating(false), mContainer(new BaseView()), mCurrentIndex(0)
+ConsoleView::ConsoleView() : mAnimating(false), mContainer(new BaseView()), mCurrentIndex(0), BaseView()
 {
 	//set opacity to 0 to fadeIn
 	mOpacity = 0;
@@ -103,7 +103,7 @@ ConsoleView::ConsoleView() : mAnimating(false), mContainer(new BaseView()), mCur
 	this->animate(a);
 
 	Sprite* help = new Sprite();
-	help->setPosition(W/4, H* 19/20);
+	help->setPosition(W/2, H* 19/20);
 	help->setSize(W/2, H/20);
 	help->FrameHeight = 54;
 	help->setPath("data/images/left-legend.png");

@@ -18,15 +18,32 @@ using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
-void MainWindow::showConsoles()
+MainWindow::MainWindow() : mScrapeComplete(false), mScrapeView(NULL)
 {
-	mConsoleView->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
-	mConsoleView->setPosition(0,0);
-	addChild(mConsoleView);
+	float H = (float)RenderController::getInstance().getScreenHeight();
+	float W = (float)RenderController::getInstance().getScreenWidth();
 
-	vector<Game>* games = new vector<Game>();
-	GamingController::getInstance().checkNewGamesAvailability(games);
-	if(games->size() > 0)
+	this->setSize( W, H );
+
+	Image* background = new Image();
+	background->setSize( W, H );
+	background->setPath("data/images/bg_bn.png");
+	background->setTiled(true);
+	addChild(background);
+
+	showLogo();
+}
+
+MainWindow::~MainWindow()
+{
+
+}
+
+void MainWindow::checkForNewGames()
+{
+	vector<Game>* newGames = new vector<Game>();
+	GamingController::getInstance().checkNewGamesAvailability(*newGames);
+	if(newGames->size() > 0)
 	{
 		MultiChoiceDialog* dialog = new MultiChoiceDialog();
 
@@ -34,26 +51,89 @@ void MainWindow::showConsoles()
 		values->push_back("Yes");
 		values->push_back("No");
 
-		dialog->showDialog(to_string(games->size()) + " new games was found.\n Do you want to try to automatically get Game informations from The Games DB?", "Attention", values,
-		[this, games, dialog] (unsigned int index)
+		dialog->showDialog(to_string(newGames->size()) + " new games was found.\n Do you want to try to automatically get Game informations from The Games DB?", "Attention", values,
+		[this, newGames, dialog] (unsigned int index)
 		{
 			if(index == 0) //yes
 			{
-				mScrapeView = new ScrapeView(games);
-				((ScrapeView*)mScrapeView)->onScrapeComplete += [this] (ScrapeResult result)
+				try
 				{
-					//the scraper event work on a different thread so we can't remove it from here
-					//we have to mark it to delete and than let the main thread remove it when need
-					mScrapeComplete = true;
-					ScrapeResult* pointerResult = new ScrapeResult(result);
-					mScrapeResult = (void*) pointerResult;
-				};
-				addChild(mScrapeView);
+					mScrapeView = new ScrapeView(*newGames);
+					((ScrapeView*)mScrapeView)->onScrapeComplete += [this] (ScrapeResult result)
+					{
+						//the scraper event work on a different thread so we can't remove it from here
+						//we have to mark it to delete and than let the main thread remove it when need
+						mScrapeComplete = true;
+						ScrapeResult* pointerResult = new ScrapeResult(result);
+						mScrapeResult = (void*) pointerResult;
+					};
+					addChild(mScrapeView);
+				}
+				catch (const char * ex)
+				{
+					RenderController::getInstance().pushPopupMessage(string(ex), PopupMessageIcon::Error);
+				}
 			}
 			removeChild(dialog);
 		});
 		addChild(dialog);
 	}
+}
+
+void MainWindow::checkForOldGames()
+{
+	vector<Game> *oldGames = new vector<Game>();
+	GamingController::getInstance().checkOldGamesAvailability(*oldGames);
+	if(oldGames->size() > 0)
+	{
+		MultiChoiceDialog* dialog = new MultiChoiceDialog();
+
+		vector<string>* values = new vector<string>();
+		values->push_back("Yes");
+		values->push_back("No");
+
+		dialog->showDialog(to_string(oldGames->size()) + " games as been removed from the roms folder. Would you like to remove those games from Manta's database?", "Attention", values,
+		[this, oldGames, dialog] (unsigned int index)
+		{
+			for(auto it = oldGames->begin(); it != oldGames->end(); ++it)
+			{
+				//yes?
+				if(index == 0)		
+					it->remove();	//remove the file
+				else
+				{
+					it->GameFile = "";
+					it->save();		//clear game file so it will not be rechecked
+				}
+			}
+			removeChild(dialog);
+
+			//we have ended with old games, check the new games
+			checkForNewGames();
+		});
+		addChild(dialog);
+	}
+	else
+	{
+		//we have ended with old games, check the new games
+		checkForNewGames();
+	}
+}
+
+bool MainWindow::input(InputConfig* config, Input input)
+{
+	if(input.id == SDLK_p && input.value != 0 )
+	{
+		RenderController::getInstance().pushPopupMessage("Miao testo lungo lungo lungo lungo lungo lungo lungo lungo lungo!", PopupMessageIcon::Info);
+		return true;
+	}
+
+	//set input only to the last view added
+	if(mChildren.size() > 0)
+	{
+		mChildren.at(mChildren.size() - 1)->input(config, input);
+	}
+	return true;
 }
 
 void MainWindow::showLogo()
@@ -100,10 +180,15 @@ void MainWindow::showLogo()
 			a->millisDuration = 1000;
 			a->newSize = new Eigen::Vector2f((float)RenderController::getInstance().getScreenWidth()/5, (float)RenderController::getInstance().getScreenHeight() / 5);
 			a->moveOffset = new Eigen::Vector3f((float)RenderController::getInstance().getScreenWidth()/2, (float)-RenderController::getInstance().getScreenHeight() / 4, 0);
-			a->endCallback =  [this, logo] ()
+			a->endCallback =  [this] ()
 			{
-				//view->removeChild(logo);
-				showConsoles();
+				//Show Consoles
+				mConsoleView->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
+				mConsoleView->setPosition(0,0);
+				addChild(mConsoleView);
+
+				//async check if old games are still available
+				checkForOldGames();
 			};
 
 			logo->animate(a);
@@ -115,27 +200,6 @@ void MainWindow::showLogo()
 	logo->animate(a);
 }
 
-MainWindow::MainWindow() : mScrapeComplete(false)
-{
-	float H = (float)RenderController::getInstance().getScreenHeight();
-	float W = (float)RenderController::getInstance().getScreenWidth();
-
-	this->setSize( W, H );
-
-	Image* background = new Image();
-	background->setSize( W, H );
-	background->setPath("data/images/bg_bn.png");
-	background->setTiled(true);
-	addChild(background);
-
-	showLogo();
-}
-
-MainWindow::~MainWindow()
-{
-
-}
-
 void MainWindow::update(unsigned int deltaTime)
 {
 	//we need to do this here because the scraper work on a different thread
@@ -144,29 +208,15 @@ void MainWindow::update(unsigned int deltaTime)
 		removeChild(mScrapeView);
 
 		//show result
-		RenderController::getInstance().pushPopupMessage( to_string( ((ScrapeResult*)mScrapeResult)->gamesFound ) + " games was founded on TGDB");
-		RenderController::getInstance().pushPopupMessage( to_string( ((ScrapeResult*)mScrapeResult)->gamesNotFound ) + " games was non founded on TGDB and added as filename");
+		if(((ScrapeResult*)mScrapeResult)->gamesFound > 0)
+			RenderController::getInstance().pushPopupMessage( to_string( ((ScrapeResult*)mScrapeResult)->gamesFound ) + " games was founded on TGDB", PopupMessageIcon::Info);
 
+		if(((ScrapeResult*)mScrapeResult)->gamesNotFound > 0)
+			RenderController::getInstance().pushPopupMessage( to_string( ((ScrapeResult*)mScrapeResult)->gamesNotFound ) + " games was non founded on TGDB and added as filename", PopupMessageIcon::Warning);
 		mScrapeResult = NULL;
 		mScrapeView = NULL;
 		mScrapeComplete = false;
 	}
 
 	BaseView::update(deltaTime);
-}
-
-bool MainWindow::input(InputConfig* config, Input input)
-{
-	if(input.id == SDLK_p && input.value != 0 )
-	{
-		RenderController::getInstance().pushPopupMessage("Miao testo lungo testo lungo!", "data/images/message.png");
-		return true;
-	}
-
-	//set input only to the last view added
-	if(mChildren.size() > 0)
-	{
-		mChildren.at(mChildren.size() - 1)->input(config, input);
-	}
-	return true;
 }

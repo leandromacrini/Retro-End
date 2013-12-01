@@ -1,0 +1,7 @@
+This is the info for the last game you ran.
+
+File: Super Mario RPG - Legend of the Seven Stars (U) [T+Ita045_Dewos].smc Header: No
+SUPER MARIO RPG           TYPE:SA-1     
+INTERLEAVED:No               CHKSUM:FAIL
+VIDEO:NTSC    BANK:Lo     CRC32:D17D0439
+BAD ROM                                 

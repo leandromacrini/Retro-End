@@ -10,7 +10,10 @@
 #include "SDL_audio.h"
 
 #include "../Model/Sound.h"
+
 #include "BaseController.h"
+#include "LogController.h"
+#include "GamingController.h"
 
 using namespace std;
 
@@ -48,6 +51,8 @@ namespace RetroEnd
 			friend class Sound;
 
 		private:
+			void init();
+			void quit();
 			void registerSound(shared_ptr<Sound> & sound);
 			void unregisterSound(shared_ptr<Sound> & sound);
 

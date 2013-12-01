@@ -27,6 +27,12 @@ namespace RetroEnd
 			void showConsoles();
 			void showLogo();
 
+			//check if new roms was added
+			void checkForNewGames();
+
+			//check if some roms was removed
+			void checkForOldGames();
+
 			void update(unsigned int deltaTime) override;
 
 			bool input(Model::InputConfig* config, Model::Input input) override;

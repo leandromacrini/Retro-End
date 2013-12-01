@@ -41,12 +41,13 @@ void onStart()
 	Controller::LogController::getInstance().start(); //first
 	Controller::LogController::getInstance().setReportingLevel(LogLevel::Debug); //TODO by setting or command line
 
-	LOG(LogLevel::Info,  "***** WELCOME TO RETRO-END *****\n\n");
+	LOG(LogLevel::Info,  "***** WELCOME TO RETRO-END *****");
 
 	//start any other controllers
 	//the order is mandatory
 	Controller::SettingsController::getInstance().start();
 	Controller::GamingController::getInstance().start();
+	Controller::ResourceController::getInstance().start();
 	Controller::ScraperController::getInstance().start();
 	Controller::RenderController::getInstance().start();
 	Controller::InputController::getInstance().start();
@@ -68,7 +69,7 @@ void onExit()
 	Controller::InputController::getInstance().stop();
 	Controller::RenderController::getInstance().stop();
 	
-	LOG(LogLevel::Info,  "\n\n***** RETRO-END IS CLOSING *****");
+	LOG(LogLevel::Info,  "***** RETRO-END IS CLOSING *****");
 
 	//stop log controller
 	Controller::LogController::getInstance().stop(); //last

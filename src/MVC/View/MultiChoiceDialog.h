@@ -12,6 +12,8 @@
 #include "Label.h"
 #include "ListView.h"
 
+#include "../Controller/LogController.h"
+
 namespace RetroEnd
 {
 	namespace View

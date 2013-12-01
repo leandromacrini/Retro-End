@@ -55,6 +55,7 @@ namespace RetroEnd
 			string FileCRC;
 
 			int TimesPlayed;
+			bool Favorite;
 
 			//computed properties
 			string getReleaseYear();
@@ -72,8 +73,15 @@ namespace RetroEnd
 			//retrive the Game identified by "id" or NULL if not present
 			static Game getGameById(sqlite3_int64 id);
 
+			//retrive the Game identified by "TGDBId" or NULL if not present
+			static Game* getGameByTGDBId(string& TGDBId);
+
 			//create the table, 
 			static void init();
+
+			//override remove to clear files too
+			//Remove instance from DB and any game's file
+			void remove() override;
 		protected:
 			string getUpdateQuery();
 			string getDeleteQuery();

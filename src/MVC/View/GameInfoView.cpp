@@ -12,13 +12,12 @@ GameInfoView::GameInfoView(Game game) : mGame(game)
 	float H = (float) RenderController::getInstance().getScreenHeight();
 
 	mSize = Eigen::Vector2f(W,H);
-	mBackgroundColor = 0x1d1d1d99;
+	mBackgroundColor = 0x1d1d1d77;
 
 	mBack = new BaseView();
 	mBack->setBackgroundColor(0xEDEDEDFF);
 	mBack->setSize(W * 5/6, H * 5/6);
 	mBack->setPosition(W/6 / 2, H);
-	mBack->setOpacity(0);
 
 	Animation* a = new Animation();
 	a->moveOffset = new Eigen::Vector3f(0, -(H * 5/6)-(H/6 / 2) - H/6 / 4, 0);

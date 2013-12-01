@@ -6,7 +6,7 @@ using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
-Sprite::Sprite() : mCurrentFrame(0), mFrameDuration(100), mTimeElapsedFromLastFrame(0), mFrameCount(0), mActive(false), mLoop(true)
+Sprite::Sprite() : mCurrentFrame(0), mFrameDuration(100), mTimeElapsedFromLastFrame(0), mFrameCount(0), mActive(false), mLoop(true), BaseView()
 {
 
 	FrameHeight = 0;

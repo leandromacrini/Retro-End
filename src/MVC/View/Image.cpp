@@ -9,6 +9,7 @@ using namespace RetroEnd::Controller;
 Image::Image() : mTiled(false)
 {
 
+	mSize = Eigen::Vector2f::Zero();
 }
 
 string& Image::getPath()

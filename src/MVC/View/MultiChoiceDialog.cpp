@@ -1,7 +1,5 @@
 #include "MultiChoiceDialog.h"
 
-#include "../Controller/LogController.h"
-
 using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;

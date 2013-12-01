@@ -47,8 +47,14 @@ std::string DownloadUrlAsString(const std::string & url)
 	//curl_multi_add_handle(multi, curl_handle);
 	//curl_multi_perform(multi, i);
 
-	curl_easy_perform(curl_handle); 
+	CURLcode result = curl_easy_perform(curl_handle); 
 	curl_easy_cleanup(curl_handle);
+
+	if(result != 0)
+	{
+		LOG(LogLevel::Error, "ScraperController connection error. CURL error code: " + to_string(result));
+		throw "Unable to retrieve data from TGDB.\nSee log for details.";
+	}
 
 	return body;
 }
@@ -70,8 +76,14 @@ std::string DownloadUrlAsFile(const std::string & url, const std::string & path)
 	curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "Retro-End Agent");
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, writetofilecallback);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, fp);
-	curl_easy_perform(curl_handle); 
+	CURLcode result = curl_easy_perform(curl_handle); 
 	curl_easy_cleanup(curl_handle);
+
+	if(result != 0)
+	{
+		LOG(LogLevel::Error, "ScraperController connection error. CURL error code: " + to_string(result));
+		throw "Unable to retrieve data from TGDB. See log for details.";
+	}
 
 	fflush(fp);
 	fclose(fp);
@@ -348,6 +360,16 @@ void ScraperController::StoreGamedata( vector<pair<Model::Game, string>>* gameDa
 			gameDoc.load(xml.c_str());
 
 			Game newGame = Game(gameDoc.child("Game"), tempGame.DeviceId);
+
+			//before go on we check if there is already the same game on db to avoid duplicates
+			Game* duplicate = Game::getGameByTGDBId(newGame.TGDBId);
+			if(duplicate != NULL)
+			{
+				newGame.id = duplicate->id;
+				newGame.Favorite = duplicate->Favorite;
+				newGame.TimesPlayed = duplicate->TimesPlayed;
+			}
+
 			newGame.GameFile = tempGame.GameFile;
 
 			string baseurl = "http://thegamesdb.net/banners/";

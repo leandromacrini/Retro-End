@@ -61,6 +61,7 @@ namespace RetroEnd
 			shared_ptr<Model::TextureResource> mTex3player;
 			shared_ptr<Model::TextureResource> mTex4player;
 			shared_ptr<Model::TextureResource> mTexCoOp;
+			shared_ptr<Model::TextureResource> mTexFavorite;
 
 			void drawGameIcon( shared_ptr<Model::TextureResource> texture, float posX, float posY, int side, unsigned int opacity);
 		};

@@ -57,7 +57,7 @@ void BaseModel::remove()
 	//check if it exists on DB
 	if(id == 0 ) return;
 
-	//open db concction
+	//open db connection
 	connect();
 
 	sqlite3_stmt *statement;
@@ -78,7 +78,7 @@ void BaseModel::remove()
 		LOG(Error, "BaseModel remove error : " + message);
 	}
 
-	//close db concction
+	//close db connection
 	disconnect();
 }
 

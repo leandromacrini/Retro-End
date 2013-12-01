@@ -1,7 +1,6 @@
 #include "AudioController.h"
 
 #include <SDL.h>
-#include "LogController.h"
 
 using namespace RetroEnd::Model;
 using namespace RetroEnd::Controller;
@@ -47,8 +46,10 @@ void AudioController::mixAudio(void *unused, Uint8 *stream, int len)
 	}
 }
 
-void AudioController::start()
+
+void AudioController::init()
 {
+	
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
 	{
 		LOG(LogLevel::Error, "Error initializing SDL audio! Error:" + string(SDL_GetError()));
@@ -78,17 +79,38 @@ void AudioController::start()
 	}
 
 	SoundsEnabled = true;
-
-	LOG(LogLevel::Info, "AudioController started.");
 }
 
-void AudioController::stop()
+void AudioController::quit()
 {
 	//stop all playback
 	stopPlaySamples();
 	//completely tear down SDL audio. else SDL hogs audio resources and emulators might fail to start...
 	SDL_CloseAudio();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+}
+
+void AudioController::start()
+{
+	GamingController::getInstance().onGameStart += [this](Game& game)
+	{
+		quit();
+	};
+
+	GamingController::getInstance().onGameEnd += [this](Game& game)
+	{
+		init();
+	};
+
+	init();
+
+	LOG(LogLevel::Info, "AudioController started.");
+}
+
+void AudioController::stop()
+{
+	quit();
+
 	LOG(LogLevel::Info, "AudioController stopped.");
 }
 

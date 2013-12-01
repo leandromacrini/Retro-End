@@ -22,8 +22,6 @@
 #include "../Controller/RenderController.h"
 #include "../Controller/ScraperController.h"
 
-
-
 using namespace std;
 
 namespace RetroEnd
@@ -51,12 +49,12 @@ namespace RetroEnd
 		class ScrapeView : public BaseView
 		{
 		public:
-			ScrapeView(vector<Model::Game>* games);
+			ScrapeView(vector<Model::Game>& games);
 			
 			Model::Observer<ScrapeResult> onScrapeComplete;
 
 		private:
-			vector<Model::Game>* mGames;
+			vector<Model::Game>& mGames;
 			vector<pair<Model::Game, vector<string>>>* mGameValuesFound;
 			vector<pair<Model::Game, string>>* mFinalGameData;
 			ScrapeResult mFinalResult;

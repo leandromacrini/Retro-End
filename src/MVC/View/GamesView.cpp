@@ -1,5 +1,7 @@
 #include "GamesView.h"
 
+#include <ctime>
+
 #include "../Controller/RenderController.h"
 #include "../Controller/AudioController.h"
 #include "../Controller/InputController.h"
@@ -10,11 +12,12 @@ using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
-GamesView::GamesView()
+GamesView::GamesView() : mIsPlaying(false), mMoving(0), mLastCheck(0), gameEnded(false)
 {
 	//create sounds
-	mMoveSound = shared_ptr<Sound>( AudioController::getInstance().createSound("data/sounds/GS25.wav"));
-	mSelectSound  = shared_ptr<Sound>( AudioController::getInstance().createSound("data/sounds/GS42.wav"));
+	mMoveSound = AudioController::getInstance().createSound("data/sounds/GS25.wav");
+	mSelectSound  = AudioController::getInstance().createSound("data/sounds/GS42.wav");
+	mCartridgeSound = AudioController::getInstance().createSound("data/sounds/cartridge_insert.wav");
 
 	//create graphics
 	float H = (float)RenderController::getInstance().getScreenHeight();
@@ -79,7 +82,7 @@ GamesView::GamesView()
 	this->addChild(mDeveloper);
 
 	Sprite* help = new Sprite();
-	help->setPosition(W/4, H* 19/20);
+	help->setPosition(W/2, H* 19/20);
 	help->setSize(W/2, H/20);
 	help->FrameHeight = 54;
 	help->setPath("data/images/left-legend.png");
@@ -87,6 +90,87 @@ GamesView::GamesView()
 	help->setFrameDuration( 1000 );
 	help->start();
 	this->addChild(help);
+
+	//FOR LAST
+	mCartridge = new Image();
+	mCartridge->setPath("data/images/manta_cartridge.png");
+	mCartridge->setPosition( (W - mCartridge->getSize().x()) / 2, H);
+	addChild(mCartridge);
+
+	//subscribe to game end event to make the rollback animation for the cartridge
+	GamingController::getInstance().onGameEnd += [&](Game& game)
+	{
+		gameEnded = true;
+	};
+
+	//subscribe to game end event to make the rollback animation for the cartridge
+	GamingController::getInstance().onGameError += [&](const string& error)
+	{
+		gameEnded = true;
+		gameEndedError = error;
+	};
+}
+
+void GamesView::endGame()
+{
+	float Y = mCartridge->getSize().y();
+
+	//cartridge animation
+	Animation* a = new Animation();
+	a->millisDelay = 1500;
+	a->millisDuration = 150;
+	a->moveOffset = new Eigen::Vector3f(0, -Y/2, 0);
+	a->endCallback = [this, Y] ()
+	{
+		//play cartridge sound
+		mCartridgeSound->play();
+		Animation* a = new Animation();
+		a->millisDuration = 350;
+		a->moveOffset = new Eigen::Vector3f(0, Y, 0);
+		a->endCallback = [this] ()
+		{
+			//toggle game block
+			mIsPlaying = false;
+		};
+
+		mCartridge->animate(a);
+	};
+	mCartridge->animate(a);
+}
+
+void GamesView::startGame()
+{
+	//toggle game block
+	mIsPlaying = true;
+
+	//cartridge animation
+	Animation* a = new Animation();
+	a->millisDuration = 350;
+	a->moveOffset = new Eigen::Vector3f(0, -mCartridge->getSize().y(), 0);
+	a->endCallback = [this] ()
+	{
+		//play cartridge sound
+		mCartridgeSound->play();
+
+		//put down the cartridge
+		Animation* a = new Animation();
+		a->millisDuration = 150;
+		a->moveOffset = new Eigen::Vector3f(0, mCartridge->getSize().y()/2, 0);
+		a->endCallback = [this] ()
+		{
+			//wait for sound to end and start the game
+			Animation* a = new Animation();
+			a->millisDuration = 500;
+			a->endCallback = [this] ()
+			{
+				//launch game
+				GamingController::getInstance().launchGame(mDevice, mGames.at(mGamesList->getSelectedIndex()));
+			};
+		mCartridge->animate(a);
+		};
+		mCartridge->animate(a);
+	};
+	mCartridge->animate(a);
 }
 
 void GamesView::setDevice(Model::Device& device)
@@ -148,10 +232,24 @@ void GamesView::updateImageSizeAndPosition()
 	}
 }
 
+void GamesView::toggleGameFavorite()
+{
+	unsigned int index = mGamesList->getSelectedIndex();
+	//update game value
+	Game game = mGames[index];
+	game.Favorite = ! game.Favorite;
+	game.save();
+
+	//reload list
+	setDevice(mDevice);
+	mGamesList->setSelectedIndex(index);
+	updateCurrentGameData();
+}
+
 void GamesView::updateCurrentGameData()
 {
 	Game game = mGames[mGamesList->getSelectedIndex()];
-	
+
 	//date and data text
 
 	mDeveloper->setText(game.Developer);
@@ -176,6 +274,17 @@ void GamesView::updateCurrentGameData()
 
 }
 
+void GamesView::startMoving(int direction)
+{
+	mLastCheck = clock();
+	mMoving = direction;
+}
+
+void GamesView::stopMoving()
+{
+	mMoving = 0;
+}
+
 void GamesView::move(int direction)
 {
 
@@ -184,22 +293,44 @@ void GamesView::move(int direction)
 	float H = (float)RenderController::getInstance().getScreenHeight();
 
 	updateCurrentGameData();
-	
+
 	mMoveSound->play();
 }
 
 bool GamesView::input(Model::InputConfig* config, Model::Input input)
 {
+	if(mIsPlaying) return false;
+
 	//TODO input from settings
-	if(input.id == SDLK_DOWN && input.value != 0 )
+	if(input.id == SDLK_DOWN)
 	{
-		move(1);
+		if( input.value == 1 )
+		{
+			//down
+			move(1);
+			startMoving(1);
+		}
+		else
+		{
+			//up
+			stopMoving();
+		}
 		return true;
 	}
 
-	if(input.id == SDLK_UP && input.value != 0)
+	if(input.id == SDLK_UP)
 	{
-		move(-1);
+		if( input.value == 1 )
+		{
+			//down
+			move(-1);
+			startMoving(-1);
+		}
+		else
+		{
+			//up
+			stopMoving();
+		}
 		return true;
 	}
 
@@ -212,6 +343,12 @@ bool GamesView::input(Model::InputConfig* config, Model::Input input)
 	if(input.id == SDLK_RIGHT && input.value != 0)
 	{
 		move(min(10u, mGames.size() -1 - mGamesList->getSelectedIndex()));
+		return true;
+	}
+
+	if(input.id == SDLK_s && input.value != 0)
+	{
+		toggleGameFavorite();
 		return true;
 	}
 
@@ -229,10 +366,34 @@ bool GamesView::input(Model::InputConfig* config, Model::Input input)
 
 	if(input.id == SDLK_RETURN && input.value != 0)
 	{
-		mSelectSound->play();
-		GamingController::getInstance().launchGame(mDevice, mGames.at(mGamesList->getSelectedIndex()));
+		startGame();
 		return true;
 	}
 
-	return true;
+	return false;
+}
+
+void GamesView::update(unsigned int deltaTime)
+{
+	//check if we need to move the list for long pressure
+	clock_t now = clock();
+	if(mMoving != 0 && now - mLastCheck > 250)
+	{
+		move(mMoving);
+		mLastCheck = now;
+	}
+
+	//local state to avoid lambda problem
+	if(gameEnded)
+	{
+		endGame();
+		if( ! gameEndedError.empty() )
+			RenderController::getInstance().pushPopupMessage(gameEndedError, PopupMessageIcon::Error);
+
+		gameEnded = false;
+		gameEndedError.clear();
+	}
+
+	//call father method
+	BaseView::update(deltaTime);
 }

@@ -56,7 +56,7 @@ namespace RetroEnd
 			static vector<Device> getAllDevices();
 
 			//retrive the Device identified by "id" (if any)
-			static Device getDeviceById(int id);
+			static Device getDeviceById(sqlite3_int64 id);
 
 			//create the table, 
 			static void init();

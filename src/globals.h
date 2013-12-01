@@ -14,6 +14,7 @@
 
 //global includes
 #include <vector>
+#include <set>
 #include <iostream>
 #include <string>
 #include <memory>
@@ -48,6 +49,8 @@ namespace RetroEnd
 	const string APP_DIRECTORY = "retro-end";
 }
 
+#pragma region Global Functions
+
 //a function used to replace part of a string
 static inline string strreplace(string& str, string replace, string with)
 {
@@ -78,3 +81,5 @@ static inline string& rtrim(string &s) {
 static inline string& trim(string &s) {
         return ltrim(rtrim(s));
 }
+
+#pragma endregion

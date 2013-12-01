@@ -212,12 +212,12 @@ bool InputController::parseEvent(const SDL_Event& ev)
 				if(currentDevices.size() > inputDevices.size())
 				{
 					onNewControllerDetected(0);
-					RenderController::getInstance().pushPopupMessage("New controller detected!", "data/images/controller_on.png");
+					RenderController::getInstance().pushPopupMessage("New controller detected!", PopupMessageIcon::Controller_Added);
 				}
 				else
 				{
 					onControllerRemoved(0);
-					RenderController::getInstance().pushPopupMessage("Controller removed!", "data/images/controller_off.png");
+					RenderController::getInstance().pushPopupMessage("Controller removed!", PopupMessageIcon::Controller_Removed);
 				}
 
 				inputDevices = currentDevices;
@@ -245,7 +245,7 @@ void InputController::loadConfig()
 		mInputConfigs[i]->setPlayerNum(-1);
 		string name = SDL_JoystickName(i);
 
-		std::string config = SettingsController::getInstance().getProperty(name, string("MIAO"));
+		std::string config = SettingsController::getInstance().getStringProperty(name, "");
 
 		if(config.empty())
 		{

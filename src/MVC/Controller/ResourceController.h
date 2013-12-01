@@ -15,6 +15,7 @@
 #include <list>
 
 #include "BaseController.h"
+#include "GamingController.h"
 
 using namespace std;
 using namespace RetroEnd;
@@ -45,11 +46,12 @@ namespace RetroEnd
 				return instance;
 			}
 
-
 			void addReloadable(std::weak_ptr<IReloadable> reloadable);
 
 			void unloadAll();
 			void reloadAll();
+
+			void start();
 
 			const ResourceData getFileData(const std::string& path) const;
 			static bool fileExists(const std::string& path);

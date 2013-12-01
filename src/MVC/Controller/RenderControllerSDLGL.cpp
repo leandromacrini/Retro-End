@@ -1,5 +1,7 @@
 #include "RenderController.h"
 
+using namespace RetroEnd::Model;
+using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
 bool RenderController::createSurface() //unsigned int display_width, unsigned int display_height)
@@ -69,11 +71,26 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 
 void RenderController::start()
 {
+	initSDL();
+
+	//create the main window
+	mainWindow = new View::MainWindow();
+	mPopupView = NULL;
+
+	LOG(LogLevel::Info, "RenderController started");
+}
+
+void RenderController::stop()
+{
+	quitSDL();
+	LOG(LogLevel::Info, "RenderController stoped");
+}
+
+void RenderController::initSDL() {
+
 	mRunning = true;
 
-	bool createdSurface = createSurface();
-
-	if(!createdSurface)
+	if( ! createSurface() )
 	{
 		LOG(LogLevel::Fatal, "Renderer failed to create surface!");
 		mRunning = false;
@@ -85,14 +102,11 @@ void RenderController::start()
 	glOrtho(0, mSdlScreen->w, mSdlScreen->h, 0, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-	//create the main window
-	mainWindow = new View::MainWindow();
-	mPopupView = NULL;
 }
 
-void RenderController::stop() {
-
+void RenderController::quitSDL()
+{
+	SDL_Quit();
 }
 
 

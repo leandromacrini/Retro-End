@@ -28,10 +28,10 @@ namespace RetroEnd
 			sqlite3_int64 id;
 
 			//Save instance into DB
-			void save();
+			virtual void save();
 
 			//Remove instance from DB
-			void remove();
+			virtual void remove();
 
 		protected:
 

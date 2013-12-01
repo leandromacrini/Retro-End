@@ -29,6 +29,7 @@ GameListView::GameListView() : BaseView()
 	mTex3player = TextureResource::get("data/images/icon_player_3.png");
 	mTex4player = TextureResource::get("data/images/icon_player_4.png");
 	mTexCoOp    = TextureResource::get("data/images/icon_coop.png");
+	mTexFavorite= TextureResource::get("data/images/icon_favorite.png");
 }
 
 // ROWS HANDLING
@@ -161,32 +162,40 @@ void GameListView::draw()
 
 		//draw icons
 
-		int iconsSize = 0;
+		int maxPosition = 0;
 
+		//icon at position 1
+		if(mItems.at(i).Favorite)
+		{
+			drawGameIcon( mTexFavorite, absPosition.x() + mSize.x() - RowHeight, getAbsolutePosition().y() + (rowYPosition)*RowHeight, RowHeight,  i == mSelectedIndex? 0xFFFFFFFF : 0xFFFFFF66);
+			maxPosition=1;
+		}
+		//icon at position 2
 		if(mItems.at(i).MaxPlayers == "1")
 		{
-			drawGameIcon( mTex1player, absPosition.x() + mSize.x() - RowHeight, getAbsolutePosition().y() + (rowYPosition)*RowHeight, RowHeight,  i == mSelectedIndex? 0xFFFFFFFF : 0xFFFFFF66);
-			iconsSize++;
+			drawGameIcon( mTex1player, absPosition.x() + mSize.x() - RowHeight*2, getAbsolutePosition().y() + (rowYPosition)*RowHeight, RowHeight,  i == mSelectedIndex? 0xFFFFFFFF : 0xFFFFFF66);
+			maxPosition=2;
 		}
 		else if(mItems.at(i).MaxPlayers == "2")
 		{
-			drawGameIcon( mTex2player, absPosition.x() + mSize.x() - RowHeight, getAbsolutePosition().y() + (rowYPosition)*RowHeight, RowHeight,  i == mSelectedIndex? 0xFFFFFFFF : 0xFFFFFF66);
-			iconsSize++;
+			drawGameIcon( mTex2player, absPosition.x() + mSize.x() - RowHeight*2, getAbsolutePosition().y() + (rowYPosition)*RowHeight, RowHeight,  i == mSelectedIndex? 0xFFFFFFFF : 0xFFFFFF66);
+			maxPosition=2;
 		}
 		else if(mItems.at(i).MaxPlayers == "3")
 		{
-			drawGameIcon( mTex3player, absPosition.x() + mSize.x() - RowHeight, getAbsolutePosition().y() + (rowYPosition)*RowHeight, RowHeight,  i == mSelectedIndex? 0xFFFFFFFF : 0xFFFFFF66);
-			iconsSize++;
+			drawGameIcon( mTex3player, absPosition.x() + mSize.x() - RowHeight*2, getAbsolutePosition().y() + (rowYPosition)*RowHeight, RowHeight,  i == mSelectedIndex? 0xFFFFFFFF : 0xFFFFFF66);
+			maxPosition=2;
 		}
 		else if(mItems.at(i).MaxPlayers == "4+")
 		{
-			drawGameIcon( mTex4player, absPosition.x() + mSize.x() - RowHeight, getAbsolutePosition().y() + (rowYPosition)*RowHeight, RowHeight,  i == mSelectedIndex? 0xFFFFFFFF : 0xFFFFFF66);
-			iconsSize++;
+			drawGameIcon( mTex4player, absPosition.x() + mSize.x() - RowHeight*2, getAbsolutePosition().y() + (rowYPosition)*RowHeight, RowHeight,  i == mSelectedIndex? 0xFFFFFFFF : 0xFFFFFF66);
+			maxPosition=2;
 		}
+		//icon at position 3
 		if(mItems.at(i).CoOp == "Yes")
 		{
-			drawGameIcon( mTexCoOp, absPosition.x() + mSize.x() - RowHeight *2, getAbsolutePosition().y() + (rowYPosition)*RowHeight, RowHeight,  i == mSelectedIndex? 0xFFFFFFFF : 0xFFFFFF66);
-			iconsSize++;
+			drawGameIcon( mTexCoOp, absPosition.x() + mSize.x() - RowHeight*3, getAbsolutePosition().y() + (rowYPosition)*RowHeight, RowHeight,  i == mSelectedIndex? 0xFFFFFFFF : 0xFFFFFF66);
+			maxPosition=3;
 		}
 
 		//draw text
@@ -194,7 +203,7 @@ void GameListView::draw()
 			mItems.at(i).Title,
 			Eigen::Vector2f( xTextOffset, absPosition.y() + (rowYPosition)*RowHeight + (RowHeight - ItemFont->sizeText(mItems.at(i).Title).y())/2 ),
 			i == mSelectedIndex? SelectedTitleColor : TitleColor,
-			(int)(-(xTextOffset - absPosition.x()) + mSize.x() - iconsSize*RowHeight) // size - pointer - icons
+			(int)(-(xTextOffset - absPosition.x()) + mSize.x() - RowHeight*maxPosition) // size - pointer - icons
 		);
 	}
 }

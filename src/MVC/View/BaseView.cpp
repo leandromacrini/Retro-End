@@ -27,8 +27,16 @@ BaseView::~BaseView()
 
 void BaseView::update(unsigned int deltaTime)
 {
+	bool delayed = false;
+	//before start animation check if it need a delay
+	if(mAnimation && mAnimation->millisDelay > 0)
+	{
+		delayed = true;
+		mAnimation->millisDelay-= deltaTime;
+	}
+
 	//animation handling
-	if(mAnimation)
+	if( !delayed && mAnimation)
 	{
 		//Moving
 		if(mAnimation->moveOffset)
@@ -78,24 +86,24 @@ void BaseView::update(unsigned int deltaTime)
 			}
 		}
 
-		bool completed = false;
-
 		//is animation completed?
 		if(mAnimation->millisDuration == 0)
 		{
+			mAnimation->completed = true;
+
 			//save callback
 			auto callback = mAnimation->endCallback;
 
 			//delete current animation so we can chain another animation in the callback
 			delete mAnimation;
 			mAnimation = NULL;
-			
-			//call the end callback
-			callback();
-			completed = true;
-		}
 
-		if(!completed && mAnimation) mAnimation->millisDuration -= deltaTime >= mAnimation->millisDuration ? mAnimation->millisDuration : deltaTime ;
+			callback();
+		}
+		else
+		{
+			mAnimation->millisDuration -= deltaTime >= mAnimation->millisDuration ? mAnimation->millisDuration : deltaTime ;
+		}
 	}
 
 	for(unsigned int i = 0; i < getChildCount(); i++)
@@ -199,7 +207,7 @@ void BaseView::removeChild(BaseView* cmp)
 	if(it != mChildren.end())
 	{
 		mChildren.erase(it);
-		delete cmp;
+		//delete cmp; //TODO Check if many errors from "update" come from this
 	}
 }
 
@@ -233,14 +241,14 @@ BaseView* BaseView::getParent() const
 
 void BaseView::animate(Animation* data)
 {
-	if(mAnimation != NULL) LOG(LogLevel::Warning, "Called animate on an animating component!");
+	if(isAnimating()) LOG(LogLevel::Warning, "Called animate on an animating component!");
 
 	mAnimation = data;
 }
 
 bool BaseView::isAnimating()
 {
-	return mAnimation != NULL;
+	return mAnimation != NULL && !mAnimation->completed;
 }
 
 bool BaseView::input(InputConfig* config, Input input)
@@ -288,7 +296,7 @@ Eigen::Vector4i BaseView::getAbsoluteClipRect()
 	if(mParent != NULL)
 	{
 		Eigen::Vector4i pclip = mParent->getAbsoluteClipRect();
-		
+
 		int leftclip = max((int)pclip.x(), (int)abs.x());
 		int topclip  = max((int)pclip.y(), (int)abs.y());
 
@@ -345,12 +353,16 @@ void BaseView::render(const Eigen::Affine3f& parentTrans)
 
 void BaseView::draw()
 {
+	//compute background colors with color's alpha and view opacity
+	unsigned char absOpacity = getAbsoluteOpacity();
+	int color = (mBackgroundColor>>8<<8) | (int)((mBackgroundColor & 0x000000FF) * (float)absOpacity / 255) ;
+	int selectedColor = (mSelectedBackgroundColor>>8<<8) | (int)((mBackgroundColor & 0x000000FF) * (float)absOpacity / 255);
+
 	//draw background rectangle
 	//at position + parent position
 	//of given size
 	RenderController::drawRect(
 		(int)getAbsolutePosition().x(), (int)getAbsolutePosition().y(),
 		(int)mSize.x(), (int)mSize.y(),
-		mSelected? mSelectedBackgroundColor : mBackgroundColor);
-		//(mBackgroundColor>>8<<8) | getAbsoluteOpacity());//TODO FIX THIS
+		mSelected? selectedColor : color);
 }

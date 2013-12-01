@@ -36,6 +36,8 @@
 
 #include "BaseController.h"
 #include "LogController.h"
+#include "GamingController.h"
+#include "ResourceController.h"
 
 #include "../View/BaseView.h"
 #include "../View/MainWindow.h"
@@ -49,14 +51,25 @@ namespace RetroEnd
 {
 	namespace Controller
 	{
+		enum PopupMessageIcon
+		{
+			None,
+			Info,
+			Warning,
+			Error,
+			Controller_Added,
+			Controller_Removed
+		};
+
 		class PopupMessage
 		{
 		public:
-			PopupMessage(string message, string icon) : Message(message), Icon(icon) { }
+			PopupMessage(string message, PopupMessageIcon icon) : Message(message), Icon(icon) { }
 
 			string Message;
-			string Icon;
+			PopupMessageIcon Icon;
 		};
+
 
 		class RenderController : public BaseController
 		{
@@ -71,6 +84,9 @@ namespace RetroEnd
 			void stop();
 			void exit();
 			void update();
+			
+			void initSDL();
+			void quitSDL();
 
 			bool isRunning();
 			
@@ -88,9 +104,10 @@ namespace RetroEnd
 			static void setColor4bArray(GLubyte* array, unsigned int color);
 			static void buildGLColorArray(GLubyte* ptr, unsigned int color, unsigned int vertCount);
 		
-			void pushPopupMessage(string message, string icon = "");
+			void pushPopupMessage(string message, PopupMessageIcon icon = PopupMessageIcon::None);
 
 		private:
+			
 			queue<PopupMessage*> mPopupMessages;
 			void showPopupMessages();
 			bool mShowingPopupMessage;

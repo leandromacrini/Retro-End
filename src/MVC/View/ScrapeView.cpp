@@ -4,7 +4,7 @@ using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
-ScrapeView::ScrapeView(vector<Model::Game>* games) : BaseView(), mGames(games)
+ScrapeView::ScrapeView(vector<Game>& games) : BaseView(), mGames(games)
 {
 
 	float W = (float) RenderController::getInstance().getScreenWidth();
@@ -25,7 +25,7 @@ ScrapeView::ScrapeView(vector<Model::Game>* games) : BaseView(), mGames(games)
 
 	if(mGameValuesFound->size() == 0)
 	{
-		for(auto gamesIt = mGames->begin(); gamesIt != mGames->end(); ++gamesIt)
+		for(auto gamesIt = mGames.begin(); gamesIt != mGames.end(); ++gamesIt)
 		{
 			//TODO Make async
 			vector<string> results = vector<string>();
@@ -49,6 +49,8 @@ void ScrapeView::showGamesChoices()
 		Game* game = &(mGameValuesFound->at(gameIndex).first);
 		vector<string> results = mGameValuesFound->at(gameIndex).second;
 
+		Device device = Device::getDeviceById(game->DeviceId);
+
 		//list choices
 		vector<string>* choices = new vector<string>();
 
@@ -67,7 +69,7 @@ void ScrapeView::showGamesChoices()
 		{
 			MultiChoiceDialog* mcd = new MultiChoiceDialog();
 			addChild(mcd);
-			mcd->showDialog("For this file\n"+game->GameFile,"Choose the right game", choices, [this, game, choices, mcd, gameIndex] (unsigned int index)
+			mcd->showDialog("Choose the right game for this file\n"+game->GameFile, device.Name , choices, [this, game, choices, mcd, gameIndex] (unsigned int index)
 			{
 				if(index == 0)
 				{

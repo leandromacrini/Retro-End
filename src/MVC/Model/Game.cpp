@@ -1,5 +1,7 @@
 #include "Game.h"
 
+#include "Device.h"
+
 namespace fs = boost::filesystem;
 
 using namespace RetroEnd::Model;
@@ -11,8 +13,10 @@ string Game::table = "games";
 // Model Class Constructor
 Game::Game() : BaseModel()
 {
-	DeviceId = 0; //default value
+	//default values
+	DeviceId = 0; 
 	TimesPlayed = 0;
+	Favorite = false;
 }
 
 // Model Class Constructor from DB record
@@ -36,14 +40,20 @@ Game::Game( sqlite3_stmt* record ) : BaseModel()
 	ImageLogo	= (char*)sqlite3_column_text(record,15);
 	GameFile	= (char*)sqlite3_column_text(record,16);
 	FileCRC		= (char*)sqlite3_column_text(record,17);
-	TimesPlayed  = sqlite3_column_int(record, 18);
+	TimesPlayed	= sqlite3_column_int(record, 18);
+	Favorite	= sqlite3_column_int(record, 19) == 1;
 }
 
 // Model Class Constructor from TGDB result
 Game::Game ( pugi::xml_node gameNode, sqlite3_int64 deviceId) : BaseModel()
 {
-	Title = gameNode.child("GameTitle").text().get();
+	//default values
+	TimesPlayed = 0;
+	Favorite = false;
+
 	DeviceId = deviceId;
+
+	Title = gameNode.child("GameTitle").text().get();
 	Description = gameNode.child("Overview").text().get();
 	ESRB = gameNode.child("ESRB").text().get();
 	MaxPlayers = gameNode.child("Players").text().get();
@@ -52,7 +62,7 @@ Game::Game ( pugi::xml_node gameNode, sqlite3_int64 deviceId) : BaseModel()
 	Developer = gameNode.child("Developer").text().get();
 	TGDBRating = gameNode.child("Rating").text().get();
 	ReleaseDate = gameNode.child("ReleaseDate").text().get();
-	TGDBId = gameNode.child("Id").text().get();
+	TGDBId = gameNode.child("id").text().get();
 }
 
 // Model Class Distructor
@@ -83,7 +93,8 @@ string Game::getUpdateQuery()
 	query += " IMAGE_LOGO = '"	+	sqlEscape( ImageLogo )+"',";
 	query += " GAME_FILE = '"	+	sqlEscape( GameFile )+"' ,";
 	query += " FILE_CRC = '"	+	sqlEscape( FileCRC )+"' ,";
-	query += " TIMES_PLAYED = "	+	to_string( TimesPlayed );
+	query += " TIMES_PLAYED = "	+	to_string( TimesPlayed )+" ,";
+	query += " FAVORITE = "		+	to_string( Favorite? 1 : 0 ) ;
 
 	query += " WHERE id="+to_string( id )+";";
 
@@ -99,8 +110,8 @@ string Game::getDeleteQuery()
 // Build the query for create the DB record
 string Game::getInsertQuery()
 {
-	string query = "INSERT into " + table + " (TITLE,DEVICE_ID,DESCRIPTION,DEVELOPER,PUBLISHER,ESRB,PLAYERS,CO_OP,RELEASE_DATE,TGDB_ID,TGDB_RATING,IMAGE_FRONT,IMAGE_BACK,IMAGE_SCREEN,IMAGE_LOGO, GAME_FILE, FILE_CRC, TIMES_PLAYED)";
-	query += "values ('" + sqlEscape( Title ) + "','" + to_string(DeviceId) + "','" + sqlEscape( Description ) + "','" + sqlEscape( Developer ) + "','" + sqlEscape( Publisher ) + "','" + sqlEscape( ESRB ) + "','" + sqlEscape( MaxPlayers ) + "','" + sqlEscape( CoOp ) + "','" + sqlEscape( ReleaseDate ) + "','" + sqlEscape( TGDBId ) + "','" + sqlEscape( TGDBRating ) + "','" + sqlEscape( ImageFront ) + "','" + sqlEscape( ImageBack ) + "','" + sqlEscape( ImageScreen ) + "','" + sqlEscape( ImageLogo ) + "','" + sqlEscape( GameFile ) + "','" + sqlEscape( FileCRC ) + "', "+to_string(TimesPlayed)+");";
+	string query = "INSERT into " + table + " (TITLE,DEVICE_ID,DESCRIPTION,DEVELOPER,PUBLISHER,ESRB,PLAYERS,CO_OP,RELEASE_DATE,TGDB_ID,TGDB_RATING,IMAGE_FRONT,IMAGE_BACK,IMAGE_SCREEN,IMAGE_LOGO, GAME_FILE, FILE_CRC, TIMES_PLAYED, FAVORITE)";
+	query += "values ('" + sqlEscape( Title ) + "','" + to_string(DeviceId) + "','" + sqlEscape( Description ) + "','" + sqlEscape( Developer ) + "','" + sqlEscape( Publisher ) + "','" + sqlEscape( ESRB ) + "','" + sqlEscape( MaxPlayers ) + "','" + sqlEscape( CoOp ) + "','" + sqlEscape( ReleaseDate ) + "','" + sqlEscape( TGDBId ) + "','" + sqlEscape( TGDBRating ) + "','" + sqlEscape( ImageFront ) + "','" + sqlEscape( ImageBack ) + "','" + sqlEscape( ImageScreen ) + "','" + sqlEscape( ImageLogo ) + "','" + sqlEscape( GameFile ) + "','" + sqlEscape( FileCRC ) + "', "+to_string(TimesPlayed)+", " + to_string(Favorite? 1 : 0) + ")";
 	return query;
 }
 
@@ -127,8 +138,9 @@ void Game::init()
 	queries.push_back( "ALTER TABLE " +Game::table + " ADD COLUMN GAME_FILE TEXT DEFAULT '';" );
 	queries.push_back( "ALTER TABLE " +Game::table + " ADD COLUMN FILE_CRC TEXT DEFAULT '';" );
 	queries.push_back( "ALTER TABLE " +Game::table + " ADD COLUMN TIMES_PLAYED INTEGER DEFAULT 0;" );
+	queries.push_back( "ALTER TABLE " +Game::table + " ADD COLUMN FAVORITE INTEGER DEFAULT 0;" );
 
-	for (std::vector<string>::iterator it = queries.begin() ; it != queries.end(); ++it) {
+	for (vector<string>::iterator it = queries.begin() ; it != queries.end(); ++it) {
 		string query = *it;
 
 		//execute query
@@ -229,6 +241,40 @@ Game Game::getGameById(sqlite3_int64 id)
 	return *game;
 }
 
+Game* Game::getGameByTGDBId(string& TGDBId)
+{
+	Game* game = NULL;
+
+	string query = "SELECT * FROM " + Game::table + " WHERE TGDB_ID = '" + TGDBId +"' LIMIT 1";
+
+	sqlite3* db;
+
+	sqlite3_open(RetroEnd::DB_NAME.c_str(), &db);
+
+	sqlite3_stmt *statement;
+
+	if(sqlite3_prepare_v2(db, query.c_str(), -1, &statement, 0) == SQLITE_OK)
+	{
+		int result = sqlite3_step(statement);
+
+		if(result == SQLITE_ROW)
+		{
+			game = new Game(statement);
+		}
+		
+		sqlite3_finalize(statement);
+	}
+	else
+	{
+		string message = sqlite3_errmsg(db);
+		LOG(Error, "Game getGameById : " + message);
+	}
+
+	sqlite3_close(db);
+
+	return game;
+}
+
 string Game::getReleaseYear()
 {
 	if(ReleaseDate.empty())
@@ -290,4 +336,26 @@ vector<Game> Game::getGamesForDevice(sqlite3_int64 deviceId)
 	sqlite3_close(db);
 
 	return games;
+}
+
+void Game::remove()
+{
+	//remove from DB
+	BaseModel::remove();
+
+	if(DeviceId != 0 && ! GameFile.empty())
+	{
+		//get GameFile path
+		string romPath = Device::getDeviceById(DeviceId).getRomsPath();
+		//get Images path
+
+		//delete rom file
+		fs::path file = romPath / fs::path(GameFile);
+		if( fs::exists(file)) fs::remove(file);
+	}
+
+	if( ! ImageFront.empty() && fs::exists(ImageFront) ) fs::remove(ImageFront);
+	if( ! ImageBack.empty() && fs::exists(ImageBack) ) fs::remove(ImageBack);
+	if( ! ImageLogo.empty() && fs::exists(ImageLogo) ) fs::remove(ImageLogo);
+	if( ! ImageScreen.empty() && fs::exists(ImageScreen) ) fs::remove(ImageScreen);
 }
