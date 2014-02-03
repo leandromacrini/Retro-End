@@ -183,11 +183,11 @@ set(ES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer_init.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/AudioController.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/BaseController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/GamingController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/InputController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/LogController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/RenderController.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/RenderControllerSDLGL.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ResourceController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ScraperController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/SettingsController.cpp
