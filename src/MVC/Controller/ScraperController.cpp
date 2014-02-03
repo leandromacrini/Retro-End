@@ -244,6 +244,8 @@ void ScraperController::ScrapeAllGamesForDevice(Model::Device& device, bool down
 //TODO deprecated (Remove?)
 void ScraperController::ScrapeGameByCRC(Model::Game& game, Model::Device& device)
 {
+	//TODO FIX THIS?
+	/*
 	if(game.GameFile == "")
 	{
 		LOG(LogLevel::Error, "ScraperController unable to calculate CRC! File is not available for " + game.Title);
@@ -286,6 +288,7 @@ void ScraperController::ScrapeGameByCRC(Model::Game& game, Model::Device& device
 		std::cout << "Getting info for:" + title;
 		//TODO read data from archive.db 
 	}
+	*/
 }
 
 //search a Game by name and device
