@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(retro-end)
+project(retro-end) 
 
 #-------------------------------------------------------------------------------
 #add local find scripts to CMAKE path
@@ -38,6 +38,7 @@ find_package(SDL2 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem regex date_time)
 find_package(Eigen3 REQUIRED)
 find_package(CURL REQUIRED)
+find_package(Sqlite3 REQUIRED)
 
 #add ALSA for Linux
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -104,6 +105,7 @@ set(ES_INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
     ${CURL_INCLUDE_DIR}
+    ${SQLITE3_INCLUDE_DIR}
 )
 
 #add ALSA for Linux
@@ -178,6 +180,8 @@ set(ES_HEADERS
 )
 set(ES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/pugiXML/pugixml.cpp
+	
+	${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/AudioController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/GamingController.cpp
@@ -242,6 +246,7 @@ set(ES_LIBRARIES
 	${SDL2_LIBRARY}
     ${SDL2MAIN_LIBRARY}
     ${CURL_LIBRARIES}
+	${SQLITE3_LIBRARY_RELEASE}
 )
 
 #add ALSA for Linux

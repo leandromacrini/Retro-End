@@ -115,6 +115,8 @@ namespace RetroEnd
 			bool mRunning;
 			int mLastTime;
 			SDL_Surface* mSdlScreen;
+			SDL_Window* mSdlWindow;
+			SDL_GLContext sdlContext;
 			View::BaseView* mainWindow;
 			View::BaseView* mPopupView;
 			std::stack<Eigen::Vector4i> clipStack;

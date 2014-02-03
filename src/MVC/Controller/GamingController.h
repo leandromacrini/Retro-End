@@ -4,7 +4,11 @@
 
 #pragma once
 
+#ifdef WIN32
+#include <curl.h>
+#else
 #include <curl/curl.h>
+#endif
 
 #include "../../globals.h"
 

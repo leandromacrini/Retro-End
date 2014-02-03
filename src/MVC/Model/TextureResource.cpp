@@ -50,6 +50,10 @@ void TextureResource::initFromResource(const ResourceData data)
 
 	//now for the openGL texture stuff
 	glGenTextures(1, &mTextureID);
+
+	if(mTextureID == 0) //error?
+		LOG(LogLevel::Error , "Error in texture generation. Error code: " + to_string(glGetError()));
+
 	glBindTexture(GL_TEXTURE_2D, mTextureID);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageRGBA.data());

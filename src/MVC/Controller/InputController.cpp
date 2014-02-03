@@ -243,7 +243,7 @@ void InputController::loadConfig()
 	for(int i = 0; i < mNumJoysticks; i++)
 	{
 		mInputConfigs[i]->setPlayerNum(-1);
-		string name = SDL_JoystickName(i);
+		string name = "TODO";//TODO fix int -> joystick * //SDL_JoystickName(i);
 
 		std::string config = SettingsController::getInstance().getStringProperty(name, "");
 
