@@ -102,11 +102,11 @@ void InputController::startPolling()
 
 void InputController::stopPolling()
 {
-	if(devicePollingTimer == NULL)
+	if(devicePollingTimer == 0)
 		return;
 
 	SDL_RemoveTimer(devicePollingTimer);
-	devicePollingTimer = NULL;
+	devicePollingTimer = 0;
 }
 
 
@@ -243,7 +243,7 @@ void InputController::loadConfig()
 	for(int i = 0; i < mNumJoysticks; i++)
 	{
 		mInputConfigs[i]->setPlayerNum(-1);
-		string name = "TODO";//TODO fix int -> joystick * //SDL_JoystickName(i);
+		string name = SDL_JoystickNameForIndex(i);
 
 		std::string config = SettingsController::getInstance().getStringProperty(name, "");
 

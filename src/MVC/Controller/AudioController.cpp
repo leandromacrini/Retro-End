@@ -116,13 +116,11 @@ void AudioController::stop()
 
 void AudioController::registerSound(std::shared_ptr<Sound> & sound)
 {
-	getInstance();
 	sSoundVector.push_back(sound);
 }
 
 void AudioController::unregisterSound(std::shared_ptr<Sound> & sound)
 {
-	getInstance();
 	for(unsigned int i = 0; i < sSoundVector.size(); i++)
 	{
 		if(sSoundVector.at(i) == sound)
@@ -137,7 +135,6 @@ void AudioController::unregisterSound(std::shared_ptr<Sound> & sound)
 
 void AudioController::startPlaySamples()
 {
-	getInstance();
 
 	//set internal audio volume. important after launching a game and returning here
 	//VolumeControl::getInstance()->setVolume(50);

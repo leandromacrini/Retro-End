@@ -159,8 +159,7 @@ void InputConfig::writeToXML(pugi::xml_node parent)
 		cfg.append_attribute("type") = "keyboard";
 	}else{
 		cfg.append_attribute("type") = "joystick";
-		//TODO fix int -> joystick * //cfg.append_attribute("deviceName") = SDL_JoystickName(mDeviceId);
-		//TODO maybe we need to enable joystick listen before sdlINIT
+		cfg.append_attribute("deviceName") = SDL_JoystickNameForIndex(mDeviceId);
 	}
 
 	typedef map<string, Input>::iterator it_type;
