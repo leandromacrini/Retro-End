@@ -289,8 +289,8 @@ string Game::getCleanFileName()
 {
 	string result = GameFile;
 
-	regex rx1("\\(.+\\)");
-	regex rx2("\\[.+\\]");
+	boost::regex rx1("\\(.+\\)");
+	boost::regex rx2("\\[.+\\]");
 
 	result = regex_replace(result, rx1, "");
 	result = regex_replace(result, rx2, "");

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <regex>
+#include <boost/regex/v4/regex.hpp>
 #include "../../LIB/pugiXML/pugixml.hpp"
 #include "boost/filesystem.hpp"
 
