@@ -29,7 +29,7 @@ namespace RetroEnd
 			unsigned int getSelectedIndex();
 
 			//POINTER
-			void setPointerPath(string& path);
+			void setPointerPath(string path);
 
 			//ROW ITEM COLORS
 			unsigned int TitleColor;

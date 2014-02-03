@@ -82,7 +82,7 @@ unsigned int GameListView::getSelectedIndex()
 	return mSelectedIndex;
 }
 
-void GameListView::setPointerPath(string& path)
+void GameListView::setPointerPath(string path)
 {
 	mPointer->setPath(path);
 }
