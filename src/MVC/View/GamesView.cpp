@@ -183,7 +183,7 @@ void GamesView::setDevice(Model::Device& device)
 	//set games list
 	mGamesList->removeAllRows();
 
-	mGamesList->setPointerPath("data/consoles/" + device.Name + "/pointer.png");
+	mGamesList->setPointerPath((string)("data/consoles/" + device.Name + "/pointer.png"));
 
 	mGames = Game::getGamesForDevice(device.id);
 
