@@ -4,8 +4,7 @@
  * Create the SQLite DB data layer
  */
 
-#ifndef _BASEMODEL_H_
-#define _BASEMODEL_H_
+#pragma once
 
 #include <sqlite3.h>
 
@@ -55,5 +54,3 @@ namespace RetroEnd
 		};
 	}
 }
-
-#endif _BASEMODEL_H_

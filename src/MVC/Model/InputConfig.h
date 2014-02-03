@@ -86,7 +86,7 @@ namespace RetroEnd
 					break;
 				}
 
-				return stream.str();
+				return (std::string) stream.str();
 			}
 		};
 
