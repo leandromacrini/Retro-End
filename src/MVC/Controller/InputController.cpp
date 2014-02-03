@@ -94,7 +94,7 @@ void InputController::stop()
 
 void InputController::startPolling()
 {
-	if(devicePollingTimer != NULL)
+	if(devicePollingTimer != 0)
 		return;
 
 	devicePollingTimer = SDL_AddTimer(POLLING_INTERVAL, devicePollingCallback, (void *)this);
