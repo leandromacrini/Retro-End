@@ -218,13 +218,13 @@ void GamesView::updateImageSizeAndPosition()
 		//resize on width or height
 		if(mGameImage->getTextureSize().x() > mGameImage->getTextureSize().y())
 		{
-			float maxImageSide = H/3*2;
+			float maxImageSide = H * 2/3;
 
 			mGameImage->resizeByWidth(maxImageSide);
 		}
 		else
 		{
-			float maxImageSide = H/3*2;
+			float maxImageSide = H * 2/3;
 
 			mGameImage->resizeByHeight(maxImageSide);
 		}
@@ -333,6 +333,8 @@ bool GamesView::input(Model::InputConfig* config, Model::Input input)
 		}
 		return true;
 	}
+
+	if(mMoving) return false;
 
 	if(input.id == SDLK_LEFT && input.value != 0 )
 	{

@@ -52,6 +52,7 @@ void ResourceController::start()
 {
 	GamingController::getInstance().onGameEnd += [this](Game& game)
 	{
+		unloadAll();
 		reloadAll();
 	};
 }

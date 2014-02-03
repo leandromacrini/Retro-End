@@ -41,6 +41,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::checkForNewGames()
 {
+	//TODO ADD A LOADING DIALOG
 	vector<Game>* newGames = new vector<Game>();
 	GamingController::getInstance().checkNewGamesAvailability(*newGames);
 	if(newGames->size() > 0)
@@ -82,6 +83,7 @@ void MainWindow::checkForNewGames()
 
 void MainWindow::checkForOldGames()
 {
+	//TODO ADD A LOADING DIALOG
 	vector<Game> *oldGames = new vector<Game>();
 	GamingController::getInstance().checkOldGamesAvailability(*oldGames);
 	if(oldGames->size() > 0)

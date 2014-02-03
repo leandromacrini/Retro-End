@@ -13,6 +13,8 @@
 #include "../Model/Game.h"
 
 #include "BaseView.h"
+#include "Image.h"
+#include "Label.h"
 
 namespace RetroEnd
 {
@@ -22,14 +24,18 @@ namespace RetroEnd
 		{
 
 		public:
-			GameInfoView(Model::Game game);
+			GameInfoView(Model::Game& game);
 			~GameInfoView();
 
 			bool input(Model::InputConfig* config, Model::Input input) override;
 
 		private:
-			Model::Game mGame;
+			Model::Game& mGame;
 			BaseView* mBack;
+			Image* mGameBack;
+			Image* mESRB;
+			Label* mTitle;
+			Label* mDescription;
 		};
 	}
 }

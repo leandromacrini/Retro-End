@@ -177,7 +177,7 @@ void ScraperController::ScrapeAllGamesForDevice(Model::Device& device, bool down
 
 	int counter = 0;
 
-	for(pugi::xml_node system = systemList.child("Game"); system && counter <= maxCount; system = system.next_sibling("Game"))
+	for(pugi::xml_node system = systemList.child("Game"); system && counter < maxCount; system = system.next_sibling("Game"))
 	{
 		counter++;
 
