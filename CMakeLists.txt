@@ -217,17 +217,6 @@ set(ES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/TestWindow.cpp
 )
 
-#add open gl specific sources
-#if(${GLSystem} MATCHES "Desktop OpenGL")
-    LIST(APPEND ES_SOURCES
-		${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer_init_sdlgl.cpp
-    )
-#else()
-#    LIST(APPEND ES_SOURCES
-#		${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer_init_rpi.cpp
-#    )
-#endif()
-
 #-------------------------------------------------------------------------------
 #define OS specific sources and headers
 if(MSVC)
