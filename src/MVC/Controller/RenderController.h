@@ -22,10 +22,6 @@
 #define GLHEADER <SDL_opengl.h>
 #endif
 
-#ifdef _WINDOWS_
-#include <Windows.h>
-#endif
-
 #include "../../globals.h"
 
 #include GLHEADER
