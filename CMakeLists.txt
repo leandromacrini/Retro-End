@@ -180,8 +180,6 @@ set(ES_HEADERS
 set(ES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/pugiXML/pugixml.cpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer_init.cpp
-
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/AudioController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/GamingController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/InputController.cpp
