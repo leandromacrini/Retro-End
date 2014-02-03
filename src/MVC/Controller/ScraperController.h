@@ -1,11 +1,16 @@
-/* Scraper Controller
+	/* Scraper Controller
  * 
  * Retrieve devices and games data from The Archive e The Games DB
  */
 
 #pragma once
 
+#ifdef WIN32
 #include <curl.h>
+#else
+	#include <curl/curl.h>
+#endif
+
 #include "../../LIB/pugiXML/pugixml.hpp"
 
 #include "../../globals.h"
