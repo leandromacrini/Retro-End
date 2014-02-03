@@ -112,7 +112,7 @@ namespace RetroEnd
 			InputController mInstance();
 
 			//private instance costructor for Singleton Controller
-			InputController() :mJoysticks(NULL), mInputConfigs(NULL), mKeyboardInputConfig(NULL), mPrevAxisValues(NULL), mNumJoysticks(0), mNumPlayers(0), devicePollingTimer(NULL) { };
+			InputController() :mJoysticks(NULL), mInputConfigs(NULL), mKeyboardInputConfig(NULL), mPrevAxisValues(NULL), mNumJoysticks(0), mNumPlayers(0), devicePollingTimer(0) { };
 			InputController(InputController const&);// Don't Implement
 			void operator=(InputController const&); // Don't implement
 			//---Singleton---

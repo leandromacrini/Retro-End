@@ -1,4 +1,4 @@
-	/* Scraper Controller
+/* Scraper Controller
  * 
  * Retrieve devices and games data from The Archive e The Games DB
  */
@@ -6,7 +6,7 @@
 #pragma once
 
 #ifdef WIN32
-#include <curl.h>
+	#include <curl.h>
 #else
 	#include <curl/curl.h>
 #endif
@@ -43,7 +43,7 @@ namespace RetroEnd
 			void ScrapeGameByCRC(Model::Game& game, Model::Device& device);
 			
 			void SearchGameData(Model::Game& game, vector<string>& result);
-			void ScraperController::StoreGamedata( vector<pair<Model::Game, string>>* gameData );
+			void StoreGamedata( vector<pair<Model::Game, string>>* gameData );
 
 		protected:
 
