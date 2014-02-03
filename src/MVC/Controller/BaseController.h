@@ -3,8 +3,7 @@
  * Create the interface for access the Log system
  */
 
-#ifndef _BASECONTROLLER_H_
-#define _BASECONTROLLER_H_
+#pragma once
 
 using namespace std;
 
@@ -28,5 +27,3 @@ namespace RetroEnd
 		};
 	}
 }
-
-#endif _BASECONTROLLER_H_
