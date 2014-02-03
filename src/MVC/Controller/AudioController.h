@@ -48,6 +48,10 @@ namespace RetroEnd
 			shared_ptr<Sound> createSound(string file);
 			bool SoundsEnabled;
 
+			//TODO private and friend of Sound
+			void startPlaySamples();
+			void stopPlaySamples();
+
 			friend class Sound;
 
 		private:
@@ -55,9 +59,6 @@ namespace RetroEnd
 			void quit();
 			void registerSound(shared_ptr<Sound> & sound);
 			void unregisterSound(shared_ptr<Sound> & sound);
-
-			void startPlaySamples();
-			void stopPlaySamples();
 
 			static SDL_AudioSpec sAudioFormat;
 			static vector<shared_ptr<Model::Sound>> sSoundVector;
