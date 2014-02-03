@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <curl.h>
+#include <curl/curl.h>
 
 #include "../../globals.h"
 
