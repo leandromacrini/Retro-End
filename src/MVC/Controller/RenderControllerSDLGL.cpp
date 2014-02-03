@@ -25,6 +25,7 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 
 #ifdef USE_OPENGL_ES
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+	#define glOrtho glOrthof
 #endif
 	
 #ifndef _FULLSCREEN
