@@ -45,7 +45,7 @@ namespace RetroEnd
 
 			void updateCurrentGameData();
 			void toggleGameFavorite();
-			void GamesView::updateImageSizeAndPosition();
+			void updateImageSizeAndPosition();
 
 			//toggle to avoid multi click on games
 			bool mIsPlaying;
