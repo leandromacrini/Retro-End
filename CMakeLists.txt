@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(emulationstation)
+project(retro-end)
 
 #-------------------------------------------------------------------------------
 #add local find scripts to CMAKE path
@@ -80,7 +80,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     #check for G++ 4.7+
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE G++_VERSION)
     if (G++_VERSION VERSION_LESS 4.7)
-            message(SEND_ERROR "You need at least G++ 4.7 to compile EmulationStation!")
+            message(SEND_ERROR "You need at least G++ 4.7 to compile retro-end!")
     endif()
     #set up compiler flags for GCC
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-attributes") #support C++11 for std::, optimize
@@ -135,174 +135,87 @@ endif()
 #-------------------------------------------------------------------------------
 #define basic sources and headers
 set(ES_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/AudioManager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/EmulationStation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/FileData.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSorts.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/GuiComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/HttpReq.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/ImageIO.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/InputConfig.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/InputManager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Log.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MathExp.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MetaData.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/platform.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/PlatformId.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ScraperCmdLine.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Settings.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/SystemData.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ThemeData.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ThemeDumper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/VolumeControl.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Window.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/XMLReader.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/pugiXML/pugiconfig.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/pugiXML/pugixml.hpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/AsyncReqComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/ButtonComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/ComponentListComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/DateTimeComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/HelpComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/ImageComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/ImageGridComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/NinePatchComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/OptionListComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/RatingComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/ScrollableContainer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/SliderComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/SwitchComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/TextComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/TextEditComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/TextListComponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiDetectDevice.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiFastSelect.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiMetaDataEd.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiMsgBoxOk.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiMsgBoxYesNo.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiGameScraper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiInputConfig.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiMenu.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiSettingsMenu.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiScraperStart.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiScraperLog.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/globals.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scrapers/Scraper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scrapers/GamesDBScraper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scrapers/TheArchiveScraper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/AudioController.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/BaseController.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/GamingController.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/InputController.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/LogController.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/RenderController.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ResourceController.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ScraperController.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/SettingsController.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/pugiXML/pugiconfig.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/pugiXML/pugixml.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/BaseModel.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Device.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Font.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Game.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/ImageIO.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/InputConfig.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Observer.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Sound.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/TextureResource.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/gamelist/BasicGameListView.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/gamelist/DetailedGameListView.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/gamelist/IGameListView.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/gamelist/ISimpleGameListView.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/gamelist/GridGameListView.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/SystemView.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/ViewController.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/BaseView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameInfoView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameListView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GamesView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Image.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Label.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ListView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MainWindow.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MessageDialog.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MultiChoiceDialog.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ScrapeView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Sprite.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/TestWindow.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/animations/Animation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/animations/AnimationController.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/animations/LambdaAnimation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/animations/LaunchAnimation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/animations/MoveCameraAnimation.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/Font.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/ResourceManager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/TextureResource.h
-	${CMAKE_CURRENT_SOURCE_DIR}/data/Resources.h
 )
 set(ES_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/AudioManager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/FileData.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSorts.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/GuiComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/HttpReq.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/ImageIO.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/InputConfig.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/InputManager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Log.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MathExp.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/MetaData.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/platform.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer_draw_gl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer_init.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ScraperCmdLine.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Settings.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Sound.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/SystemData.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ThemeData.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ThemeDumper.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/VolumeControl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Window.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/XMLReader.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/pugiXML/pugixml.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/AsyncReqComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/ButtonComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/ComponentListComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/DateTimeComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/HelpComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/ImageComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/NinePatchComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/RatingComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/ScrollableContainer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/SliderComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/SwitchComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/TextComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/TextEditComponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiDetectDevice.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiFastSelect.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiMetaDataEd.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiMsgBoxOk.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiMsgBoxYesNo.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiGameScraper.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiInputConfig.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiMenu.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiSettingsMenu.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiScraperStart.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components/GuiScraperLog.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer_init.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scrapers/Scraper.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scrapers/GamesDBScraper.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scrapers/TheArchiveScraper.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/AudioController.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/BaseController.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/GamingController.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/InputController.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/LogController.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/RenderController.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ResourceController.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ScraperController.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/SettingsController.cpp
+		
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/BaseModel.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Device.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Font.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Game.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/ImageIO.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/InputConfig.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Sound.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/TextureResource.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/pugiXML/pugixml.cpp
-    
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/Font.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/ResourceManager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/TextureResource.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/gamelist/BasicGameListView.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/gamelist/DetailedGameListView.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/gamelist/IGameListView.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/gamelist/ISimpleGameListView.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/gamelist/GridGameListView.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/SystemView.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/views/ViewController.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/animations/AnimationController.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/ResourceUtil.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/ES_logo_16_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/ES_logo_32_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/button_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/frame_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/textbox_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/textbox_glow_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/star_filled_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/star_unfilled_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/help_a_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/help_b_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/help_menu_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/help_dpad_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/help_up_down_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/converted/help_left_right_png.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/BaseView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameInfoView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameListView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GamesView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Image.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Label.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ListView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MainWindow.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MessageDialog.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MultiChoiceDialog.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ScrapeView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Sprite.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/TestWindow.cpp
 )
-
-SOURCE_GROUP(resources FILES ResourceUtil.cpp)
 
 #add open gl specific sources
 #if(${GLSystem} MATCHES "Desktop OpenGL")
@@ -319,7 +232,7 @@ SOURCE_GROUP(resources FILES ResourceUtil.cpp)
 #define OS specific sources and headers
 if(MSVC)
     LIST(APPEND ES_SOURCES
-		${CMAKE_CURRENT_SOURCE_DIR}/src/EmulationStation.rc
+		${CMAKE_CURRENT_SOURCE_DIR}/src/retro-end.rc
     )
 endif()
 
@@ -384,17 +297,17 @@ set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 #-------------------------------------------------------------------------------
 #define target
 include_directories(${ES_INCLUDE_DIRS})
-add_executable(emulationstation ${ES_SOURCES} ${ES_HEADERS})
-target_link_libraries(emulationstation ${ES_LIBRARIES})
+add_executable(retro-end ${ES_SOURCES} ${ES_HEADERS})
+target_link_libraries(retro-end ${ES_LIBRARIES})
 
 #special properties for windows builds
 if(MSVC)
     #show console in debug builds, but not in proper release builds
     #Note that up to CMake 2.8.10 this feature is broken: http://public.kitware.com/Bug/view.php?id=12566
-    set_target_properties(emulationstation PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-    set_target_properties(emulationstation PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
-    set_target_properties(emulationstation PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-    set_target_properties(emulationstation PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
-    set_target_properties(emulationstation PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-    set_target_properties(emulationstation PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
+    set_target_properties(retro-end PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+    set_target_properties(retro-end PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+    set_target_properties(retro-end PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
+    set_target_properties(retro-end PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
+    set_target_properties(retro-end PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+    set_target_properties(retro-end PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()
