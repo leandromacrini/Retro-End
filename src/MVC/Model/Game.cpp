@@ -292,8 +292,8 @@ string Game::getCleanFileName()
 	regex rx1("\\(.+\\)");
 	regex rx2("\\[.+\\]");
 
-	result = tr1::regex_replace(result, rx1, "");
-	result = tr1::regex_replace(result, rx2, "");
+	result = regex_replace(result, rx1, "");
+	result = regex_replace(result, rx2, "");
 	result = result.substr(0, result.find_last_of('.'));
 	result = trim(result);
 	return result;
