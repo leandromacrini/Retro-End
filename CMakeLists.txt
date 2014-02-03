@@ -139,7 +139,6 @@ set(ES_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/pugiXML/pugixml.hpp
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/globals.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Renderer.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/AudioController.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/BaseController.h
