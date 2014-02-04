@@ -25,6 +25,11 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
+#ifdef USE_OPENGL_ES
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+#define glOrtho glOrthof
+#endif    
+
 #ifndef _FULLSCREEN
     mSdlScreen = SDL_SetVideoMode(1280, 720, 16, SDL_OPENGL);
 #else
