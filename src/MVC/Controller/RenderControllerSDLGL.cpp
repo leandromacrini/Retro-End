@@ -29,7 +29,7 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 #define glOrtho glOrthof
 #endif    
 
-#ifndef _FULLSCREEN
+#ifdef _DEBUG
     mSdlScreen = SDL_SetVideoMode(1280, 720, 16, SDL_OPENGL);
 #else
 	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1); //vsync
