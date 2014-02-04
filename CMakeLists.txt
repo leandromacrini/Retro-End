@@ -34,7 +34,7 @@ else()
 endif()
 find_package(Freetype REQUIRED)
 find_package(FreeImage REQUIRED)
-find_package(SDL2 REQUIRED)
+find_package(SDL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem regex date_time)
 find_package(Eigen3 REQUIRED)
 find_package(CURL REQUIRED)
@@ -51,22 +51,6 @@ if(DEFINED BCMHOST)
     add_definitions(-D_RPI_)
 endif()
 
-#-------------------------------------------------------------------------------
-#set up _WIN32_WINNT variable (used by boost::asio) on Windows
-macro(get_WIN32_WINNT version)
-    if (WIN32 AND CMAKE_SYSTEM_VERSION)
-        set(ver ${CMAKE_SYSTEM_VERSION})
-        string(REPLACE "." "" ver ${ver})
-        string(REGEX REPLACE "([0-9])" "0\\1" ver ${ver})
-
-        set(${version} "0x${ver}")
-    endif()
-endmacro()
-
-if(WIN32)
-    get_WIN32_WINNT(ver)
-    add_definitions(-D_WIN32_WINNT=${ver})
-endif()
 #-------------------------------------------------------------------------------
 
 if(MSVC)
@@ -101,7 +85,7 @@ add_definitions(-DEIGEN_DONT_ALIGN)
 set(ES_INCLUDE_DIRS
     ${FREETYPE_INCLUDE_DIRS}
     ${FreeImage_INCLUDE_DIRS}
-    ${SDL2_INCLUDE_DIR}
+    ${SDL_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
     ${CURL_INCLUDE_DIR}
@@ -243,8 +227,8 @@ set(ES_LIBRARIES
     ${Boost_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${FreeImage_LIBRARIES}
-	${SDL2_LIBRARY}
-    ${SDL2MAIN_LIBRARY}
+	${SDL_LIBRARY}
+    ${SDLMAIN_LIBRARY}
     ${CURL_LIBRARIES}
 	${SQLITE3_LIBRARY_RELEASE}
 )

@@ -17,33 +17,20 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 		return false;
 	}
 
+	SDL_WM_SetCaption("Retro-End", "Retro-End");
+
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-#ifdef USE_OPENGL_ES
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-	#define glOrtho glOrthof
-#endif
-	
 #ifndef _FULLSCREEN
-	mSdlWindow = SDL_CreateWindow("Retro-End",
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
-		1280,
-		720,
-		SDL_WINDOW_OPENGL);
+    mSdlScreen = SDL_SetVideoMode(1280, 720, 16, SDL_OPENGL);
 #else
-	SDL_GL_SetSwapInterval(1); //vsync
-	mSdlWindow = SDL_CreateWindow("Retro-End",
-		SDL_WINDOWPOS_UNDEFINED,
-		SDL_WINDOWPOS_UNDEFINED,
-		0, 0,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP);
+	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1); //vsync
+	mSdlScreen = SDL_SetVideoMode(0, 0, 16, SDL_OPENGL | SDL_FULLSCREEN);
 #endif
-	mSdlScreen = SDL_GetWindowSurface(mSdlWindow);
 
 	if(mSdlScreen == NULL)
 	{
@@ -52,8 +39,6 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 	}
 
 	LOG(LogLevel::Info, "Created surface successfully.");
-
-	sdlContext = SDL_GL_CreateContext(mSdlWindow);
 
 	SDL_ShowCursor(0);
 
@@ -103,6 +88,6 @@ void RenderController::quitSDL()
 
 void RenderController::swapBuffers()
 {
-	SDL_GL_SwapWindow(mSdlWindow);
+	SDL_GL_SwapBuffers();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

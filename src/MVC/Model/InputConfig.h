@@ -79,7 +79,7 @@ namespace RetroEnd
 					stream << "Hat " << id << " " << getHatDir(value);
 					break;
 				case TYPE_KEY:
-					stream << "Key " << SDL_GetKeyName((SDL_Keycode)id);
+					stream << "Key " << SDL_GetKeyName((SDLKey)id);
 					break;
 				default:
 					stream << "Input to string error";
