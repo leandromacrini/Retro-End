@@ -36,10 +36,10 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 		720,
 		SDL_WINDOW_OPENGL);
 #else
-	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1); //vsync
+	SDL_GL_SetSwapInterval(1); //vsync
 	mSdlWindow = SDL_CreateWindow("Retro-End",
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_UNDEFINED,
 		0, 0,
 		SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP);
 #endif

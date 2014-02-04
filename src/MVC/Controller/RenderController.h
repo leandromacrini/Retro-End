@@ -5,6 +5,8 @@
 
 #pragma once
 
+#define _FULLSCREEN
+
 //the Makefiles define these via command line
 //#define USE_OPENGL_ES
 //#define USE_OPENGL_DESKTOP

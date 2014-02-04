@@ -7,6 +7,9 @@
 
 using namespace RetroEnd::Controller;
 
+#define LOG_PATH "data/log"
+#define LOG_FILE "data/log/Retro-End.log"
+
 const string logLevelToString(LogLevel level)
 {
 	switch (level)
@@ -70,13 +73,18 @@ void LogController::log(LogLevel level, const string& message)
 
 void LogController::start()
 {
-	mLogFile = fopen("data/log/Retro-End.log", "w");
+	//the log folder must always exists
+	boost::filesystem::create_directory(LOG_PATH);
+
+	mLogFile = fopen(LOG_FILE, "w");
 
 	if(mLogFile == NULL)
 	{
 		LOG(LogLevel::Error,  "LogController start Error! Unable to open Retro-End.log file for write!");
-		return;
+		throw "LogController start Error! Unable to open Retro-End.log file for write!";
 	}
+
+	LOG(LogLevel::Error,  "LogController started");
 }
 
 void LogController::stop()
