@@ -161,12 +161,12 @@ void RenderController::exit()
 
 int RenderController::getScreenWidth()
 {
-	return mSdlScreen->w;
+	return display_width;
 }
 
 int RenderController::getScreenHeight()
 {
-	return mSdlScreen->h;
+	return display_height;
 }
 
 

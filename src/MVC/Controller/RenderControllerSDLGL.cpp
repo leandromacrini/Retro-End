@@ -4,6 +4,10 @@ using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
+#ifdef USE_OPENGL_ES
+	#define glOrtho glOrthof
+#endif
+
 bool RenderController::createSurface() //unsigned int display_width, unsigned int display_height)
 {
 	LOG(LogLevel::Info, "Creating surface...");
@@ -17,8 +21,6 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 		return false;
 	}
 
-	SDL_WM_SetCaption("Retro-End", "Retro-End");
-
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -26,23 +28,37 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 #ifdef USE_OPENGL_ES
-#define glOrtho glOrthof
-#endif    
-
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+#endif   
+	
 #ifdef _DEBUG
-    mSdlScreen = SDL_SetVideoMode(1280, 720, 16, SDL_OPENGL);
+	display_width = 1280;
+	display_height = 720;
+
+    sdlWindow = SDL_CreateWindow("Manta Entertainment System", 
+		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+		1280, 720, 
+		SDL_WINDOW_OPENGL);
 #else
-	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1); //vsync
-	mSdlScreen = SDL_SetVideoMode(0, 0, 16, SDL_OPENGL | SDL_FULLSCREEN);
+	SDL_DisplayMode dispMode;
+	SDL_GetDesktopDisplayMode(0, &dispMode);
+	display_width  = dispMode.w;
+	display_height = dispMode.h;
+    sdlWindow = SDL_CreateWindow("Manta Entertainment System", 
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+		display_width, display_height, 
+		SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
 #endif
 
-	if(mSdlScreen == NULL)
+	if(sdlWindow == NULL)
 	{
-		LOG(LogLevel::Fatal, "Error creating SDL video surface!");
+		LOG(LogLevel::Fatal, "Error creating SDL window!");
 		return false;
 	}
 
-	LOG(LogLevel::Info, "Created surface successfully.");
+	sdlContext = SDL_GL_CreateContext(sdlWindow);
+
+	LOG(LogLevel::Info, "Created context successfully.");
 
 	SDL_ShowCursor(0);
 
@@ -54,7 +70,7 @@ void RenderController::start()
 	initSDL();
 
 	//create the main window
-	mainWindow = new View::MainWindow();
+	mainWindow = new View::TestWindow();
 	mPopupView = NULL;
 
 	LOG(LogLevel::Info, "RenderController started");
@@ -76,22 +92,28 @@ void RenderController::initSDL() {
 		mRunning = false;
 	}
 
-	glViewport(0, 0, mSdlScreen->w, mSdlScreen->h);
+	glViewport(0, 0, display_width, display_height);
 
 	glMatrixMode(GL_PROJECTION);
-	glOrtho(0, mSdlScreen->w, mSdlScreen->h, 0, -1.0, 1.0);
+	glOrtho(0, display_width, display_height, 0, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void RenderController::quitSDL()
 {
+	SDL_GL_DeleteContext(sdlContext);
+	sdlContext = NULL;
+
+	SDL_DestroyWindow(sdlWindow);
+	sdlWindow = NULL;
+
 	SDL_Quit();
 }
 
 
 void RenderController::swapBuffers()
 {
-	SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(sdlWindow);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

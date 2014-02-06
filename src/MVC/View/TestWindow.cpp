@@ -18,19 +18,19 @@ ListView* myList;
 TestWindow::TestWindow()
 {
 	this->setSize((float)RenderController::getInstance().getScreenWidth(),(float) RenderController::getInstance().getScreenHeight());
-	
+	/*
 	Image* background = new Image();
 	background->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
 	background->setPath("data/images/sfondo2.jpg");
 	this->addChild(background);
-
+	*/
 	Label* title = new Label();
 	title->setText("TEST WINDOW");
-	title->setPosition(0,0);
-	title->setColor(0xFFFFFFFF);
+	title->setPosition(550,100);
+	title->setColor(0x000000FF);
 
 	this->addChild(title);
-
+	/*
 	myList = new ListView();
 
 	myList->setPosition(100, 50);
@@ -44,7 +44,7 @@ TestWindow::TestWindow()
 	}
 	
 	this->addChild(myList);
-
+	*/
 }
 
 bool TestWindow::input(Model::InputConfig* config, Model::Input input)

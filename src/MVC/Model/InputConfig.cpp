@@ -159,7 +159,7 @@ void InputConfig::writeToXML(pugi::xml_node parent)
 		cfg.append_attribute("type") = "keyboard";
 	}else{
 		cfg.append_attribute("type") = "joystick";
-		cfg.append_attribute("deviceName") = SDL_JoystickName(mDeviceId);
+		cfg.append_attribute("deviceName") = SDL_JoystickNameForIndex(mDeviceId);
 
 	}
 

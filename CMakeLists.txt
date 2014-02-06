@@ -34,7 +34,7 @@ else()
 endif()
 find_package(Freetype REQUIRED)
 find_package(FreeImage REQUIRED)
-find_package(SDL REQUIRED)
+find_package(SDL2 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem regex date_time)
 find_package(Eigen3 REQUIRED)
 find_package(CURL REQUIRED)
@@ -85,7 +85,7 @@ add_definitions(-DEIGEN_DONT_ALIGN)
 set(ES_INCLUDE_DIRS
     ${FREETYPE_INCLUDE_DIRS}
     ${FreeImage_INCLUDE_DIRS}
-    ${SDL_INCLUDE_DIR}
+    ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
     ${CURL_INCLUDE_DIR}
@@ -227,8 +227,8 @@ set(ES_LIBRARIES
     ${Boost_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${FreeImage_LIBRARIES}
-	${SDL_LIBRARY}
-    ${SDLMAIN_LIBRARY}
+	${SDL2_LIBRARY}
+    ${SDL2MAIN_LIBRARY}
     ${CURL_LIBRARIES}
 	${SQLITE3_LIBRARY_RELEASE}
 )

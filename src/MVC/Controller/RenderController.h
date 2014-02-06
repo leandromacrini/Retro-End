@@ -108,9 +108,13 @@ namespace RetroEnd
 			void showPopupMessages();
 			bool mShowingPopupMessage;
 
+			int display_width;
+			int display_height;
+
 			bool mRunning;
 			int mLastTime;
-			SDL_Surface* mSdlScreen;
+			SDL_Window* sdlWindow;
+			SDL_GLContext sdlContext;
 			View::BaseView* mainWindow;
 			View::BaseView* mPopupView;
 			std::stack<Eigen::Vector4i> clipStack;
