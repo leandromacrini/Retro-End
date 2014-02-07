@@ -7,8 +7,9 @@
 
 #include "../../globals.h"
 
+#include <SDL.h>
 #include "SDL_audio.h"
-#include "Sound.h"
+
 
 #include "../Model/Sound.h"
 
