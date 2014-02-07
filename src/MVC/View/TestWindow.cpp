@@ -1,4 +1,3 @@
-#pragma once
 
 #include "TestWindow.h"
 
@@ -34,6 +33,37 @@ TestWindow::TestWindow()
 	title->setColor(0x000000FF);
 
 	this->addChild(title);
+
+	Image* logo = new Image();
+	logo->setSize((float)RenderController::getInstance().getScreenWidth()/2, (float)RenderController::getInstance().getScreenHeight() / 2);
+	logo->setPosition((float)RenderController::getInstance().getScreenWidth()/4, (float)RenderController::getInstance().getScreenHeight() / 4);
+	logo->setPath("data/logo black.png");
+	logo->setOpacity(0);
+	addChild(logo);
+
+	Animation* a = new Animation();
+
+	a->millisDuration = 2000;
+	a->endCallback = [this, logo] ()
+	{
+		Animation* a = new Animation();
+
+		a->millisDuration = 2000;
+		a->newOpacity = new unsigned char(255);
+		a->endCallback = [this, logo] ()
+		{
+			Animation* a = new Animation();
+			a->millisDuration = 1000;
+			a->newSize = new Eigen::Vector2f((float)RenderController::getInstance().getScreenWidth()/5, (float)RenderController::getInstance().getScreenHeight() / 5);
+			a->moveOffset = new Eigen::Vector3f((float)RenderController::getInstance().getScreenWidth()/2, (float)-RenderController::getInstance().getScreenHeight() / 4, 0);
+
+			logo->animate(a);
+		};
+
+		logo->animate(a);
+	};
+
+	logo->animate(a);
 
 }
 
