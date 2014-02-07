@@ -62,9 +62,9 @@ TestWindow::TestWindow()
 			a->endCallback =  [this] ()
 			{
 				//Show Consoles
-				mConsoleView->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
-				mConsoleView->setPosition(0,0);
-				addChild(mConsoleView);
+				//mConsoleView->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
+				//mConsoleView->setPosition(0,0);
+				//addChild(mConsoleView);
 			};
 
 			logo->animate(a);
