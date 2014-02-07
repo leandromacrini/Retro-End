@@ -35,7 +35,7 @@ TestWindow::TestWindow()
 
 	this->addChild(title);
 
-	mConsoleView = new ConsoleView(); //pre load images
+	//mConsoleView = new ConsoleView(); //pre load images
 
 	Image* logo = new Image();
 	logo->setSize((float)RenderController::getInstance().getScreenWidth()/2, (float)RenderController::getInstance().getScreenHeight() / 2);
