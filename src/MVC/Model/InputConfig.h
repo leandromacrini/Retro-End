@@ -3,7 +3,6 @@
 #include "../../globals.h"
 
 #include <map>
-#include <SDL.h>
 #include <sstream>
 #include <algorithm>
 #include <iostream>

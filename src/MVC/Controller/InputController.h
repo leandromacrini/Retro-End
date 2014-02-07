@@ -6,7 +6,6 @@
 #pragma once
 
 #include <map>
-#include <SDL.h>
 #include <boost/filesystem.hpp>
 
 #include "../../globals.h"

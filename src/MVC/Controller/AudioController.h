@@ -7,8 +7,9 @@
 
 #include "../../globals.h"
 
-#include "../Model/Sound.h"
+#include "SDL_audio.h"
 
+#include "../Model/Sound.h"
 #include "BaseController.h"
 #include "LogController.h"
 #include "GamingController.h"

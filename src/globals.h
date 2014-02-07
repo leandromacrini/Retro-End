@@ -13,6 +13,7 @@
 #define RESOURCE_VERSION PROGRAM_VERSION_MAJOR,PROGRAM_VERSION_MINOR,PROGRAM_VERSION_MAINTENANCE,PROGRAM_VERSION_REVISION
 
 //global includes
+#include <SDL.h>
 #include <vector>
 #include <set>
 #include <iostream>

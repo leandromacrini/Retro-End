@@ -26,7 +26,6 @@
 
 #include GLHEADER
 
-#include <SDL.h>
 #include <Eigen/Dense>
 #include <stack>
 
