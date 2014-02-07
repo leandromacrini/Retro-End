@@ -1,5 +1,8 @@
 #include "AudioController.h"
 
+#include <SDL.h>
+#include "SDL_audio.h"
+
 using namespace RetroEnd::Model;
 using namespace RetroEnd::Controller;
 
