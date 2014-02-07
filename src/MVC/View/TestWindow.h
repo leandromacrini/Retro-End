@@ -19,7 +19,7 @@ namespace RetroEnd
 			bool input(Model::InputConfig* config, Model::Input input) override;
 
 		private:
-
+			BaseView* mConsoleView;
 		};
 	}
 }

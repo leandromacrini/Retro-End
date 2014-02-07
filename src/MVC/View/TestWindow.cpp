@@ -1,6 +1,7 @@
 
 #include "TestWindow.h"
 
+#include "ConsoleView.h"
 #include "Label.h"
 #include "Image.h"
 #include "ListView.h"
@@ -34,6 +35,8 @@ TestWindow::TestWindow()
 
 	this->addChild(title);
 
+	mConsoleView = new ConsoleView(); //pre load images
+
 	Image* logo = new Image();
 	logo->setSize((float)RenderController::getInstance().getScreenWidth()/2, (float)RenderController::getInstance().getScreenHeight() / 2);
 	logo->setPosition((float)RenderController::getInstance().getScreenWidth()/4, (float)RenderController::getInstance().getScreenHeight() / 4);
@@ -56,6 +59,13 @@ TestWindow::TestWindow()
 			a->millisDuration = 1000;
 			a->newSize = new Eigen::Vector2f((float)RenderController::getInstance().getScreenWidth()/5, (float)RenderController::getInstance().getScreenHeight() / 5);
 			a->moveOffset = new Eigen::Vector3f((float)RenderController::getInstance().getScreenWidth()/2, (float)-RenderController::getInstance().getScreenHeight() / 4, 0);
+			a->endCallback =  [this] ()
+			{
+				//Show Consoles
+				mConsoleView->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
+				mConsoleView->setPosition(0,0);
+				addChild(mConsoleView);
+			};
 
 			logo->animate(a);
 		};
@@ -69,23 +79,16 @@ TestWindow::TestWindow()
 
 bool TestWindow::input(Model::InputConfig* config, Model::Input input)
 {
-	//TODO input from settings
-	if(input.id == SDLK_DOWN && input.value != 0 )
+	if(input.id == SDLK_p && input.value != 0 )
 	{
-		myList->setSelectedIndex( myList->getSelectedIndex() + 1 );
+		RenderController::getInstance().pushPopupMessage("Miao testo lungo lungo lungo lungo lungo lungo lungo lungo lungo!", PopupMessageIcon::Info);
 		return true;
 	}
 
-	if(input.id == SDLK_UP && input.value != 0)
-	{
-		myList->setSelectedIndex( myList->getSelectedIndex() - 1 );
-		return true;
-	}
-
+	//set input only to the last view added
 	if(mChildren.size() > 0)
 	{
 		mChildren.at(mChildren.size() - 1)->input(config, input);
 	}
-
 	return true;
 }
