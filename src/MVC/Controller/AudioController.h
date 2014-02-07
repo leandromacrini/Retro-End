@@ -25,14 +25,6 @@ using namespace RetroEnd::Model;
 
 namespace RetroEnd
 {
-	namespace Model
-	{
-		class Sound;
-	}
-}
-
-namespace RetroEnd
-{
 	namespace Controller
 	{
 		class AudioController : public BaseController

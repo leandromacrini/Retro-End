@@ -6,6 +6,7 @@
 #include "Image.h"
 #include "ListView.h"
 #include "../Model/Font.h"
+#include "../Controller/AudioController.h"
 #include "../Controller/ResourceController.h"
 #include "../Controller/RenderController.h"
 
@@ -49,6 +50,9 @@ TestWindow::TestWindow()
 	a->millisDuration = 2000;
 	a->endCallback = [this, logo] ()
 	{
+		shared_ptr<Sound> sound = AudioController::getInstance().createSound("data/sounds/splash.wav");
+		sound->play();
+
 		Animation* a = new Animation();
 
 		a->millisDuration = 2000;

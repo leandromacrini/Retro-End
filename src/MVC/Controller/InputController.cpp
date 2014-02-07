@@ -26,91 +26,68 @@ bool InputDevice::operator==(const InputDevice & b) const
 /*******************/
 void InputController::start()
 {
-	//get current input devices from system
-	inputDevices = getInputDevices();
-
-	SDL_InitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_TIMER);
+	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
 
 	mNumJoysticks = SDL_NumJoysticks();
-	mJoysticks = new SDL_Joystick*[mNumJoysticks];
-	mInputConfigs = new InputConfig*[mNumJoysticks];
-	mPrevAxisValues = new map<int, int>[mNumJoysticks];
 
 	for(int i = 0; i < mNumJoysticks; i++)
 	{
-		mJoysticks[i] = SDL_JoystickOpen(i);
-		mInputConfigs[i] = new InputConfig(i);
+		SDL_Joystick* joy = SDL_JoystickOpen(i);
+		SDL_JoystickID joyId = SDL_JoystickInstanceID(joy);
+		mJoysticks.push_back(joy);
+		mInputConfigs[joyId] = new InputConfig(i, SDL_JoystickName(joy));
 
-		for(int k = 0; k < SDL_JoystickNumAxes(mJoysticks[i]); k++)
-		{
-			mPrevAxisValues[i][k] = 0;
-		}
+		int numAxes = SDL_JoystickNumAxes(joy);
+		mPrevAxisValues[joyId] = new int[numAxes];
+		std::fill(mPrevAxisValues[joyId], mPrevAxisValues[joyId] + numAxes, 0); //initialize array to 0
 	}
 
-	mKeyboardInputConfig = new InputConfig(DEVICE_KEYBOARD);
-
-	SDL_JoystickEventState(SDL_ENABLE);
-
-	//start timer for input device polling
-	startPolling();
+	mKeyboardInputConfig = new InputConfig(DEVICE_KEYBOARD, "Keyboard");
 
 	loadConfig();
 }
 
 void InputController::stop()
 {
-	stopPolling();
-
 	SDL_JoystickEventState(SDL_DISABLE);
 
-	if(!SDL_WasInit(SDL_INIT_JOYSTICK))
-		return;
+	if(!SDL_WasInit(SDL_INIT_JOYSTICK)) return;
 
-	if(mJoysticks != NULL)
+	for(auto iter = mJoysticks.begin(); iter != mJoysticks.end(); iter++)
 	{
-		for(int i = 0; i < mNumJoysticks; i++)
-		{
-			SDL_JoystickClose(mJoysticks[i]);
-			delete mInputConfigs[i];
-		}
-
-		delete[] mInputConfigs;
-		mInputConfigs = NULL;
-
-		delete[] mJoysticks;
-		mJoysticks = NULL;
-
-		delete mKeyboardInputConfig;
-		mKeyboardInputConfig = NULL;
-
-		delete[] mPrevAxisValues;
-		mPrevAxisValues = NULL;
+		SDL_JoystickClose(*iter);
 	}
 
-	SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_TIMER);
+	mJoysticks.clear();
 
-	inputDevices.clear();
+	for(auto iter = mInputConfigs.begin(); iter != mInputConfigs.end(); iter++)
+	{
+		delete iter->second;
+	}
+
+	mInputConfigs.clear();
+
+	for(auto iter = mPrevAxisValues.begin(); iter != mPrevAxisValues.end(); iter++)
+	{
+		delete[] iter->second;
+	}
+
+	mPrevAxisValues.clear();
+
+	if(mKeyboardInputConfig != NULL)
+	{
+		delete mKeyboardInputConfig;
+		mKeyboardInputConfig = NULL;
+	}
+
+	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
 
-void InputController::startPolling()
+int InputController::getNumJoysticks()
 {
-	if(devicePollingTimer != 0)
-		return;
-
-	devicePollingTimer = SDL_AddTimer(POLLING_INTERVAL, devicePollingCallback, (void *)this);
+	return mNumJoysticks;
 }
 
-void InputController::stopPolling()
-{
-	if(devicePollingTimer == 0)
-		return;
-
-	SDL_RemoveTimer(devicePollingTimer);
-	devicePollingTimer = 0;
-}
-
-
-int InputController::getNumJoysticks() { return mNumJoysticks; }
 int InputController::getButtonCountByDevice(int id)
 {
 	if(id == DEVICE_KEYBOARD)
@@ -119,8 +96,15 @@ int InputController::getButtonCountByDevice(int id)
 		return SDL_JoystickNumButtons(mJoysticks[id]);
 }
 
-int InputController::getNumPlayers() { return mNumPlayers; }
-void InputController::setNumPlayers(int num) { mNumPlayers = num; }
+int InputController::getNumPlayers()
+{
+	return mNumPlayers;
+}
+
+void InputController::setNumPlayers(int num)
+{
+	mNumPlayers = num;
+}
 
 InputConfig* InputController::getInputConfigByDevice(int device)
 {
@@ -135,10 +119,12 @@ InputConfig* InputController::getInputConfigByPlayer(int player)
 	if(mKeyboardInputConfig->getPlayerNum() == player)
 		return mKeyboardInputConfig;
 
-	for(int i = 0; i < mNumJoysticks; i++)
+	for(auto iter = mInputConfigs.begin(); iter != mInputConfigs.end(); iter++)
 	{
-		if(mInputConfigs[i]->getPlayerNum() == player)
-			return mInputConfigs[i];
+		if(iter->second->getPlayerNum() == player)
+		{
+			return iter->second;
+		}
 	}
 
 	LOG(LogLevel::Error, "Could not find input config for player number " + to_string(player) + "!")
@@ -197,33 +183,10 @@ bool InputController::parseEvent(const SDL_Event& ev)
 		mWindow->input(getInputConfigByDevice(DEVICE_KEYBOARD), Input(DEVICE_KEYBOARD, TYPE_KEY, ev.key.keysym.sym, 0, false));
 		return true;
 
-	case SDL_USEREVENT:
-		if (ev.user.code == SDL_USEREVENT_POLLDEVICES) {
-			//poll joystick / HID again
-			vector<InputDevice> currentDevices = getInputDevices();
-			//compare device lists to see if devices were added/deleted
-			if (currentDevices != inputDevices) {
-				LOG(LogLevel::Info, "Device configuration changed!");
-				//deinit and reinit InputController
-				//TODO
-				//deinit();
-				//init();
-
-				if(currentDevices.size() > inputDevices.size())
-				{
-					onNewControllerDetected(0);
-					RenderController::getInstance().pushPopupMessage("New controller detected!", PopupMessageIcon::Controller_Added);
-				}
-				else
-				{
-					onControllerRemoved(0);
-					RenderController::getInstance().pushPopupMessage("Controller removed!", PopupMessageIcon::Controller_Removed);
-				}
-
-				inputDevices = currentDevices;
-			}
-			return true;
-		}
+	case SDL_JOYDEVICEADDED:
+		stop();
+		start();
+		return true;
 	}
 
 	return false;
@@ -306,18 +269,10 @@ void InputController::loadDefaultConfig()
 
 	cfg->mapInput("mastervolup", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_PLUS, 1, true));
 	cfg->mapInput("mastervoldown", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_MINUS, 1, true));
-
-	cfg->mapInput("sortordernext", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_F7, 1, true));
-	cfg->mapInput("sortorderprevious", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_F8, 1, true));
 }
 
 void InputController::writeConfig()
 {
-	if(!mJoysticks)
-	{
-		LOG(LogLevel::Error, "ERROR - cannot write config without being initialized!");
-		return;
-	}
 
 	string path = getConfigPath();
 
@@ -342,102 +297,6 @@ string InputController::getConfigPath()
 	return path;
 }
 
-Uint32 InputController::devicePollingCallback(Uint32 interval, void* param)
-{
-	//this thing my be running in a different thread, so we're not allowed to call
-	//any functions or change/allocate/delete stuff, but can send a user event
-	SDL_Event event;
-	event.user.type = SDL_USEREVENT;
-	event.user.code = SDL_USEREVENT_POLLDEVICES;
-	event.user.data1 = nullptr;
-	event.user.data2 = nullptr;
-	if (SDL_PushEvent(&event) != 0) {
-		LOG(LogLevel::Error, "InputManager::devicePollingCallback - SDL event queue is full!");
-	}
-
-	return interval;
-}
-
-std::vector<InputDevice> InputController::getInputDevices() const
-{
-	std::vector<InputDevice> currentDevices;
-
-	//retrieve all input devices from system
-#if defined (__APPLE__)
-#error TODO: Not implemented for MacOS yet!!!
-#elif defined(__linux__)
-	//open linux input devices file system
-	const std::string inputPath("/dev/input");
-	fs::directory_iterator dirIt(inputPath);
-	while (dirIt != fs::directory_iterator()) {
-		//get directory entry
-		std::string deviceName = (*dirIt).path().string();
-		//remove parent path
-		deviceName.erase(0, inputPath.length() + 1);
-		//check if it start with "js"
-		if (deviceName.length() >= 3 && deviceName.find("js") == 0) {
-			//looks like a joystick. add to devices.
-			currentDevices.push_back(InputDevice(deviceName, 0, 0));
-		}
-		++dirIt;
-	}
-	//or dump /proc/bus/input/devices anbd search for a Handler=..."js"... entry
-#elif defined(WIN32) || defined(_WIN32)
-	RAWINPUTDEVICELIST * deviceList = nullptr;
-	UINT nrOfDevices = 0;
-	//get number of input devices
-	if (GetRawInputDeviceList(deviceList, &nrOfDevices, sizeof(RAWINPUTDEVICELIST)) != -1 && nrOfDevices > 0)
-	{
-		//get list of input devices
-		deviceList = new RAWINPUTDEVICELIST[nrOfDevices];
-		if (GetRawInputDeviceList(deviceList, &nrOfDevices, sizeof(RAWINPUTDEVICELIST)) != -1)
-		{
-			//loop through input devices
-			for (unsigned int i = 0; i < nrOfDevices; i++)
-			{
-				//get device name
-				char * rawName = new char[2048];
-				UINT rawNameSize = 2047;
-				GetRawInputDeviceInfo(deviceList[i].hDevice, RIDI_DEVICENAME, (void *)rawName, &rawNameSize);
-				//null-terminate string
-				rawName[rawNameSize] = '\0';
-				//convert to string
-				std::string deviceName = rawName;
-				delete [] rawName;
-				//get deviceType
-				RID_DEVICE_INFO deviceInfo;
-				UINT deviceInfoSize = sizeof(RID_DEVICE_INFO);
-				GetRawInputDeviceInfo(deviceList[i].hDevice, RIDI_DEVICEINFO, (void *)&deviceInfo, &deviceInfoSize);
-				//check if it is a HID. we ignore keyboards and mice...
-				if (deviceInfo.dwType == RIM_TYPEHID)
-				{
-					//check if the vendor/product already exists in list. yes. could be more elegant...
-					std::vector<InputDevice>::const_iterator cdIt = currentDevices.cbegin();
-					while (cdIt != currentDevices.cend())
-					{
-						if (cdIt->name == deviceName && cdIt->product == deviceInfo.hid.dwProductId && cdIt->vendor == deviceInfo.hid.dwVendorId)
-						{
-							//device already there
-							break;
-						}
-						++cdIt;
-					}
-					//was the device found?
-					if (cdIt == currentDevices.cend())
-					{
-						//no. add it.
-						currentDevices.push_back(InputDevice(deviceName, deviceInfo.hid.dwProductId, deviceInfo.hid.dwVendorId));
-					}
-				}
-			}
-		}
-		delete [] deviceList;
-	}
-#endif
-
-	return currentDevices;
-}
-
 void InputController::update()
 {
 	SDL_Event event;
@@ -445,17 +304,12 @@ void InputController::update()
 	{
 		switch(event.type)
 		{
-		case SDL_JOYHATMOTION:
-		case SDL_JOYBUTTONDOWN:
-		case SDL_JOYBUTTONUP:
-		case SDL_KEYDOWN:
-		case SDL_KEYUP:
-		case SDL_JOYAXISMOTION:
-		case SDL_USEREVENT:
-			parseEvent(event);
-			break;
 		case SDL_QUIT:
 			RenderController::getInstance().exit();
+			break;
+		
+		default:
+			parseEvent(event);
 			break;
 		}
 	}

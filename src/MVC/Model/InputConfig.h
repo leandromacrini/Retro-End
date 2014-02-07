@@ -92,7 +92,7 @@ namespace RetroEnd
 		class InputConfig
 		{
 		public:
-			InputConfig(int deviceId);
+			InputConfig(int deviceId, const std::string& deviceName);
 
 			void clear();
 			void mapInput(const string& name, Input input);
@@ -115,6 +115,7 @@ namespace RetroEnd
 		private:
 			map<string, Input> mNameMap;
 			const int mDeviceId;
+			const std::string mDeviceName;
 			int mPlayerNum;
 		};
 	}
