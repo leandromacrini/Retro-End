@@ -16,35 +16,25 @@ using namespace RetroEnd::Controller;
 ListView* myList;
 
 TestWindow::TestWindow()
-{
-	this->setSize((float)RenderController::getInstance().getScreenWidth(),(float) RenderController::getInstance().getScreenHeight());
-	/*
+{	
+	float H = (float)RenderController::getInstance().getScreenHeight();
+	float W = (float)RenderController::getInstance().getScreenWidth();
+
+	this->setSize( W, H );
+
 	Image* background = new Image();
-	background->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
-	background->setPath("data/images/sfondo2.jpg");
-	this->addChild(background);
-	*/
+	background->setSize( W, H );
+	background->setPath("data/images/bg_bn.png");
+	background->setTiled(true);
+	addChild(background);
+
 	Label* title = new Label();
 	title->setText("TEST WINDOW");
 	title->setPosition(550,100);
 	title->setColor(0x000000FF);
 
 	this->addChild(title);
-	/*
-	myList = new ListView();
 
-	myList->setPosition(100, 50);
-	myList->setSize(500, 425);
-	myList->HorizontalTextAlign = TextAlign::Center;
-	myList->SelectedRowBackgroundColor = 0xFFFFFFFF;
-
-	for(int i = 0 ; i < 100 ; i++)
-	{
-		myList->addRow("Titolo del gioco " + to_string(i));
-	}
-	
-	this->addChild(myList);
-	*/
 }
 
 bool TestWindow::input(Model::InputConfig* config, Model::Input input)
