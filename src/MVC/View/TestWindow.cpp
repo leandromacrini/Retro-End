@@ -36,7 +36,7 @@ TestWindow::TestWindow()
 
 	this->addChild(title);
 
-	//mConsoleView = new ConsoleView(); //pre load images
+	mConsoleView = new ConsoleView(); //pre load images
 
 	Image* logo = new Image();
 	logo->setSize((float)RenderController::getInstance().getScreenWidth()/2, (float)RenderController::getInstance().getScreenHeight() / 2);
@@ -66,9 +66,9 @@ TestWindow::TestWindow()
 			a->endCallback =  [this] ()
 			{
 				//Show Consoles
-				//mConsoleView->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
-				//mConsoleView->setPosition(0,0);
-				//addChild(mConsoleView);
+				mConsoleView->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
+				mConsoleView->setPosition(0,0);
+				addChild(mConsoleView);
 			};
 
 			logo->animate(a);
