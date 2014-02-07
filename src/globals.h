@@ -14,6 +14,11 @@
 
 //global includes
 #include <SDL.h>
+#ifdef _WINDOWS
+#include <SDL.h>
+#else
+#include <SDL2/SDL.h>
+#endif
 #include <vector>
 #include <set>
 #include <iostream>

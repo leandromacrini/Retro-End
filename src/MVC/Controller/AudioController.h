@@ -7,7 +7,11 @@
 
 #include "../../globals.h"
 
+#ifdef _WINDOWS
 #include "SDL_audio.h"
+#else
+#include "SDL2/SDL_audio.h"
+#endif
 
 #include "../Model/Sound.h"
 #include "BaseController.h"
