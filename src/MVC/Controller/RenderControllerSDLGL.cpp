@@ -69,11 +69,16 @@ void RenderController::start()
 {
 	initSDL();
 
+	LOG(LogLevel::Info, "RenderController started");
+}
+
+void RenderController::manta()
+{
 	//create the main window
 	mainWindow = new View::MainWindow();
 	mPopupView = NULL;
 
-	LOG(LogLevel::Info, "RenderController started");
+	mRunning = true;
 }
 
 void RenderController::stop()
@@ -83,8 +88,6 @@ void RenderController::stop()
 }
 
 void RenderController::initSDL() {
-
-	mRunning = true;
 
 	if( ! createSurface() )
 	{

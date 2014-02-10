@@ -77,8 +77,11 @@ void onExit()
 
 int main(int argc, char* argv[])
 {
-	//starts any controller
+	//activate controllers
 	onStart();
+
+	//start MANTA
+	Controller::RenderController::getInstance().manta();
 
 	//loop until stop
 	while( Controller::RenderController::getInstance().isRunning() )

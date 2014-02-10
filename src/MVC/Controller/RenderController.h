@@ -79,6 +79,7 @@ namespace RetroEnd
 			void stop();
 			void exit();
 			void update();
+			void manta();
 			
 			void initSDL();
 			void quitSDL();
