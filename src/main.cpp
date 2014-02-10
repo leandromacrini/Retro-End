@@ -39,7 +39,7 @@ void onStart()
 {
 	//start log controller
 	Controller::LogController::getInstance().start(); //first
-	Controller::LogController::getInstance().setReportingLevel(LogLevel::Debug); //TODO by setting or command line
+	Controller::LogController::getInstance().setReportingLevel(LogLevel::Debug); //TODO by settings or command line
 
 	LOG(LogLevel::Info,  "***** WELCOME TO RETRO-END *****");
 

@@ -27,10 +27,14 @@ void Image::setPath(string image)
 			mTexture.reset();
 		else
 		{
+			LOG(LogLevel::Debug, "Image::setPath - Creating TextureResource from: " + mPath);
 			mTexture = TextureResource::get(mPath);
 
 			//update size if was Zero
-			if(mSize == Eigen::Vector2f::Zero()) setSize( (float)mTexture->getSize().x(), (float)mTexture->getSize().y());
+			if(mSize == Eigen::Vector2f::Zero()){
+				LOG(LogLevel::Debug, "Image::setPath - Size is not set, use Texture size.");
+				setSize( (float)mTexture->getSize().x(), (float)mTexture->getSize().y());
+			}
 		}
 	}
 

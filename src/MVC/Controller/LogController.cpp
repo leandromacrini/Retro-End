@@ -64,10 +64,7 @@ void LogController::log(LogLevel level, const string& message)
 		fprintf(mLogFile, "%s", output.c_str());
 
 		//if debug print to cout too
-		if(mReportingLevel >= LogLevel::Debug)
-		{
-			std::cout << output;
-		}
+		std::cout << output;
 	}
 }
 
@@ -84,7 +81,7 @@ void LogController::start()
 		throw "LogController start Error! Unable to open Retro-End.log file for write!";
 	}
 
-	LOG(LogLevel::Error,  "LogController started");
+	LOG(LogLevel::Info,  "LogController started");
 }
 
 void LogController::stop()

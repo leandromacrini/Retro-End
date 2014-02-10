@@ -10,6 +10,8 @@
 
 #include "../../globals.h"
 
+#include "../Controller/LogController.h"
+
 using namespace std;
 
 namespace RetroEnd

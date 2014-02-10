@@ -112,7 +112,7 @@ ConsoleView::ConsoleView() : mAnimating(false), mContainer(new BaseView()), mCur
 	help->start();
 	this->addChild(help);
 
-	//updateCurrentConsoleData();
+	updateCurrentConsoleData();
 }
 
 ConsoleView::~ConsoleView()
@@ -122,16 +122,39 @@ ConsoleView::~ConsoleView()
 
 void ConsoleView::updateCurrentConsoleData()
 {
-	mLogo->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/logo.png");
+	LOG(LogLevel::Debug, "ConsoleView::updateCurrentConsoleData");
+
+	if( boost::filesystem::exists("data/consoles/" + mDevices[mCurrentIndex].Name +"/logo.png") )
+		mLogo->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/logo.png");
+	else
+		mLogo->setPath("data/images/blank.png");
+	
+	if( boost::filesystem::exists("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype1.png") )
+		mMediaIcon1->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype1.png");
+	else
+		mMediaIcon1->setPath("data/images/blank.png");
+	
+	if( boost::filesystem::exists("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype2.png") )
+		mMediaIcon2->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype2.png");
+	else
+		mMediaIcon2->setPath("data/images/blank.png");
+
+	if( boost::filesystem::exists("data/consoles/" + mDevices[mCurrentIndex].Name +"/controller1.png") )
+		mControllerIcon1->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/controller1.png");
+	else
+		mControllerIcon1->setPath("data/images/blank.png");
+
+	if( boost::filesystem::exists("data/consoles/" + mDevices[mCurrentIndex].Name +"/controller2.png") )
+		mControllerIcon2->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/controller2.png");
+	else
+		mControllerIcon2->setPath("data/images/blank.png");
+
 	mDateManufacturer->setText(mDevices[mCurrentIndex].ReleaseDate + ", " + mDevices[mCurrentIndex].Manufacturer);
-	mMediaIcon1->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype1.png");
-	mMediaIcon2->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype2.png");
-	mControllerIcon1->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/controller1.png");
-	mControllerIcon2->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/controller2.png");
 }
 
 void ConsoleView::move(int direction)
 {
+	LOG(LogLevel::Debug, "ConsoleView::move -> " + to_string(direction));
 	if( mContainer->isAnimating()) return;
 
 	if( (direction == -1 && mCurrentIndex == 0) || (direction == 1 && mCurrentIndex == mDevices.size()-1))
@@ -184,6 +207,7 @@ bool ConsoleView::input(Model::InputConfig* config, Model::Input input)
 
 	if(input.id == SDLK_RETURN && input.value != 0 )
 	{
+		LOG(LogLevel::Debug, "ConsoleView::onOpenGamesList -> " + to_string(mCurrentIndex));
 		mSelectSound->play();
 		onOpenGamesList(mDevices.at(mCurrentIndex));
 		return true;

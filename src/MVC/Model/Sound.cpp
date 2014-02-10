@@ -8,6 +8,8 @@ using namespace RetroEnd::Controller;
 
 Sound::Sound(const std::string & path) : mSampleData(NULL), mSamplePos(0), mSampleLength(0), playing(false)
 {	
+	LOG(LogLevel::Debug, "Sound::Sound -> " + path);
+
 	if(path.empty())
 	{
 		LOG(LogLevel::Error, "Sound Error - Creating sound from empty path!");
@@ -66,6 +68,8 @@ void Sound::play()
 	
 	if( ! AudioController::getInstance().SoundsEnabled ) return;
 
+	LOG(LogLevel::Debug, "Sound::play -> " + mPath);
+
 	SDL_LockAudio();
 	if (playing)
 	{
@@ -91,6 +95,8 @@ bool Sound::isPlaying() const
 
 void Sound::stop()
 {
+	LOG(LogLevel::Debug, "Sound::stop -> " + mPath);
+
 	//flag our sample as playing and rewind its position
 	SDL_LockAudio();
 	playing = false;
