@@ -70,7 +70,7 @@ void RenderController::start()
 	initSDL();
 
 	//create the main window
-	mainWindow = new View::MainWindow();
+	mainWindow = new View::TestWindow();
 	mPopupView = NULL;
 
 	LOG(LogLevel::Info, "RenderController started");
