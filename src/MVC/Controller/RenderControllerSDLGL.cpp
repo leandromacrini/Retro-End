@@ -74,6 +74,8 @@ void RenderController::start()
 
 void RenderController::manta()
 {
+	SDL_Delay(5000);
+
 	//create the main window
 	mainWindow = new View::MainWindow();
 	mPopupView = NULL;

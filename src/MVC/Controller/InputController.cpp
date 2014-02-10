@@ -133,6 +133,8 @@ InputConfig* InputController::getInputConfigByPlayer(int player)
 
 bool InputController::parseEvent(const SDL_Event& ev)
 {
+	LOG(LogLevel::Debug, "InputController::parseEvent -> " + to_string(ev.type));
+
 	View::BaseView* mWindow = RenderController::getInstance().getCurrentWindow();
 
 	bool causedEvent = false;
