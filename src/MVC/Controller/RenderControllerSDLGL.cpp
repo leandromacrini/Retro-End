@@ -74,8 +74,6 @@ void RenderController::start()
 
 void RenderController::manta()
 {
-	SDL_Delay(5000);
-
 	//create the main window
 	mainWindow = new View::MainWindow();
 	mPopupView = NULL;
@@ -103,6 +101,8 @@ void RenderController::initSDL() {
 	glOrtho(0, display_width, display_height, 0, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+	swapBuffers();
 }
 
 void RenderController::quitSDL()
