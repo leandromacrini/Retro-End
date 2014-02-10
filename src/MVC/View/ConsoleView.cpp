@@ -128,12 +128,12 @@ void ConsoleView::updateCurrentConsoleData()
 		mLogo->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/logo.png");
 	else
 		mLogo->setPath("data/images/blank.png");
-	
+
 	if( boost::filesystem::exists("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype1.png") )
 		mMediaIcon1->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype1.png");
 	else
 		mMediaIcon1->setPath("data/images/blank.png");
-	
+
 	if( boost::filesystem::exists("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype2.png") )
 		mMediaIcon2->setPath("data/consoles/" + mDevices[mCurrentIndex].Name +"/mediatype2.png");
 	else

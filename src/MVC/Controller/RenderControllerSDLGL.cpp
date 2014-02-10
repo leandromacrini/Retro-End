@@ -5,7 +5,7 @@ using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
 #ifdef USE_OPENGL_ES
-	#define glOrtho glOrthof
+#define glOrtho glOrthof
 #endif
 
 bool RenderController::createSurface() //unsigned int display_width, unsigned int display_height)
@@ -30,12 +30,12 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 #ifdef USE_OPENGL_ES
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
 #endif   
-	
+
 #ifdef _DEBUG
 	display_width = 1280;
 	display_height = 720;
 
-    sdlWindow = SDL_CreateWindow("Manta Entertainment System", 
+	sdlWindow = SDL_CreateWindow("Manta Entertainment System", 
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
 		1280, 720, 
 		SDL_WINDOW_OPENGL);
@@ -44,7 +44,7 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 	SDL_GetDesktopDisplayMode(0, &dispMode);
 	display_width  = dispMode.w;
 	display_height = dispMode.h;
-    sdlWindow = SDL_CreateWindow("Manta Entertainment System", 
+	sdlWindow = SDL_CreateWindow("Manta Entertainment System", 
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
 		display_width, display_height, 
 		SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);

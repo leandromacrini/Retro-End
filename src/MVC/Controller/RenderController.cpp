@@ -205,10 +205,10 @@ void RenderController::showPopupMessages()
 
 	//DRAW MESSAGE
 	BaseView* container = new BaseView();
-	container->setSize( W/2, H/6 );
-	container->setPosition( W/4, H/18);
+	container->setSize( W, H/6 );
+	container->setPosition( 0, 0);
 	container->setOpacity(0);
-	container->setBackgroundColor(0x2B7295DD);
+	container->setBackgroundColor(0x2B7295FF);
 
 	float leftMargin = 0;
 
@@ -222,10 +222,10 @@ void RenderController::showPopupMessages()
 
 		leftMargin = H/6;
 	}
-	
+
 	Label* text = new Label();
 	text->setColor(0xFFFFFFFF);
-	text->setSize( W/2 - leftMargin, 0 );
+	text->setSize( W - leftMargin, 0 );
 	text->setText(popup->Message);
 	text->setPosition( leftMargin, (H/6 - text->getSize().y()) / 2 );
 	text->WrapText = true;
@@ -235,7 +235,7 @@ void RenderController::showPopupMessages()
 
 	mPopupView->addChild(container);
 
-	#pragma region PopupAnimation
+#pragma region PopupAnimation
 
 	//ANIMATE MESSAGE
 	Animation* a = new Animation();
@@ -267,5 +267,5 @@ void RenderController::showPopupMessages()
 
 	container->animate(a);
 
-	#pragma endregion
+#pragma endregion
 }
