@@ -186,8 +186,8 @@ bool InputController::parseEvent(const SDL_Event& ev)
 		return true;
 
 	case SDL_JOYDEVICEADDED:
-		stop();
-		start();
+		//stop();
+		//start();
 		return true;
 	}
 
@@ -304,6 +304,8 @@ void InputController::update()
 	SDL_Event event;
 	while(SDL_PollEvent(&event))
 	{
+		LOG(LogLevel::Debug, "InputController::SDL_PollEvent -> " + to_string(event.type));
+
 		switch(event.type)
 		{
 		case SDL_QUIT:
