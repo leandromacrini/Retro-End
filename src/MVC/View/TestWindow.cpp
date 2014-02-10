@@ -31,54 +31,16 @@ TestWindow::TestWindow()
 
 	Label* title = new Label();
 	title->setText("TEST WINDOW");
-	title->setPosition(550,100);
+	title->setPosition(550,10);
 	title->setColor(0x000000FF);
 
 	this->addChild(title);
 
+	//Show Consoles
 	mConsoleView = new ConsoleView(); //pre load images
-
-	Image* logo = new Image();
-	logo->setSize((float)RenderController::getInstance().getScreenWidth()/2, (float)RenderController::getInstance().getScreenHeight() / 2);
-	logo->setPosition((float)RenderController::getInstance().getScreenWidth()/4, (float)RenderController::getInstance().getScreenHeight() / 4);
-	logo->setPath("data/logo black.png");
-	logo->setOpacity(0);
-	addChild(logo);
-
-	Animation* a = new Animation();
-
-	a->millisDuration = 2000;
-	a->endCallback = [this, logo] ()
-	{
-		shared_ptr<Sound> sound = AudioController::getInstance().createSound("data/sounds/splash.wav");
-		sound->play();
-
-		Animation* a = new Animation();
-
-		a->millisDuration = 2000;
-		a->newOpacity = new unsigned char(255);
-		a->endCallback = [this, logo] ()
-		{
-			Animation* a = new Animation();
-			a->millisDuration = 1000;
-			a->newSize = new Eigen::Vector2f((float)RenderController::getInstance().getScreenWidth()/5, (float)RenderController::getInstance().getScreenHeight() / 5);
-			a->moveOffset = new Eigen::Vector3f((float)RenderController::getInstance().getScreenWidth()/2, (float)-RenderController::getInstance().getScreenHeight() / 4, 0);
-			a->endCallback =  [this] ()
-			{
-				//Show Consoles
-				mConsoleView->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
-				mConsoleView->setPosition(0,0);
-				addChild(mConsoleView);
-			};
-
-			logo->animate(a);
-		};
-
-		logo->animate(a);
-	};
-
-	logo->animate(a);
-
+	mConsoleView->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
+	mConsoleView->setPosition(0,0);
+	addChild(mConsoleView);
 }
 
 bool TestWindow::input(Model::InputConfig* config, Model::Input input)

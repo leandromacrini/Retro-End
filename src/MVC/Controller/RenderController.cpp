@@ -206,7 +206,7 @@ void RenderController::showPopupMessages()
 	//DRAW MESSAGE
 	BaseView* container = new BaseView();
 	container->setSize( W, H/6 );
-	container->setPosition( 0, 0);
+	container->setPosition( 0, (H - H/6) / 2);
 	container->setOpacity(0);
 	container->setBackgroundColor(0x2B7295FF);
 
@@ -229,7 +229,7 @@ void RenderController::showPopupMessages()
 	text->setText(popup->Message);
 	text->setPosition( leftMargin, (H/6 - text->getSize().y()) / 2 );
 	text->WrapText = true;
-	text->HorizontalTextAlign = TextAlign::Center;
+	text->HorizontalTextAlign = TextAlign::Left;
 
 	container->addChild(text);
 
