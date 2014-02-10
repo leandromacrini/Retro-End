@@ -112,7 +112,7 @@ ConsoleView::ConsoleView() : mAnimating(false), mContainer(new BaseView()), mCur
 	help->start();
 	this->addChild(help);
 
-	updateCurrentConsoleData();
+	//updateCurrentConsoleData();
 }
 
 ConsoleView::~ConsoleView()
