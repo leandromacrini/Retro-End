@@ -112,7 +112,7 @@ ConsoleView::ConsoleView() : mAnimating(false), mContainer(new BaseView()), mCur
 	help->start();
 	this->addChild(help);
 
-	updateCurrentConsoleData();
+	//updateCurrentConsoleData();
 }
 
 ConsoleView::~ConsoleView()
@@ -192,6 +192,8 @@ void ConsoleView::move(int direction)
 
 bool ConsoleView::input(Model::InputConfig* config, Model::Input input)
 {
+	LOG(LogLevel::Debug, "ConsoleView::input -> " + to_string(input.id));
+
 	//TODO input from settings
 	if(input.id == SDLK_DOWN && input.value != 0 )
 	{
