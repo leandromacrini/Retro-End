@@ -47,7 +47,7 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 	sdlWindow = SDL_CreateWindow("Manta Entertainment System", 
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
 		display_width, display_height, 
-		SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+		SDL_WINDOW_OPENGL);
 #endif
 
 	if(sdlWindow == NULL)
