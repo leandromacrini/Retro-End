@@ -10,7 +10,7 @@
 #ifdef _WINDOWS
 #include "SDL_audio.h"
 #else
-#include "SDL2/SDL_audio.h"
+#include "SDL/SDL_audio.h"
 #endif
 
 #include "../Model/Sound.h"

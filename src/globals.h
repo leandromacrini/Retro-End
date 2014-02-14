@@ -17,7 +17,7 @@
 #ifdef _WINDOWS
 #include <SDL.h>
 #else
-#include <SDL2/SDL.h>
+#include <SDL/SDL.h>
 #endif
 #include <vector>
 #include <set>

@@ -32,33 +32,13 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 #endif   
 
 #ifdef _DEBUG
-	display_width = 1280;
-	display_height = 720;
-
-	sdlWindow = SDL_CreateWindow("Manta Entertainment System", 
-		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-		1280, 720, 
-		SDL_WINDOW_OPENGL);
+	mSdlScreen = SDL_SetVideoMode(1280, 720, 16, SDL_OPENGL);
 #else
-	SDL_DisplayMode dispMode;
-	SDL_GetDesktopDisplayMode(0, &dispMode);
-	display_width  = dispMode.w;
-	display_height = dispMode.h;
-	sdlWindow = SDL_CreateWindow("Manta Entertainment System", 
-		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-		display_width, display_height, 
-		SDL_WINDOW_OPENGL);
+    SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1); //vsync
+    mSdlScreen = SDL_SetVideoMode(0, 0, 16, SDL_OPENGL | SDL_FULLSCREEN);
 #endif
 
-	if(sdlWindow == NULL)
-	{
-		LOG(LogLevel::Fatal, "Error creating SDL window!");
-		return false;
-	}
-
-	sdlContext = SDL_GL_CreateContext(sdlWindow);
-
-	LOG(LogLevel::Info, "Created context successfully.");
+	LOG(LogLevel::Info, "Created screen successfully.");
 
 	SDL_ShowCursor(0);
 
@@ -107,18 +87,12 @@ void RenderController::initSDL() {
 
 void RenderController::quitSDL()
 {
-	SDL_GL_DeleteContext(sdlContext);
-	sdlContext = NULL;
-
-	SDL_DestroyWindow(sdlWindow);
-	sdlWindow = NULL;
-
 	SDL_Quit();
 }
 
 
 void RenderController::swapBuffers()
 {
-	SDL_GL_SwapWindow(sdlWindow);
+    SDL_GL_SwapBuffers();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
