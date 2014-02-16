@@ -27,35 +27,32 @@ bool InputDevice::operator==(const InputDevice & b) const
 void InputController::start()
 {
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+	SDL_JoystickEventState(SDL_ENABLE);
 
-	mNumJoysticks = SDL_NumJoysticks();
-
-	for(int i = 0; i < mNumJoysticks; i++)
+	GamingController::getInstance().onGameEnd += [this](Game game)
 	{
-		SDL_Joystick* joy = SDL_JoystickOpen(i);
-		SDL_JoystickID joyId = SDL_JoystickInstanceID(joy);
-		mJoysticks.push_back(joy);
-		mInputConfigs[joyId] = new InputConfig(i, SDL_JoystickName(joy));
+		//retake the joystick control after emulation
+		resetJoystickState();
+	};
 
-		int numAxes = SDL_JoystickNumAxes(joy);
-		mPrevAxisValues[joyId] = new int[numAxes];
-		std::fill(mPrevAxisValues[joyId], mPrevAxisValues[joyId] + numAxes, 0); //initialize array to 0
-	}
-
-	mKeyboardInputConfig = new InputConfig(DEVICE_KEYBOARD, "Keyboard");
-
-	loadConfig();
+	resetJoystickState();
 }
 
 void InputController::stop()
 {
 	SDL_JoystickEventState(SDL_DISABLE);
+	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+}
 
-	if(!SDL_WasInit(SDL_INIT_JOYSTICK)) return;
+void InputController::resetJoystickState()
+{
+	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+	SDL_JoystickEventState(SDL_ENABLE);
 
+	//clear
 	for(auto iter = mJoysticks.begin(); iter != mJoysticks.end(); iter++)
 	{
-		SDL_JoystickClose(*iter);
+		if(SDL_JoystickGetAttached(*iter)) SDL_JoystickClose(*iter);
 	}
 
 	mJoysticks.clear();
@@ -67,20 +64,35 @@ void InputController::stop()
 
 	mInputConfigs.clear();
 
-	for(auto iter = mPrevAxisValues.begin(); iter != mPrevAxisValues.end(); iter++)
-	{
-		delete[] iter->second;
-	}
-
-	mPrevAxisValues.clear();
-
 	if(mKeyboardInputConfig != NULL)
 	{
 		delete mKeyboardInputConfig;
 		mKeyboardInputConfig = NULL;
 	}
 
-	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+	//start SDL Joystick
+	mNumJoysticks = SDL_NumJoysticks();
+
+	for(int i = 0; i < mNumJoysticks; i++)
+	{
+		SDL_Joystick* joy = SDL_JoystickOpen(i);
+		SDL_JoystickID joyId = SDL_JoystickInstanceID(joy);
+		
+		char* buffer = new char[33];
+
+		SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(joy), buffer, 33);
+		
+		string guid = string(buffer);
+
+		mJoysticks.push_back(joy);
+		mInputConfigs[joyId] = new InputConfig(i, SDL_JoystickName(joy), guid);
+
+		int numAxes = SDL_JoystickNumAxes(joy);
+	}
+
+	mKeyboardInputConfig = new InputConfig(DEVICE_KEYBOARD, "Keyboard", "");
+
+	//TODO loadConfig(); re do this
 }
 
 int InputController::getNumJoysticks()
@@ -137,28 +149,22 @@ bool InputController::parseEvent(const SDL_Event& ev)
 
 	View::BaseView* mWindow = RenderController::getInstance().getCurrentWindow();
 
-	bool causedEvent = false;
 	switch(ev.type)
 	{
 	case SDL_JOYAXISMOTION:
 		//if it switched boundaries
-		if((abs(ev.jaxis.value) > DEADZONE) != (abs(mPrevAxisValues[ev.jaxis.which][ev.jaxis.axis]) > DEADZONE))
-		{
-			int normValue;
-			if(abs(ev.jaxis.value) <= DEADZONE)
-				normValue = 0;
+		int normValue;
+		if(abs(ev.jaxis.value) <= DEADZONE)
+			normValue = 0;
+		else
+			if(ev.jaxis.value > 0)
+				normValue = 1;
 			else
-				if(ev.jaxis.value > 0)
-					normValue = 1;
-				else
-					normValue = -1;
+				normValue = -1;
 
-			mWindow->input(getInputConfigByDevice(ev.jaxis.which), Input(ev.jaxis.which, TYPE_AXIS, ev.jaxis.axis, normValue, false));
-			causedEvent = true;
-		}
-
-		mPrevAxisValues[ev.jaxis.which][ev.jaxis.axis] = ev.jaxis.value;
-		return causedEvent;
+		mWindow->input(getInputConfigByDevice(ev.jaxis.which), Input(ev.jaxis.which, TYPE_AXIS, ev.jaxis.axis, normValue, false));
+		
+		return true;
 
 	case SDL_JOYBUTTONDOWN:
 	case SDL_JOYBUTTONUP:
@@ -186,8 +192,14 @@ bool InputController::parseEvent(const SDL_Event& ev)
 		return true;
 
 	case SDL_JOYDEVICEADDED:
-		//stop();
-		//start();
+		RenderController::getInstance().pushPopupMessage("New controller found!", PopupMessageIcon::Controller_Added);
+		resetJoystickState();
+		onControllerAdded(ev.jdevice.which);
+		return true;
+	case SDL_JOYDEVICEREMOVED:
+		RenderController::getInstance().pushPopupMessage("Controller removed", PopupMessageIcon::Controller_Removed);
+		resetJoystickState();
+		onControllerRemoved(ev.jdevice.which);
 		return true;
 	}
 

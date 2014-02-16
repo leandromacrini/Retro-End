@@ -147,19 +147,20 @@ set(ES_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/TextureResource.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/BaseView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Image.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Sprite.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Label.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MessageDialog.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MultiChoiceDialog.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameInfoView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameListView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GamesView.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Image.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Label.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ListView.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MainWindow.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MessageDialog.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MultiChoiceDialog.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/HelpView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ScrapeView.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Sprite.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/TestWindow.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MainWindow.h
 
 )
 set(ES_SOURCES
@@ -172,7 +173,6 @@ set(ES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/InputController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/LogController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/RenderController.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/RenderControllerSDLGL.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ResourceController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ScraperController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/SettingsController.cpp
@@ -198,6 +198,7 @@ set(ES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MessageDialog.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MultiChoiceDialog.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ScrapeView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/HelpView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Sprite.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/TestWindow.cpp
 )

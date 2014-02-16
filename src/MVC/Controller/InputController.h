@@ -52,7 +52,7 @@ namespace RetroEnd
 
 			//EVENTS
 
-			Model::Observer<int> onNewControllerDetected;
+			Model::Observer<int> onControllerAdded;
 			Model::Observer<int> onControllerRemoved;
 
 		protected:
@@ -77,14 +77,14 @@ namespace RetroEnd
 
 			void loadDefaultConfig();
 
+			void resetJoystickState();
+
 			int mNumJoysticks;
 			int mNumPlayers;
 			std::vector<SDL_Joystick*> mJoysticks;
 			std::map<SDL_JoystickID, Model::InputConfig*> mInputConfigs;
 
 			Model::InputConfig* mKeyboardInputConfig;
-
-			std::map<SDL_JoystickID, int*> mPrevAxisValues;
 
 			//---Singleton---
 			InputController mInstance();

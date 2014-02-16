@@ -45,9 +45,9 @@ string toLower(string str)
 }
 //end util functions
 
-InputConfig::InputConfig(int deviceId, const std::string& deviceName) : mDeviceId(deviceId), mDeviceName(deviceName)
+InputConfig::InputConfig(int deviceId, const string& deviceName, const string& guid) : mDeviceId(deviceId), mDeviceName(deviceName), mPlayerNum(-1), mGuid(guid)
 {
-	mPlayerNum = -1;
+	
 }
 
 void InputConfig::clear()

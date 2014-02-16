@@ -195,19 +195,19 @@ bool ConsoleView::input(Model::InputConfig* config, Model::Input input)
 	LOG(LogLevel::Debug, "ConsoleView::input -> " + to_string(input.id));
 
 	//TODO input from settings
-	if(input.id == SDLK_DOWN && input.value != 0 )
+	if( (input.id == SDLK_DOWN && input.value != SDL_RELEASED) || (input.id == 4 && input.type == TYPE_AXIS && input.value == 1))
 	{
 		move(1);
 		return true;
 	}
 
-	if(input.id == SDLK_UP && input.value != 0 )
+	if( (input.id == SDLK_UP && input.value != SDL_RELEASED) || (input.id == 4 && input.type == TYPE_AXIS && input.value == -1))
 	{
 		move(-1);
 		return true;
 	}
 
-	if(input.id == SDLK_RETURN && input.value != 0 )
+	if(input.id == SDLK_RETURN && input.value != SDL_RELEASED || (input.id == 2 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
 	{
 		LOG(LogLevel::Debug, "ConsoleView::onOpenGamesList -> " + to_string(mCurrentIndex));
 		mSelectSound->play();

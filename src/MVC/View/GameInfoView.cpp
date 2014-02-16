@@ -131,7 +131,7 @@ GameInfoView::~GameInfoView()
 
 bool GameInfoView::input(InputConfig* config, Model::Input input)
 {
-	if(input.id == SDLK_SPACE && input.value != 0 )
+	if( (input.id == SDLK_SPACE && input.value != 0 ) || (input.id == 0 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
 	{
 		float H = (float) RenderController::getInstance().getScreenHeight();
 

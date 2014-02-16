@@ -334,6 +334,27 @@ bool GamesView::input(Model::InputConfig* config, Model::Input input)
 		return true;
 	}
 
+	if(input.id == 4 && input.type == TYPE_AXIS){
+		if( input.value == -1 )
+		{
+			//down
+			move(-1);
+			startMoving(-1);
+		}
+		if( input.value == 1 )
+		{
+			//down
+			move(1);
+			startMoving(1);
+		}
+		else
+		{
+			//up
+			stopMoving();
+		}
+		return true;
+	}
+
 	if(mMoving) return false;
 
 	if(input.id == SDLK_LEFT && input.value != 0 )
@@ -354,19 +375,25 @@ bool GamesView::input(Model::InputConfig* config, Model::Input input)
 		return true;
 	}
 
-	if(input.id == SDLK_ESCAPE && input.value != 0)
+	if((input.id == SDLK_ESCAPE && input.value != 0) || (input.id == 1 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
 	{
 		mParent->removeChild(this);
 		return true;
 	}
 
-	if(input.id == SDLK_SPACE && input.value != 0)
+	if((input.id == SDLK_SPACE && input.value != 0) || (input.id == 0 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
 	{
 		onOpenGameInfo(mGames.at(mGamesList->getSelectedIndex()));
 		return true;
 	}
 
-	if(input.id == SDLK_RETURN && input.value != 0)
+	if((input.id == 8 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
+	{
+		onOpenGameHelpScreen(0);
+		return true;
+	}
+
+	if((input.id == SDLK_RETURN && input.value != 0) || (input.id == 2 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
 	{
 		startGame();
 		return true;

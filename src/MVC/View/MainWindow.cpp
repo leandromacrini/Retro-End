@@ -6,6 +6,7 @@
 #include "Label.h"
 #include "MultiChoiceDialog.h"
 #include "ScrapeView.h"
+#include "HelpView.h"
 #include "Sprite.h"
 
 #include "../Controller/AudioController.h"
@@ -152,6 +153,12 @@ void MainWindow::showLogo()
 		{
 			GameInfoView* info = new GameInfoView(game);
 			addChild(info);
+		};
+
+		games->onOpenGameHelpScreen += [this] (int)
+		{
+			HelpView* help = new HelpView(HelpScreen::GAME_HELP);
+			addChild(help);
 		};
 
 		addChild(games);

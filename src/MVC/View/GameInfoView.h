@@ -1,8 +1,6 @@
-/* Base View class
+/* Game Info View
 *
-* Create the interface for access to any GUI component
-* Implements the animation system
-* Implements the rendering and update systems
+* Shows the information of the selected game
 */
 
 

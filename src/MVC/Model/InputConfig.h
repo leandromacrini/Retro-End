@@ -92,7 +92,7 @@ namespace RetroEnd
 		class InputConfig
 		{
 		public:
-			InputConfig(int deviceId, const std::string& deviceName);
+			InputConfig(int deviceId, const string& deviceName,const string& guid);
 
 			void clear();
 			void mapInput(const string& name, Input input);
@@ -113,6 +113,7 @@ namespace RetroEnd
 			void loadFromXML(pugi::xml_node root, int playerNum);
 			void writeToXML(pugi::xml_node parent);
 		private:
+			string mGuid;
 			map<string, Input> mNameMap;
 			const int mDeviceId;
 			const std::string mDeviceName;
