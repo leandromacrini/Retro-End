@@ -27,7 +27,7 @@ namespace RetroEnd
 			void showDialog(string message, string title, vector<string>* values, function<void (unsigned int selectedIndex)> callback);
 			void move(int direction); // 1 Next | -1 Prev
 
-			bool input(Model::InputConfig* config, Model::Input input) override;
+			bool input(Model::Input input) override;
 		private:
 			vector<string>* mValues;
 			function<void (unsigned int selectedIndex)> mCallback;

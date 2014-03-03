@@ -35,7 +35,7 @@ namespace RetroEnd
 
 			void update(unsigned int deltaTime) override;
 
-			bool input(Model::InputConfig* config, Model::Input input) override;
+			bool input(Model::Input input) override;
 		private:
 			BaseView* mConsoleView;
 

@@ -190,28 +190,38 @@ void ConsoleView::move(int direction)
 	mMoveSound->play();
 }
 
-bool ConsoleView::input(Model::InputConfig* config, Model::Input input)
+bool ConsoleView::input(Model::Input input)
 {
-	LOG(LogLevel::Debug, "ConsoleView::input -> " + to_string(input.id));
-
 	//TODO input from settings
-	if( (input.id == SDLK_DOWN && input.value != SDL_RELEASED) || (input.id == 4 && input.type == TYPE_AXIS && input.value == 1))
+	if(input.Semantic == InputSemantic::DOWN && input.Value != SDL_RELEASED )
 	{
 		move(1);
 		return true;
 	}
 
-	if( (input.id == SDLK_UP && input.value != SDL_RELEASED) || (input.id == 4 && input.type == TYPE_AXIS && input.value == -1))
+	if(input.Semantic == InputSemantic::UP && input.Value != SDL_RELEASED )
 	{
 		move(-1);
 		return true;
 	}
 
-	if(input.id == SDLK_RETURN && input.value != SDL_RELEASED || (input.id == 2 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
+	if(input.Semantic == InputSemantic::BUTTON_A && input.Value != SDL_RELEASED )
 	{
 		LOG(LogLevel::Debug, "ConsoleView::onOpenGamesList -> " + to_string(mCurrentIndex));
 		mSelectSound->play();
 		onOpenGamesList(mDevices.at(mCurrentIndex));
+		return true;
+	}
+
+	if(input.Semantic == InputSemantic::BUTTON_X && input.Value != SDL_RELEASED )
+	{
+		onOpenConsoleInfo(mDevices[mCurrentIndex]);
+		return true;
+	}
+
+	if(input.Semantic == InputSemantic::SELECT && input.Value != SDL_RELEASED )
+	{
+		onOpenConsoleHelpScreen(0);
 		return true;
 	}
 

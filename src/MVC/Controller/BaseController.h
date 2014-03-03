@@ -17,13 +17,25 @@ namespace RetroEnd
 		{
 
 		public:
+			BaseController() : mActivated(false) { };
+
 			virtual void start() {};
 			virtual void stop() {};
 
+			virtual void activate()
+			{
+				mActivated = true;
+			}
+
+			virtual void deactivate()
+			{
+				mActivated = true;
+			}
+
 		protected:
-
+			bool mActivated;
 		private:
-
+			
 		};
 	}
 }

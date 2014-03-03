@@ -25,7 +25,7 @@ namespace RetroEnd
 			GameInfoView(Model::Game& game);
 			~GameInfoView();
 
-			bool input(Model::InputConfig* config, Model::Input input) override;
+			bool input(Model::Input input) override;
 
 		private:
 			Model::Game& mGame;

@@ -44,6 +44,8 @@ namespace RetroEnd
 			void checkNewGamesAvailability(vector<Model::Game>& result);
 			void checkOldGamesAvailability(vector<Model::Game>& result);
 
+			const bool IsPlaying();
+
 			//EVENTS
 
 			Model::Observer<Model::Game&> onGameStart;
@@ -53,8 +55,10 @@ namespace RetroEnd
 		protected:
 
 		private:
+			bool mIsPlaying;
+
 			GamingController mInstance();
-			GamingController() {}; //private instance costructor for Singleton Controller
+			GamingController() : mIsPlaying(false) { }; //private instance costructor for Singleton Controller
 			GamingController(GamingController const&);// Don't Implement
 			void operator=(GamingController const&); // Don't implement
 		};

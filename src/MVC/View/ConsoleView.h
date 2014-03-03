@@ -23,9 +23,13 @@ namespace RetroEnd
 
 			void move(int direction); // 1 Next | -1 Prev
 
-			Model::Observer<Model::Device> onOpenGamesList;
+			//EVENTS
 
-			bool input(Model::InputConfig* config, Model::Input input) override;
+			Model::Observer<Model::Device> onOpenConsoleInfo;	//open Console info event
+			Model::Observer<int> onOpenConsoleHelpScreen;		//open Console help screen
+			Model::Observer<Model::Device> onOpenGamesList;		//open Game List 
+
+			bool input(Model::Input input) override;
 		private:
 			void updateCurrentConsoleData();
 

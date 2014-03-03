@@ -297,14 +297,14 @@ void GamesView::move(int direction)
 	mMoveSound->play();
 }
 
-bool GamesView::input(Model::InputConfig* config, Model::Input input)
+bool GamesView::input(Model::Input input)
 {
 	if(mIsPlaying) return false;
 
 	//TODO input from settings
-	if(input.id == SDLK_DOWN)
+	if(input.Semantic == InputSemantic::DOWN)
 	{
-		if( input.value == 1 )
+		if( input.Value == SDL_PRESSED )
 		{
 			//down
 			move(1);
@@ -318,34 +318,13 @@ bool GamesView::input(Model::InputConfig* config, Model::Input input)
 		return true;
 	}
 
-	if(input.id == SDLK_UP)
+	if(input.Semantic == InputSemantic::UP)
 	{
-		if( input.value == 1 )
+		if( input.Value == SDL_PRESSED )
 		{
 			//down
 			move(-1);
 			startMoving(-1);
-		}
-		else
-		{
-			//up
-			stopMoving();
-		}
-		return true;
-	}
-
-	if(input.id == 4 && input.type == TYPE_AXIS){
-		if( input.value == -1 )
-		{
-			//down
-			move(-1);
-			startMoving(-1);
-		}
-		if( input.value == 1 )
-		{
-			//down
-			move(1);
-			startMoving(1);
 		}
 		else
 		{
@@ -357,43 +336,43 @@ bool GamesView::input(Model::InputConfig* config, Model::Input input)
 
 	if(mMoving) return false;
 
-	if(input.id == SDLK_LEFT && input.value != 0 )
+	if(input.Semantic == InputSemantic::LEFT && input.Value != SDL_RELEASED )
 	{
 		move(- min(10,(int) mGamesList->getSelectedIndex()));
 		return true;
 	}
 
-	if(input.id == SDLK_RIGHT && input.value != 0)
+	if(input.Semantic == InputSemantic::RIGHT && input.Value != SDL_RELEASED )
 	{
 		move(min(10u, mGames.size() -1 - mGamesList->getSelectedIndex()));
 		return true;
 	}
 
-	if(input.id == SDLK_s && input.value != 0)
+	if(input.Semantic == InputSemantic::START && input.Value != SDL_RELEASED )
 	{
 		toggleGameFavorite();
 		return true;
 	}
 
-	if((input.id == SDLK_ESCAPE && input.value != 0) || (input.id == 1 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
+	if(input.Semantic == InputSemantic::BUTTON_B && input.Value != SDL_RELEASED )
 	{
 		mParent->removeChild(this);
 		return true;
 	}
 
-	if((input.id == SDLK_SPACE && input.value != 0) || (input.id == 0 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
+	if(input.Semantic == InputSemantic::BUTTON_X && input.Value != SDL_RELEASED )
 	{
 		onOpenGameInfo(mGames.at(mGamesList->getSelectedIndex()));
 		return true;
 	}
 
-	if((input.id == 8 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
+	if(input.Semantic == InputSemantic::SELECT && input.Value != SDL_RELEASED )
 	{
 		onOpenGameHelpScreen(0);
 		return true;
 	}
 
-	if((input.id == SDLK_RETURN && input.value != 0) || (input.id == 2 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
+	if(input.Semantic == InputSemantic::BUTTON_A && input.Value != SDL_RELEASED )
 	{
 		startGame();
 		return true;

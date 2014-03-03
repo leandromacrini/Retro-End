@@ -251,11 +251,11 @@ bool BaseView::isAnimating()
 	return mAnimation != NULL && !mAnimation->completed;
 }
 
-bool BaseView::input(InputConfig* config, Input input)
+bool BaseView::input(Input input)
 {
 	for(unsigned int i = 0; i < getChildCount(); i++)
 	{
-		if(getChild(i)->input(config, input))
+		if(getChild(i)->input(input))
 			return true;
 	}
 

@@ -90,6 +90,7 @@ set(ES_INCLUDE_DIRS
     ${EIGEN3_INCLUDE_DIR}
     ${CURL_INCLUDE_DIR}
     ${SQLITE3_INCLUDE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/
 )
 
 #add ALSA for Linux
@@ -135,6 +136,7 @@ set(ES_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ResourceController.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ScraperController.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/SettingsController.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/SocialController.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/BaseModel.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Device.h
@@ -145,6 +147,7 @@ set(ES_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Observer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Sound.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/TextureResource.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/User.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/BaseView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Image.h
@@ -154,6 +157,8 @@ set(ES_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MultiChoiceDialog.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameInfoView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleInfoView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/InputConfigurationView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameListView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GamesView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ListView.h
@@ -176,6 +181,7 @@ set(ES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ResourceController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/ScraperController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/SettingsController.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Controller/SocialController.cpp
 		
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/BaseModel.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Device.cpp
@@ -185,10 +191,13 @@ set(ES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/InputConfig.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Sound.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/TextureResource.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/User.cpp
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/BaseView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameInfoView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleInfoView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/InputConfigurationView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameListView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GamesView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Image.cpp

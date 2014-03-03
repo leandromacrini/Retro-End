@@ -1,19 +1,22 @@
 #include "MainWindow.h"
 
-#include "ConsoleView.h"
-#include "GameInfoView.h"
-#include "GamesView.h"
 #include "Label.h"
 #include "MultiChoiceDialog.h"
+#include "Sprite.h"
+#include "ConsoleView.h"
+#include "GameInfoView.h"
+#include "ConsoleInfoView.h"
+#include "GamesView.h"
 #include "ScrapeView.h"
 #include "HelpView.h"
-#include "Sprite.h"
+#include "InputConfigurationView.h"
 
 #include "../Controller/AudioController.h"
 #include "../Controller/GamingController.h"
 #include "../Controller/InputController.h"
 #include "../Controller/RenderController.h"
 #include "../Controller/ScraperController.h"
+#include "../Controller/SocialController.h"
 
 using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
@@ -31,6 +34,12 @@ MainWindow::MainWindow() : mScrapeComplete(false), mScrapeView(NULL)
 	background->setPath("data/images/bg_bn.png");
 	background->setTiled(true);
 	addChild(background);
+
+	InputController::getInstance().onControllerNeedConfiguration += [this] (InputConfig* config)
+	{
+		InputConfigurationView* view = new InputConfigurationView(config);
+		addChild(view);
+	};
 
 	showLogo();
 }
@@ -123,9 +132,9 @@ void MainWindow::checkForOldGames()
 	}
 }
 
-bool MainWindow::input(InputConfig* config, Input input)
+bool MainWindow::input(Input input)
 {
-	if(input.id == SDLK_p && input.value != 0 )
+	if(input.RawData.ValueID == SDLK_p && input.Value != SDL_RELEASED )
 	{
 		RenderController::getInstance().pushPopupMessage("Miao testo lungo lungo lungo lungo lungo lungo lungo lungo lungo!", PopupMessageIcon::Info);
 		return true;
@@ -134,7 +143,7 @@ bool MainWindow::input(InputConfig* config, Input input)
 	//set input only to the last view added
 	if(mChildren.size() > 0)
 	{
-		mChildren.at(mChildren.size() - 1)->input(config, input);
+		mChildren.at(mChildren.size() - 1)->input(input);
 	}
 	return true;
 }
@@ -143,6 +152,7 @@ void MainWindow::showLogo()
 {
 	mConsoleView = new ConsoleView(); //pre load images
 
+	//game view events
 	((ConsoleView*)mConsoleView)->onOpenGamesList += [this] (Device device)
 	{
 		GamesView* games = new GamesView();
@@ -164,6 +174,19 @@ void MainWindow::showLogo()
 		addChild(games);
 	};
 
+	//console info event
+	((ConsoleView*)mConsoleView)->onOpenConsoleInfo += [this](Device device)
+	{
+		ConsoleInfoView* info = new ConsoleInfoView(device);
+		addChild(info);
+	};
+
+	((ConsoleView*)mConsoleView)->onOpenConsoleHelpScreen += [this] (int)
+		{
+			HelpView* help = new HelpView(HelpScreen::CONSOLE_HELP);
+			addChild(help);
+		};
+	
 	Image* logo = new Image();
 	logo->setSize((float)RenderController::getInstance().getScreenWidth()/2, (float)RenderController::getInstance().getScreenHeight() / 2);
 	logo->setPosition((float)RenderController::getInstance().getScreenWidth()/4, (float)RenderController::getInstance().getScreenHeight() / 4);
@@ -194,10 +217,27 @@ void MainWindow::showLogo()
 				//Show Consoles
 				mConsoleView->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
 				mConsoleView->setPosition(0,0);
+				mConsoleView->setOpacity(0);
 				addChild(mConsoleView);
 
-				//async check if old games are still available
-				checkForOldGames();
+				Animation* a = new Animation();
+
+				a->millisDuration = 1000;
+				a->newOpacity = new unsigned char(255);
+				a->endCallback = [this] ()
+				{
+					//tell inputcontroller to start handling controllers
+					InputController::getInstance().enableJoystickHandling();
+
+					//activate SocialController
+					//SocialController::getInstance().activate();
+					//SocialController::getInstance().doLogin("leon", "homerj2");
+					
+					//async check if old games are still available
+					checkForOldGames();
+				};
+
+				mConsoleView->animate(a);
 			};
 
 			logo->animate(a);

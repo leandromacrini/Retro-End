@@ -5,7 +5,6 @@
 #include "BaseView.h"
 #include "../Model/InputConfig.h"
 
-
 namespace RetroEnd
 {
 	namespace View
@@ -16,7 +15,7 @@ namespace RetroEnd
 			TestWindow();
 			~TestWindow();
 
-			bool input(Model::InputConfig* config, Model::Input input) override;
+			bool input(Model::Input input) override;
 
 		private:
 			BaseView* mConsoleView;

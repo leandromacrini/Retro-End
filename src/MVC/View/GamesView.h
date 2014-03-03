@@ -30,10 +30,12 @@ namespace RetroEnd
 
 			void update(unsigned int deltaTime) override;
 
-			Model::Observer<Model::Game> onOpenGameInfo; //open game info event
-			Model::Observer<int> onOpenGameHelpScreen; //open game help screen
+			//EVENTS
 
-			bool input(Model::InputConfig* config, Model::Input input) override;
+			Model::Observer<Model::Game> onOpenGameInfo;	//open game info event
+			Model::Observer<int> onOpenGameHelpScreen;		//open game help screen
+
+			bool input(Model::Input input) override;
 		private:
 			void startGame();
 			void endGame();

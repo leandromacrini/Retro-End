@@ -8,116 +8,139 @@
 #include <iostream>
 #include "../../LIB/pugiXML/pugixml.hpp"
 
+#include "BaseModel.h"
+
 #include "../Controller/LogController.h"
 
+#define DEVICE_UNKNOWN	-2
 #define DEVICE_KEYBOARD -1
+
+#define VALUE_ID_UNKNOWN -1
 
 namespace RetroEnd
 {
 	namespace Model
 	{
-		enum InputType
+		//this is the source of the input
+		enum InputRawType
 		{
-			TYPE_AXIS,
+			TYPE_AXIS_POSITIVE,
+			TYPE_AXIS_NEGATIVE,
 			TYPE_BUTTON,
 			TYPE_HAT,
 			TYPE_KEY,
-			TYPE_COUNT
+			TYPE_UNKNOWN
+		};
+
+		//this is the semantic of the received input if mapped to a config
+		enum InputSemantic
+		{
+			UP,
+			DOWN,
+			LEFT,
+			RIGHT,
+			BUTTON_A,
+			BUTTON_B,
+			BUTTON_X,
+			BUTTON_Y,
+			BUTTON_L,
+			BUTTON_R,
+			START,
+			SELECT,
+			BUTTON_L2,
+			BUTTON_L3,
+			BUTTON_R2,
+			BUTTON_R3,
+			SYSTEM,
+			UNMAPPED
+		};
+
+		struct InputRaw
+		{
+		public:
+			InputRawType Type;	//the type of input
+			int ValueID;		//the ID of input
+			unsigned int Timestamp;
+
+			InputRaw()
+			{
+				Type = TYPE_UNKNOWN;
+				ValueID = VALUE_ID_UNKNOWN;
+				Timestamp = 0;
+			}
+
+			InputRaw(InputRawType type, int valueID, unsigned int timestamp = 0) : Type(type), ValueID(valueID), Timestamp(timestamp)
+			{
+
+			}
 		};
 
 		struct Input
 		{
-		public:
-			int device;
-			InputType type;
-			int id;
-			int value;
-			bool configured;
+			int Value;
+			int PlayerNumber;
+			InputSemantic Semantic;
+			InputRaw RawData;
 
-			Input()
+			Input() : Value(0), PlayerNumber(-1), Semantic(InputSemantic::UNMAPPED), RawData()
 			{
-				device = DEVICE_KEYBOARD;
-				configured = false;
-				id = -1;
-				value = -999;
-				type = TYPE_COUNT;
+
 			}
 
-			Input(int dev, InputType t, int i, int val, bool conf) : device(dev), type(t), id(i), value(val), configured(conf)
+			Input(int value, int player, InputSemantic semantic, InputRawType type, int valueid, unsigned int timestamp)
 			{
-			}
-
-			string getHatDir(int val)
-			{
-				if(val & SDL_HAT_UP)
-					return "up";
-				else if(val & SDL_HAT_DOWN)
-					return "down";
-				else if(val & SDL_HAT_LEFT)
-					return "left";
-				else if(val & SDL_HAT_RIGHT)
-					return "right";
-				return "neutral?";
-			}
-
-			string toString()
-			{
-				if(!configured)
-					return "";
-
-				stringstream stream;
-				switch(type)
-				{
-				case TYPE_BUTTON:
-					stream << "Button " << id;
-					break;
-				case TYPE_AXIS:
-					stream << "Axis " << id << (value > 0 ? "+" : "-");
-					break;
-				case TYPE_HAT:
-					stream << "Hat " << id << " " << getHatDir(value);
-					break;
-				case TYPE_KEY:
-					stream << "Key " << SDL_GetKeyName((SDL_Keycode)id);
-					break;
-				default:
-					stream << "Input to string error";
-					break;
-				}
-
-				return (std::string) stream.str();
+				Value = value;
+				PlayerNumber = player;
+				Semantic = semantic;
+				RawData.Type = type;
+				RawData.ValueID = valueid;
+				RawData.Timestamp = timestamp;
 			}
 		};
 
-		class InputConfig
+		class InputConfig : public BaseModel
 		{
 		public:
-			InputConfig(int deviceId, const string& deviceName,const string& guid);
+			InputConfig(const string& deviceName, const string& guid);
+
+			//constructor from sqlite record
+			InputConfig( sqlite3_stmt* record );
+
+			//table name
+			static string table;
 
 			void clear();
-			void mapInput(const string& name, Input input);
-			void setPlayerNum(int num);
 
-			int getPlayerNum();
-			int getDeviceId();
+			//DB PROPERTIES
+			string DeviceName;
+			string Guid;
 
-			//Returns the input mapped to this name.
-			Input getInputByName(const string& name);
+			//RUN TIME PROPERTIES
+			SDL_Joystick* Joystick;
+			int PlayerNumber;
 
-			//Returns true if Input is mapped to this name, false otherwise.
-			bool isMappedTo(const string& name, Input input);
+			void setInputMap(InputSemantic key, InputRaw value);
+			InputSemantic getInputMapKey(InputRaw value);
+			InputRaw getInputMapValue(InputSemantic key);
 
-			//Returns a list of names this input is mapped to.
-			vector<string> getMappedTo(Input input);
+			bool TryLoadFromDB();
 
-			void loadFromXML(pugi::xml_node root, int playerNum);
-			void writeToXML(pugi::xml_node parent);
+			static InputConfig* getInputConfigByGUID(string guid);
+			static InputConfig* getInputConfigByControllerName(string name);
+
+			//create the table, 
+			static void init();
+		
+		protected:
+			string getUpdateQuery();
+			string getDeleteQuery();
+			string getInsertQuery();
+
 		private:
-			string mGuid;
-			map<string, Input> mNameMap;
-			const int mDeviceId;
-			const std::string mDeviceName;
-			int mPlayerNum;
+			map<InputSemantic, InputRaw> mInputMap;
+
+			void loadFromXML(string xml);
+			string writeToXML();
 		};
 	}
 }

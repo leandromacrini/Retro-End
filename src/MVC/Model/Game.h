@@ -21,13 +21,13 @@ namespace RetroEnd
 		class Game : public BaseModel
 		{
 		public:
-			//empty creator
+			//constructor
 			Game();
 
-			//creator from sqlite record
+			//constructor from sqlite record
 			Game( sqlite3_stmt* record );
 
-			//creator from TGDB xml result
+			//constructor from TGDB xml result
 			Game ( pugi::xml_node gameNode, sqlite3_int64 deviceId = -1);
 
 			~Game();

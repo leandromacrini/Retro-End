@@ -58,9 +58,9 @@ namespace RetroEnd
 
 			//Called when input is received.
 			//Return true if the input is consumed, false if it should continue to be passed to other children.
-			virtual bool input(Model::InputConfig* config, Model::Input input);
+			virtual bool input(Model::Input input);
 
-			//Called when time passes.  Default implementation also calls update(deltaTime) on children - so you should probably call GuiComponent::update(deltaTime) at some point.
+			//Called when time passes.  Default implementation also calls update(deltaTime) on children - so you should probably call BaseView::update(deltaTime) at some point.
 			virtual void update(unsigned int deltaTime);
 
 			//Called when it's time to render.  By default, just calls renderChildren(transform).

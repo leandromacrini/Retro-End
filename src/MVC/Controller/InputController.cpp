@@ -26,121 +26,114 @@ bool InputDevice::operator==(const InputDevice & b) const
 /*******************/
 void InputController::start()
 {
-	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
-	SDL_JoystickEventState(SDL_ENABLE);
+	LOG(LogLevel::Info, "InputController is creating and updating all the tables");
+	//init all the models so the tables are always updated
+	InputConfig::init();
+
+	//keyboard is always configured and has fixed values
+	loadDefaultKeyboardConfig();
+
+	GamingController::getInstance().onGameStart += [this](Game game)
+	{
+		//release the joystick control before emulation
+		disableJoystickHandling();
+	};
 
 	GamingController::getInstance().onGameEnd += [this](Game game)
 	{
 		//retake the joystick control after emulation
-		resetJoystickState();
+		enableJoystickHandling();
 	};
 
-	resetJoystickState();
+	LOG(LogLevel::Info, "InputController started.");
 }
 
 void InputController::stop()
 {
+	disableJoystickHandling();
+}
+
+void InputController::disableJoystickHandling()
+{
+	//release all joystick
+	for(auto iter = mPlayersConfig.begin(); iter != mPlayersConfig.end(); iter++)
+	{
+		if(SDL_JoystickGetAttached(iter->second->Joystick)) SDL_JoystickClose(iter->second->Joystick);
+	}
+	mPlayersConfig.clear();
+
+	//disable joystick handling
 	SDL_JoystickEventState(SDL_DISABLE);
+	
+	//de init SDL Joyatick
 	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
 
-void InputController::resetJoystickState()
+void InputController::enableJoystickHandling()
 {
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
 	SDL_JoystickEventState(SDL_ENABLE);
+}
 
-	//clear
-	for(auto iter = mJoysticks.begin(); iter != mJoysticks.end(); iter++)
-	{
-		if(SDL_JoystickGetAttached(*iter)) SDL_JoystickClose(*iter);
-	}
-
-	mJoysticks.clear();
-
-	for(auto iter = mInputConfigs.begin(); iter != mInputConfigs.end(); iter++)
-	{
-		delete iter->second;
-	}
-
-	mInputConfigs.clear();
-
-	if(mKeyboardInputConfig != NULL)
-	{
-		delete mKeyboardInputConfig;
-		mKeyboardInputConfig = NULL;
-	}
-
-	//start SDL Joystick
-	mNumJoysticks = SDL_NumJoysticks();
-
-	for(int i = 0; i < mNumJoysticks; i++)
-	{
-		SDL_Joystick* joy = SDL_JoystickOpen(i);
-		SDL_JoystickID joyId = SDL_JoystickInstanceID(joy);
+void InputController::addJoystick(int deviceID)
+{
+	SDL_Joystick* joy = SDL_JoystickOpen(deviceID);
+	SDL_JoystickID joyId = SDL_JoystickInstanceID(joy);
 		
-		char* buffer = new char[33];
+	char* buffer = new char[33];
 
-		SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(joy), buffer, 33);
+	SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(joy), buffer, 33);
 		
-		string guid = string(buffer);
+	string guid = string(buffer);
 
-		mJoysticks.push_back(joy);
-		mInputConfigs[joyId] = new InputConfig(i, SDL_JoystickName(joy), guid);
+	InputConfig* config = new InputConfig(SDL_JoystickName(joy), guid);
 
-		int numAxes = SDL_JoystickNumAxes(joy);
-	}
-
-	mKeyboardInputConfig = new InputConfig(DEVICE_KEYBOARD, "Keyboard", "");
-
+	config->Joystick = joy;
+	
 	//TODO loadConfig(); re do this
-}
+	mPlayersConfig[joyId] = config;
 
-int InputController::getNumJoysticks()
-{
-	return mNumJoysticks;
-}
+	config->PlayerNumber = mPlayersConfig.size();
 
-int InputController::getButtonCountByDevice(int id)
-{
-	if(id == DEVICE_KEYBOARD)
-		return 120; //it's a lot, okay.
+	//check if we have the configuration for this joystick on DB or ask the user to configure
+	if(!config->TryLoadFromDB())
+		onControllerNeedConfiguration(config);
 	else
-		return SDL_JoystickNumButtons(mJoysticks[id]);
+		RenderController::getInstance().pushPopupMessage("Controller recognized\nUsed for player "+to_string(config->PlayerNumber), PopupMessageIcon::Controller_Added);
+	
+	LOG(LogLevel::Info, "InputController : addJoystick " + guid);
+	onControllerAdded(config->PlayerNumber);
 }
 
-int InputController::getNumPlayers()
+void InputController::delJoystick(int joystickID)
 {
-	return mNumPlayers;
-}
-
-void InputController::setNumPlayers(int num)
-{
-	mNumPlayers = num;
-}
-
-InputConfig* InputController::getInputConfigByDevice(int device)
-{
-	if(device == DEVICE_KEYBOARD)
-		return mKeyboardInputConfig;
-	else
-		return mInputConfigs[device];
-}
-
-InputConfig* InputController::getInputConfigByPlayer(int player)
-{
-	if(mKeyboardInputConfig->getPlayerNum() == player)
-		return mKeyboardInputConfig;
-
-	for(auto iter = mInputConfigs.begin(); iter != mInputConfigs.end(); iter++)
+	//search and remove the joystick and then shift all the players by one
+	SDL_JoystickID found = -1;
+	for(auto iter = mPlayersConfig.begin(); iter != mPlayersConfig.end(); iter++)
 	{
-		if(iter->second->getPlayerNum() == player)
+		if(iter->first == joystickID)
 		{
-			return iter->second;
+			found = iter->first;
+			continue;
+		}
+		
+		if(found != -1)
+		{
+			iter->second->PlayerNumber--;
 		}
 	}
 
-	LOG(LogLevel::Error, "Could not find input config for player number " + to_string(player) + "!")
-		return NULL;
+	if(found != -1)
+	{	
+		
+		int player = mPlayersConfig[found]->PlayerNumber;
+
+		if(SDL_JoystickGetAttached(mPlayersConfig[found]->Joystick)) SDL_JoystickClose(mPlayersConfig[found]->Joystick);
+		mPlayersConfig.erase(found);
+
+		RenderController::getInstance().pushPopupMessage("Controller removed for player "+to_string(player), PopupMessageIcon::Controller_Removed);
+		onControllerRemoved(player);
+	}
 }
 
 bool InputController::parseEvent(const SDL_Event& ev)
@@ -152,164 +145,132 @@ bool InputController::parseEvent(const SDL_Event& ev)
 	switch(ev.type)
 	{
 	case SDL_JOYAXISMOTION:
-		//if it switched boundaries
-		int normValue;
-		if(abs(ev.jaxis.value) <= DEADZONE)
-			normValue = 0;
-		else
-			if(ev.jaxis.value > 0)
-				normValue = 1;
+		{
+
+			//if it switched boundaries
+			int normValue;
+			if(abs(ev.jaxis.value) <= DEADZONE)
+				normValue = 0;
 			else
-				normValue = -1;
+				if(ev.jaxis.value > 0)
+					normValue = 1;
+				else
+					normValue = -1;
 
-		mWindow->input(getInputConfigByDevice(ev.jaxis.which), Input(ev.jaxis.which, TYPE_AXIS, ev.jaxis.axis, normValue, false));
-		
-		return true;
+			InputConfig* config = mPlayersConfig[ev.jaxis.which];
 
+			if(config == NULL) return true;
+
+			InputRaw raw = InputRaw(normValue < 0 ? TYPE_AXIS_NEGATIVE : TYPE_AXIS_POSITIVE, ev.jaxis.axis);
+
+			InputSemantic semantic = config->getInputMapKey(raw);
+
+			mWindow->input(Input(abs(normValue), config->PlayerNumber, semantic, raw.Type, raw.ValueID, ev.jaxis.timestamp));
+			return true;
+		}
 	case SDL_JOYBUTTONDOWN:
 	case SDL_JOYBUTTONUP:
-		mWindow->input(getInputConfigByDevice(ev.jbutton.which), Input(ev.jbutton.which, TYPE_BUTTON, ev.jbutton.button, ev.jbutton.state == SDL_PRESSED, false));
-		return true;
-
-	case SDL_JOYHATMOTION:
-		mWindow->input(getInputConfigByDevice(ev.jhat.which), Input(ev.jhat.which, TYPE_HAT, ev.jhat.hat, ev.jhat.value, false));
-		return true;
-
-	case SDL_KEYDOWN:
-		if(ev.key.keysym.sym == SDLK_F4)
 		{
-			SDL_Event* quit = new SDL_Event();
-			quit->type = SDL_QUIT;
-			SDL_PushEvent(quit);
-			return false;
-		}
+			//check if the user is pressing start + select = System button
 
-		mWindow->input(getInputConfigByDevice(DEVICE_KEYBOARD), Input(DEVICE_KEYBOARD, TYPE_KEY, ev.key.keysym.sym, 1, false));
+			InputConfig* config = mPlayersConfig[ev.jaxis.which];
+
+			InputRaw start = config->getInputMapValue(InputSemantic::START);
+			InputRaw select= config->getInputMapValue(InputSemantic::SELECT);
+
+			if( start.Type != TYPE_UNKNOWN && select.Type != TYPE_UNKNOWN )
+			{
+				bool startPressed  = SDL_JoystickGetButton(config->Joystick, start.ValueID ) != 0;
+				bool selectPressed = SDL_JoystickGetButton(config->Joystick, select.ValueID ) != 0;
+
+				if(startPressed && selectPressed)
+				{
+					SDL_Event* quit = new SDL_Event();
+					quit->type = SDL_QUIT;
+					SDL_PushEvent(quit);
+					return false;
+					//TODO exit window
+					//mWindow->input(Input(SDL_PRESSED, config->PlayerNumber, InputSemantic::SYSTEM, TYPE_BUTTON, VALUE_ID_UNKNOWN, ev.jbutton.timestamp));
+					//return true;
+				}
+			}
+			
+			InputRaw raw = InputRaw(TYPE_BUTTON, ev.jbutton.button);
+			InputSemantic semantic = config->getInputMapKey(raw);
+
+			mWindow->input(Input(ev.jbutton.state, config->PlayerNumber, semantic, raw.Type, raw.ValueID, ev.jbutton.timestamp));
+			return true;
+		}
+	case SDL_JOYHATMOTION:
+		//TODO understand what is this
+		//mWindow->input(getInputConfigByDevice(ev.jhat.which), Input(ev.jhat.which, TYPE_HAT, ev.jhat.hat, ev.jhat.value, false));
 		return true;
 
 	case SDL_KEYUP:
-		mWindow->input(getInputConfigByDevice(DEVICE_KEYBOARD), Input(DEVICE_KEYBOARD, TYPE_KEY, ev.key.keysym.sym, 0, false));
-		return true;
+	case SDL_KEYDOWN:
+		{
+			if(ev.key.keysym.sym == SDLK_F4)
+			{
+				SDL_Event* quit = new SDL_Event();
+				quit->type = SDL_QUIT;
+				SDL_PushEvent(quit);
+				return false;
+				//TODO exit window
+				//mWindow->input(Input(SDL_PRESSED, config->PlayerNumber, InputSemantic::SYSTEM, TYPE_BUTTON, VALUE_ID_UNKNOWN, ev.jbutton.timestamp));
+				//return true;
+			}
+			
+			InputRaw raw = InputRaw(TYPE_KEY, ev.key.keysym.sym);
+			InputSemantic semantic = mKeyboardInputConfig->getInputMapKey(raw);
 
+			mWindow->input(Input(ev.key.state, mKeyboardInputConfig->PlayerNumber, semantic, raw.Type, raw.ValueID, ev.key.timestamp));
+			return true;
+		}
+	
 	case SDL_JOYDEVICEADDED:
-		RenderController::getInstance().pushPopupMessage("New controller found!", PopupMessageIcon::Controller_Added);
-		resetJoystickState();
-		onControllerAdded(ev.jdevice.which);
-		return true;
+		{
+			addJoystick(ev.jdevice.which);
+			return true;
+		}
 	case SDL_JOYDEVICEREMOVED:
-		RenderController::getInstance().pushPopupMessage("Controller removed", PopupMessageIcon::Controller_Removed);
-		resetJoystickState();
-		onControllerRemoved(ev.jdevice.which);
-		return true;
+		{
+			delJoystick(ev.jdevice.which);
+			return true;
+		}
 	}
 
 	return false;
 }
 
-void InputController::loadConfig()
+
+void InputController::loadDefaultKeyboardConfig()
 {
-	//if there are no joysticks we have nothing to do
-	if(mNumJoysticks == 0) return;
+	mKeyboardInputConfig = new InputConfig("Keyboard", "DEFAULT_KEYBOARD_CONFIGURATION");
 
-	//in the DB we save a key-value pair for each device we have configured
-	//the key is the device name
-	//the value is the XML based configuration
+	mKeyboardInputConfig->setInputMap(InputSemantic::UP, InputRaw(TYPE_KEY, SDLK_UP));
+	mKeyboardInputConfig->setInputMap(InputSemantic::DOWN, InputRaw(TYPE_KEY, SDLK_DOWN));
+	mKeyboardInputConfig->setInputMap(InputSemantic::LEFT, InputRaw(TYPE_KEY, SDLK_LEFT));
+	mKeyboardInputConfig->setInputMap(InputSemantic::RIGHT, InputRaw(TYPE_KEY, SDLK_RIGHT));
 
-	mNumPlayers = 0;
+	mKeyboardInputConfig->setInputMap(InputSemantic::BUTTON_A, InputRaw(TYPE_KEY,  SDLK_x));
+	mKeyboardInputConfig->setInputMap(InputSemantic::BUTTON_B, InputRaw(TYPE_KEY,  SDLK_z));
+	mKeyboardInputConfig->setInputMap(InputSemantic::BUTTON_X, InputRaw(TYPE_KEY,  SDLK_s));
+	mKeyboardInputConfig->setInputMap(InputSemantic::BUTTON_Y, InputRaw(TYPE_KEY,  SDLK_a));
 
-	for(int i = 0; i < mNumJoysticks; i++)
-	{
-		mInputConfigs[i]->setPlayerNum(-1);
-		string name = SDL_JoystickNameForIndex(i);
+	mKeyboardInputConfig->setInputMap(InputSemantic::BUTTON_L, InputRaw(TYPE_KEY,  SDLK_e));
+	mKeyboardInputConfig->setInputMap(InputSemantic::BUTTON_L2, InputRaw(TYPE_KEY,  SDLK_w));
+	mKeyboardInputConfig->setInputMap(InputSemantic::BUTTON_L3, InputRaw(TYPE_KEY,  SDLK_q));
+	mKeyboardInputConfig->setInputMap(InputSemantic::BUTTON_R, InputRaw(TYPE_KEY,  SDLK_r));
+	mKeyboardInputConfig->setInputMap(InputSemantic::BUTTON_R2, InputRaw(TYPE_KEY,  SDLK_t));
+	mKeyboardInputConfig->setInputMap(InputSemantic::BUTTON_R3, InputRaw(TYPE_KEY,  SDLK_y));
 
-		std::string config = SettingsController::getInstance().getStringProperty(name, "");
+	mKeyboardInputConfig->setInputMap(InputSemantic::SELECT, InputRaw(TYPE_KEY,  SDLK_SPACE));
+	mKeyboardInputConfig->setInputMap(InputSemantic::START, InputRaw(TYPE_KEY,  SDLK_RETURN));
+	mKeyboardInputConfig->setInputMap(InputSemantic::SYSTEM, InputRaw(TYPE_KEY,  SDLK_ESCAPE));
 
-		if(config.empty())
-		{
-			LOG(LogLevel::Warning, "Could not find configuration for joystick named \"" + name + "\"! Skipping it.\n");
-			continue;
-		}
-		
-		pugi::xml_document doc;
-		pugi::xml_parse_result res = doc.load(config.c_str());
-
-		pugi::xml_node node = doc.child("inputConfig");
-
-		string type = node.attribute("type").as_string();
-
-		if(type == "keyboard")
-		{
-			getInputConfigByDevice(DEVICE_KEYBOARD)->loadFromXML(node, mNumPlayers);
-			mNumPlayers++;
-		}else if(type == "joystick")
-		{
-			mInputConfigs[i]->loadFromXML(node, mNumPlayers);
-			mNumPlayers++;
-			break;
-
-		}else{
-			LOG(LogLevel::Warning, "Device type \"" + type + "\" unknown!\n");
-		}
-	}
-
-	if(mNumPlayers == 0)
-	{
-		LOG(LogLevel::Info, "No input configs loaded. Loading default keyboard config.");
-		loadDefaultConfig();
-	}
-
-	LOG(LogLevel::Info, "Loaded InputConfig data for " + to_string(getNumPlayers()) + " devices.");
+	mKeyboardInputConfig->PlayerNumber = 1;
 }
 
-//used in an "emergency" where no configs could be loaded from the InputController config file
-//allows the user to select to reconfigure in menus if this happens without having to delete es_input.cfg manually
-void InputController::loadDefaultConfig()
-{
-	InputConfig* cfg = getInputConfigByDevice(DEVICE_KEYBOARD);
-
-	mNumPlayers++;
-	cfg->setPlayerNum(0);
-	cfg->mapInput("up", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_UP, 1, true));
-	cfg->mapInput("down", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_DOWN, 1, true));
-	cfg->mapInput("left", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_LEFT, 1, true));
-	cfg->mapInput("right", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_RIGHT, 1, true));
-
-	cfg->mapInput("a", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_RETURN, 1, true));
-	cfg->mapInput("b", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_ESCAPE, 1, true));
-	cfg->mapInput("menu", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_F1, 1, true));
-	cfg->mapInput("select", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_F2, 1, true));
-	cfg->mapInput("pageup", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_RIGHTBRACKET, 1, true));
-	cfg->mapInput("pagedown", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_LEFTBRACKET, 1, true));
-
-	cfg->mapInput("mastervolup", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_PLUS, 1, true));
-	cfg->mapInput("mastervoldown", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_MINUS, 1, true));
-}
-
-void InputController::writeConfig()
-{
-
-	string path = getConfigPath();
-
-	pugi::xml_document doc;
-
-	pugi::xml_node root = doc.append_child("inputList");
-
-	mKeyboardInputConfig->writeToXML(root);
-	for(int i = 0; i < mNumJoysticks; i++)
-	{
-		mInputConfigs[i]->writeToXML(root);
-	}
-
-	doc.save_file(path.c_str());
-}
-
-string InputController::getConfigPath()
-{
-
-	string path = "";//TODO getHomePath();
-	path += "/.emulationstation/es_input.cfg";
-	return path;
-}
 
 void InputController::update()
 {

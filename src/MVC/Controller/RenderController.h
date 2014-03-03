@@ -46,6 +46,18 @@ namespace RetroEnd
 {
 	namespace Controller
 	{
+		class Timeout
+		{
+		public:
+			unsigned int Delay;
+			function<void ()> Callback;
+
+			Timeout(unsigned int delay, function<void ()> callback = [](){}) : Delay(delay), Callback(callback)
+			{
+
+			}
+		};
+
 		enum PopupMessageIcon
 		{
 			None,
@@ -102,7 +114,9 @@ namespace RetroEnd
 		
 			void pushPopupMessage(string message, PopupMessageIcon icon = PopupMessageIcon::None);
 
+			void setTimeout(unsigned int delay, function<void ()> callback);
 		private:
+			list<Timeout*> mTimeouts;
 			
 			queue<PopupMessage*> mPopupMessages;
 			void showPopupMessages();

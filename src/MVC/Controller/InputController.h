@@ -46,43 +46,35 @@ namespace RetroEnd
 				return instance;
 			}
 
+			//activation of the controller
 			void start();
 			void stop();
 			void update();
 
-			//EVENTS
+			//starts getting joystick events
+			void enableJoystickHandling();
+			void disableJoystickHandling();
 
+			//handle inputConfig creation
+			void addJoystick(int deviceID);		//deviceID is the Nth joystick in the system
+			void delJoystick(int joystickID);	//joystickID is the SDL ID of the opened SDL_Joystick
+
+			//EVENTS
 			Model::Observer<int> onControllerAdded;
 			Model::Observer<int> onControllerRemoved;
+			Model::Observer<Model::InputConfig* > onControllerNeedConfiguration;
 
 		protected:
 
 		private:
+			//analog to digital value limit
 			static const int DEADZONE = 23000;
-
-			void loadConfig();
-			void writeConfig();
-			static std::string getConfigPath();
-
-			void setNumPlayers(int num);
-			int getNumPlayers();
-
-			int getNumJoysticks();
-			int getButtonCountByDevice(int id);
 
 			bool parseEvent(const SDL_Event& ev);
 
-			Model::InputConfig* getInputConfigByPlayer(int player);
-			Model::InputConfig* getInputConfigByDevice(int device);
+			void loadDefaultKeyboardConfig();
 
-			void loadDefaultConfig();
-
-			void resetJoystickState();
-
-			int mNumJoysticks;
-			int mNumPlayers;
-			std::vector<SDL_Joystick*> mJoysticks;
-			std::map<SDL_JoystickID, Model::InputConfig*> mInputConfigs;
+			std::map<SDL_JoystickID, Model::InputConfig*> mPlayersConfig;
 
 			Model::InputConfig* mKeyboardInputConfig;
 
@@ -90,7 +82,7 @@ namespace RetroEnd
 			InputController mInstance();
 
 			//private instance costructor for Singleton Controller
-			InputController() : mKeyboardInputConfig(NULL), mNumJoysticks(0), mNumPlayers(0) { };
+			InputController() : mKeyboardInputConfig(NULL) { };
 			InputController(InputController const&);// Don't Implement
 			void operator=(InputController const&); // Don't implement
 			//---Singleton---

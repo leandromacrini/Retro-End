@@ -48,6 +48,7 @@ void GamingController::launchGame(Device& device, Game& game)
 		LOG(LogLevel::Info, "Starting game: " + game.Title);
 
 		onGameStart(game);
+		mIsPlaying = true;
 
 		//we must stop our SDL here
 		RenderController::getInstance().quitSDL();
@@ -63,12 +64,19 @@ void GamingController::launchGame(Device& device, Game& game)
 		RenderController::getInstance().initSDL();
 
 		LOG(LogLevel::Info, "Ended game: " + game.Title);
+
+		mIsPlaying = false;
 		onGameEnd(game);
 
 		//update number of times the game has been launched and the time
 		game.TimesPlayed++;
 		game.save();
 	}	
+}
+
+const bool GamingController::IsPlaying()
+{
+	return mIsPlaying;
 }
 
 //this function search for game files that are no more present on the disk

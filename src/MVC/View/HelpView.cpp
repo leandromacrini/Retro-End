@@ -66,9 +66,9 @@ HelpView::~HelpView()
 
 }
 
-bool HelpView::input(InputConfig* config, Model::Input input)
+bool HelpView::input(Model::Input input)
 {
-	if((input.id == 8 && input.type == TYPE_BUTTON && input.value == SDL_RELEASED))
+	if(input.Semantic == InputSemantic::SELECT && input.Value != SDL_RELEASED )
 	{
 		float H = (float) RenderController::getInstance().getScreenHeight();
 

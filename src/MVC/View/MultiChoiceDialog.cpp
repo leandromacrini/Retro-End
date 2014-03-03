@@ -70,22 +70,22 @@ void MultiChoiceDialog::move(int direction)
 	mValuesList->setSelectedIndex( mValuesList->getSelectedIndex() + direction );
 }
 
-bool MultiChoiceDialog::input(InputConfig* config, Input input)
+bool MultiChoiceDialog::input(Input input)
 {
 	//TODO input with settings
-	if(input.id == SDLK_UP && input.value != 0 )
+	if(input.Semantic == InputSemantic::UP && input.Value != SDL_RELEASED )
 	{
 		move(-1);
 		return true;
 	}
 
-	if(input.id == SDLK_DOWN && input.value != 0 )
+	if(input.Semantic == InputSemantic::DOWN && input.Value != SDL_RELEASED )
 	{
 		move(1);
 		return true;
 	}
 
-	if(input.id == SDLK_RETURN && input.value != 0 )
+	if(input.Semantic == InputSemantic::BUTTON_A && input.Value != SDL_RELEASED )
 	{
 		if(mCallback) mCallback(mValuesList->getSelectedIndex());
 		return true;

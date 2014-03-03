@@ -134,13 +134,30 @@ bool RenderController::isRunning()
 
 void RenderController::update()
 {
+	//if we are playing avoid any update
+	if(GamingController::getInstance().IsPlaying()) return;
+
 	//compute the delta time with last update
-	int curTime = SDL_GetTicks();
-	int deltaTime = curTime - mLastTime;
+	unsigned int curTime = SDL_GetTicks();
+	unsigned int deltaTime = curTime - mLastTime;
 	mLastTime = curTime;
 
 	//cap deltaTime at 1000
 	if(deltaTime > 1000 || deltaTime < 0) deltaTime = 1000;
+
+	//check timeouts
+	auto it = mTimeouts.begin();
+	while(it != mTimeouts.end())
+	{
+		if((*it)->Delay > deltaTime)
+		{
+			(*it)->Delay -= deltaTime;
+			it++;
+		} else {
+			(*it)->Callback();
+			it = mTimeouts.erase(it);
+		}
+	}
 
 	//update the main window
 	mainWindow->update(deltaTime);
@@ -174,6 +191,10 @@ int RenderController::getScreenHeight()
 	return display_height;
 }
 
+void RenderController::setTimeout(unsigned int delay, function<void ()> callback)
+{
+	mTimeouts.push_back(new Timeout(delay, callback));
+}
 
 void RenderController::pushPopupMessage(string message, PopupMessageIcon icon)
 {
@@ -209,32 +230,35 @@ void RenderController::showPopupMessages()
 	float W = (float)RenderController::getInstance().getScreenWidth();
 
 	//DRAW MESSAGE
-	BaseView* container = new BaseView();
-	container->setSize( W, H/6 );
-	container->setPosition( 0, 0);
+	Image* container = new Image();
+	container->setSize( W/2, H/6 );
+	container->setPosition( W/4, H/24);
 	container->setOpacity(0);
-	container->setBackgroundColor(0x2B7295FF);
+	container->setPath("data/images/message.png");
 
 	float leftMargin = 0;
 
 	if(popup->Icon != PopupMessageIcon::None)
 	{
+		leftMargin = H/6;
+
 		Image* icon = new Image();
 		icon->setPath("data/images/" + PopupMessageIconPath[popup->Icon]);
-		icon->setSize(H/6, H/6);
+		icon->setSize(leftMargin, leftMargin);
 		icon->setPosition( 0, 0);
 		container->addChild(icon);
 
-		leftMargin = H/6;
+		
 	}
 
 	Label* text = new Label();
 	text->setColor(0xFFFFFFFF);
-	text->setSize( W - leftMargin, 0 );
+	text->setSize( W/2 - leftMargin, 0 );
 	text->setText(popup->Message);
 	text->setPosition( leftMargin, (H/6 - text->getSize().y()) / 2 );
 	text->WrapText = true;
-	text->HorizontalTextAlign = TextAlign::Left;
+	text->HorizontalTextAlign = TextAlign::Center;
+	text->setFont(Font::get("data/fonts/eurof35.ttf", FONT_SIZE_MEDIUM));
 
 	container->addChild(text);
 
@@ -299,7 +323,7 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
 #endif   
 
-#ifdef _DEBUG
+#ifdef _DEBUG_
 	display_width = 1280;
 	display_height = 720;
 

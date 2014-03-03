@@ -16,6 +16,7 @@
 #include "MVC/Controller/ResourceController.h"
 #include "MVC/Controller/ScraperController.h"
 #include "MVC/Controller/SettingsController.h"
+#include "MVC/Controller/SocialController.h"
 
 ///////////////////////////////////////////
 
@@ -56,6 +57,7 @@ void onStart()
 	Controller::ScraperController::getInstance().start();
 	Controller::InputController::getInstance().start();
 	Controller::AudioController::getInstance().start();
+	Controller::SocialController::getInstance().start();
 }
 
 //called on exit
@@ -72,6 +74,7 @@ void onExit()
 	Controller::AudioController::getInstance().stop();
 	Controller::InputController::getInstance().stop();
 	Controller::RenderController::getInstance().stop();
+	Controller::SocialController::getInstance().stop();
 	
 	LOG(LogLevel::Info,  "***** RETRO-END IS CLOSING *****");
 

@@ -14,7 +14,6 @@ using namespace RetroEnd::View;
 using namespace RetroEnd::Model;
 using namespace RetroEnd::Controller;
 
-ListView* myList;
 
 TestWindow::TestWindow()
 {	
@@ -35,17 +34,11 @@ TestWindow::TestWindow()
 	title->setColor(0x000000FF);
 
 	this->addChild(title);
-
-	//Show Consoles
-	mConsoleView = new ConsoleView(); //pre load images
-	mConsoleView->setSize((float)RenderController::getInstance().getScreenWidth(), (float)RenderController::getInstance().getScreenHeight());
-	mConsoleView->setPosition(0,0);
-	addChild(mConsoleView);
 }
 
-bool TestWindow::input(Model::InputConfig* config, Model::Input input)
+bool TestWindow::input(Model::Input input)
 {
-	if(input.id == SDLK_p && input.value != 0 )
+	if(input.RawData.ValueID == SDLK_p && input.Value != 0 )
 	{
 		RenderController::getInstance().pushPopupMessage("Miao testo lungo lungo lungo lungo lungo lungo lungo lungo lungo!", PopupMessageIcon::Info);
 		return true;
@@ -54,7 +47,7 @@ bool TestWindow::input(Model::InputConfig* config, Model::Input input)
 	//set input only to the last view added
 	if(mChildren.size() > 0)
 	{
-		mChildren.at(mChildren.size() - 1)->input(config, input);
+		mChildren.at(mChildren.size() - 1)->input(input);
 	}
 	return true;
 }

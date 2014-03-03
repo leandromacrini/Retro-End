@@ -28,7 +28,7 @@ namespace RetroEnd
 			HelpView(HelpScreen screen);
 			~HelpView();
 
-			bool input(Model::InputConfig* config, Model::Input input) override;
+			bool input(Model::Input input) override;
 
 		private:
 			Image* mBack;
