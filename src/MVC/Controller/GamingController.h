@@ -39,7 +39,9 @@ namespace RetroEnd
 			}
 			void start();
 
-			void launchGame(Model::Device& device, Model::Game& game);
+			void launchSingleGame(Model::Device& device, Model::Game& game);
+			void launchNetplayGameServer(Model::Device& device, Model::Game& game, int port);
+			void launchNetplayGameClient(Model::Device& device, Model::Game& game, int port, string& server);
 			
 			void checkNewGamesAvailability(vector<Model::Game>& result);
 			void checkOldGamesAvailability(vector<Model::Game>& result);
@@ -55,6 +57,7 @@ namespace RetroEnd
 		protected:
 
 		private:
+			void launchRetroarch(string& command, Model::Game);
 			bool mIsPlaying;
 
 			GamingController mInstance();

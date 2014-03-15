@@ -7,17 +7,20 @@ using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
 BaseView::BaseView() : 
+	debugName(typeid(this).name()),
 	mParent(NULL),
 	mOpacity(255),
 	mPosition(Eigen::Vector3f::Zero()),
 	mSize(Eigen::Vector2f(1,1)), //SIZE MUST NEVER BE ZERO WHEN RENDERED
 	mAnimation(NULL),
-	mBackgroundColor(0x00000000),
-	mSelectedBackgroundColor(0x00000000),
-	mSelected(false)
+	mMarkerdToDelete(false),
+	BackgroundColor(0x00000000),
+	Focused(false),
+	Focusable(false),
+	FocusIndex(0),
+	Visible(true)
 {
-
-	Visible = true;
+	
 }
 
 BaseView::~BaseView()
@@ -39,7 +42,7 @@ void BaseView::update(unsigned int deltaTime)
 	if( !delayed && mAnimation)
 	{
 		//Moving
-		if(mAnimation->moveOffset)
+		if(mAnimation->moveOffset.is_initialized())
 		{
 			float deltaX = mAnimation->moveOffset->x() * deltaTime / ( mAnimation->millisDuration > 0? mAnimation->millisDuration : 1 );
 			float deltaY = mAnimation->moveOffset->y() * deltaTime / ( mAnimation->millisDuration > 0? mAnimation->millisDuration : 1 );
@@ -53,11 +56,11 @@ void BaseView::update(unsigned int deltaTime)
 		}
 
 		//fading
-		if(mAnimation->newOpacity && *mAnimation->newOpacity != mOpacity)
+		if(mAnimation->newOpacity.is_initialized() && *mAnimation->newOpacity != mOpacity)
 		{
 			if(mAnimation->millisDuration == 0)
 			{
-				mOpacity =  *mAnimation->newOpacity;
+				mOpacity = *mAnimation->newOpacity;
 			}
 			else 
 			{
@@ -71,7 +74,7 @@ void BaseView::update(unsigned int deltaTime)
 		}
 
 		//scaling
-		if(mAnimation->newSize && *mAnimation->newSize != mSize)
+		if(mAnimation->newSize.is_initialized() && *mAnimation->newSize != mSize)
 		{
 			if(mAnimation->millisDuration == 0)
 			{
@@ -98,7 +101,7 @@ void BaseView::update(unsigned int deltaTime)
 			delete mAnimation;
 			mAnimation = NULL;
 
-			callback();
+			if(callback)callback();
 		}
 		else
 		{
@@ -106,9 +109,24 @@ void BaseView::update(unsigned int deltaTime)
 		}
 	}
 
+	//first update all children
 	for(unsigned int i = 0; i < getChildCount(); i++)
 	{
 		getChild(i)->update(deltaTime);
+	}
+
+	//then check id some must be deleted
+	for(auto it = mChildren.begin(); it != mChildren.end(); /*don't increment iterator here*/)
+	{
+		BaseView* child = *it;
+		if( (*it)->mMarkerdToDelete )
+		{
+			it = mChildren.erase(it);
+			delete child;
+			continue;
+		}
+
+		it++;
 	}
 }
 
@@ -120,13 +138,11 @@ Eigen::Vector3f BaseView::getPosition() const
 void BaseView::setPosition(const Eigen::Vector3f& offset)
 {
 	mPosition = offset;
-	onPositionChanged();
 }
 
 void BaseView::setPosition(float x, float y, float z)
 {
 	mPosition << x, y, z;
-	onPositionChanged();
 }
 
 Eigen::Vector2f BaseView::getSize() const
@@ -156,34 +172,6 @@ void BaseView::setOpacity(unsigned char opacity)
 	mOpacity = opacity;
 }
 
-unsigned int BaseView::getBackgroundColor() const
-{
-	return mBackgroundColor;
-}
-
-void BaseView::setBackgroundColor(unsigned int color)
-{
-	mBackgroundColor = color;
-}
-
-unsigned int BaseView::getSelectedBackgroundColor() const
-{
-	return mSelectedBackgroundColor;
-}
-
-void BaseView::setSelectedBackgroundColor(unsigned int color)
-{
-	mSelectedBackgroundColor = color;
-}
-void BaseView::setSelected(bool selected)
-{
-	mSelected = selected;
-}
-bool BaseView::getSelected() const
-{
-	return mSelected;
-}
-
 const Eigen::Affine3f BaseView::getTransform()
 {
 	mTransform.setIdentity();
@@ -203,19 +191,16 @@ void BaseView::addChild(BaseView* cmp)
 //this function remove the child from the vector and call delete on it
 void BaseView::removeChild(BaseView* cmp)
 {
-	vector<BaseView*>::iterator it = find(mChildren.begin(), mChildren.end(), cmp);
-	if(it != mChildren.end())
-	{
-		mChildren.erase(it);
-		//delete cmp; //TODO Check if many errors from "update" come from this
-	}
+	//to avoid errors after animations or from other thread
+	//mark the view to be deleted from the parent into the update method
+	cmp->mMarkerdToDelete = true;
 }
 
 void BaseView::removeAllChildren()
 {
-	while(mChildren.size() > 0)
+	for(auto it = mChildren.begin(); it != mChildren.end(); it++)
 	{
-		removeChild(mChildren.at(0));
+		removeChild(*it);
 	}
 }
 
@@ -255,10 +240,10 @@ bool BaseView::input(Input input)
 {
 	for(unsigned int i = 0; i < getChildCount(); i++)
 	{
-		if(getChild(i)->input(input))
-			return true;
+		BaseView* child = mChildren[i];
+		
+		if(mChildren[i]->input(input)) return true;
 	}
-
 	return false;
 }
 
@@ -351,18 +336,119 @@ void BaseView::render(const Eigen::Affine3f& parentTrans)
 	}
 }
 
+void BaseView::focusPrev()
+{
+	if(mChildren.size() == 0) return;
+
+	map<Uint32, BaseView*> indexMap;
+	Uint32 lastFocusedIndex = MAXUINT32;
+
+	//blur all child, map indexes and find the last focused child
+	for( auto it = mChildren.begin(); it != mChildren.end(); it++)
+	{
+		BaseView* child = *it;
+		if( child->Focusable)
+		{
+			indexMap[child->FocusIndex] = child;
+
+			if(child->Focused)
+			{
+				lastFocusedIndex = child->FocusIndex;
+				child->Focused = false;
+			}
+		}
+	}
+
+	//if none is focusable we have done
+	if(indexMap.size() == 0) return;
+
+	auto it = indexMap.find(lastFocusedIndex);
+
+	if(it != indexMap.end())
+	{
+		BaseView* current = it->second;
+
+		if((--it) != indexMap.end())
+		{
+			//we have prev child, focus it
+			it->second->Focused = true;
+		}
+		else
+		{
+			//we have only the crrent focus item, leave it focused
+			current->Focused = true;
+		}
+	}
+	else if(lastFocusedIndex == MAXUINT32)
+	{
+		//focus the first index if none was focused
+		indexMap.begin()->second->Focused = true;
+	}
+}
+
+void BaseView::focusNext()
+{
+	if(mChildren.size() == 0) return;
+
+	map<Uint32, BaseView*> indexMap;
+	Uint32 lastFocusedIndex = MAXUINT32;
+
+	//blur all child, map indexes and find the last focused child
+	for( auto it = mChildren.begin(); it != mChildren.end(); it++)
+	{
+		BaseView* child = *it;
+		if( child->Focusable)
+		{
+			indexMap[child->FocusIndex] = child;
+
+			if(child->Focused)
+			{
+				lastFocusedIndex = child->FocusIndex;
+				child->Focused = false;
+			}
+		}
+	}
+
+	//if none is focusable we have done
+	if(indexMap.size() == 0) return;
+
+	auto it = indexMap.find(lastFocusedIndex);
+
+	if(it != indexMap.end())
+	{
+		BaseView* current = it->second;
+
+		if((++it) != indexMap.end())
+		{
+			//we have next child, focus it
+			it->second->Focused = true;
+		}
+		else
+		{
+			//we have only the crrent focus item, leave it focused
+			current->Focused = true;
+		}
+	}
+	else if(lastFocusedIndex == MAXUINT32)
+	{
+		//focus the first index if none was focused
+		indexMap.begin()->second->Focused = true;
+	}
+}
+
 void BaseView::draw()
 {
 	//compute background colors with color's alpha and view opacity
 	unsigned char absOpacity = getAbsoluteOpacity();
-	int color = (mBackgroundColor>>8<<8) | (int)((mBackgroundColor & 0x000000FF) * (float)absOpacity / 255) ;
-	int selectedColor = (mSelectedBackgroundColor>>8<<8) | (int)((mBackgroundColor & 0x000000FF) * (float)absOpacity / 255);
+	int color = (BackgroundColor>>8<<8) | (int)((BackgroundColor & 0x000000FF) * (float)absOpacity / 255) ;
+	int focusedColor = FocusedBackgroundColor.is_initialized()? ((*FocusedBackgroundColor)>>8<<8) | (int)((*FocusedBackgroundColor & 0x000000FF) * (float)absOpacity / 255) : 0;
 
 	//draw background rectangle
 	//at position + parent position
 	//of given size
+	Eigen::Vector3f absPos = getAbsolutePosition();
 	RenderController::drawRect(
-		(int)getAbsolutePosition().x(), (int)getAbsolutePosition().y(),
+		(int)absPos.x(), (int)absPos.y(),
 		(int)mSize.x(), (int)mSize.y(),
-		mSelected? selectedColor : color);
+		Focused && FocusedBackgroundColor.is_initialized()? focusedColor : color);
 }

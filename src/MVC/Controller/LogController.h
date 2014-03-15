@@ -12,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <iostream>
+#include <mutex>
 
 #include "BaseController.h"
 
@@ -55,6 +56,7 @@ namespace RetroEnd
 		protected:
 
 		private:
+			recursive_mutex mMutex;
 			LogLevel mReportingLevel;
 			FILE* mLogFile;
 

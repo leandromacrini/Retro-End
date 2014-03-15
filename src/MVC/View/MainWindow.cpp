@@ -9,6 +9,7 @@
 #include "GamesView.h"
 #include "ScrapeView.h"
 #include "HelpView.h"
+#include "NetplayView.h"
 #include "InputConfigurationView.h"
 
 #include "../Controller/AudioController.h"
@@ -40,6 +41,9 @@ MainWindow::MainWindow() : mScrapeComplete(false), mScrapeView(NULL)
 		InputConfigurationView* view = new InputConfigurationView(config);
 		addChild(view);
 	};
+
+	//activate Social Controller
+	SocialController::getInstance().activate();
 
 	showLogo();
 }
@@ -171,6 +175,12 @@ void MainWindow::showLogo()
 			addChild(help);
 		};
 
+		games->onOpenNetplayScreen += [this] (NetplayRequest request)
+		{
+			NetplayView* netplay = new NetplayView(request);
+			addChild(netplay);
+		};
+
 		addChild(games);
 	};
 
@@ -182,10 +192,10 @@ void MainWindow::showLogo()
 	};
 
 	((ConsoleView*)mConsoleView)->onOpenConsoleHelpScreen += [this] (int)
-		{
-			HelpView* help = new HelpView(HelpScreen::CONSOLE_HELP);
-			addChild(help);
-		};
+	{
+		HelpView* help = new HelpView(HelpScreen::CONSOLE_HELP);
+		addChild(help);
+	};
 	
 	Image* logo = new Image();
 	logo->setSize((float)RenderController::getInstance().getScreenWidth()/2, (float)RenderController::getInstance().getScreenHeight() / 2);
@@ -205,13 +215,13 @@ void MainWindow::showLogo()
 		Animation* a = new Animation();
 
 		a->millisDuration = 2000;
-		a->newOpacity = new unsigned char(255);
+		a->newOpacity = 255;
 		a->endCallback = [this, logo] ()
 		{
 			Animation* a = new Animation();
 			a->millisDuration = 1000;
-			a->newSize = new Eigen::Vector2f((float)RenderController::getInstance().getScreenWidth()/5, (float)RenderController::getInstance().getScreenHeight() / 5);
-			a->moveOffset = new Eigen::Vector3f((float)RenderController::getInstance().getScreenWidth()/2, (float)-RenderController::getInstance().getScreenHeight() / 4, 0);
+			a->newSize = Eigen::Vector2f((float)RenderController::getInstance().getScreenWidth()/5, (float)RenderController::getInstance().getScreenHeight() / 5);
+			a->moveOffset = Eigen::Vector3f((float)RenderController::getInstance().getScreenWidth()/2, (float)-RenderController::getInstance().getScreenHeight() / 4, 0);
 			a->endCallback =  [this] ()
 			{
 				//Show Consoles
@@ -221,17 +231,17 @@ void MainWindow::showLogo()
 				addChild(mConsoleView);
 
 				Animation* a = new Animation();
-
 				a->millisDuration = 1000;
-				a->newOpacity = new unsigned char(255);
+				a->newOpacity = 255;
 				a->endCallback = [this] ()
 				{
 					//tell inputcontroller to start handling controllers
 					InputController::getInstance().enableJoystickHandling();
-
-					//activate SocialController
-					//SocialController::getInstance().activate();
-					//SocialController::getInstance().doLogin("leon", "homerj2");
+					SocialController::getInstance().doLogin("leon", "homerj2");
+					SocialController::getInstance().onDoneLogin += [this] (SocialBoolResponse r)
+					{
+						SocialController::getInstance().doGetFriends();
+					};
 					
 					//async check if old games are still available
 					checkForOldGames();

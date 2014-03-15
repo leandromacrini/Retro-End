@@ -28,6 +28,7 @@
 
 #include <Eigen/Dense>
 #include <stack>
+#include <mutex>
 
 #include "BaseController.h"
 #include "LogController.h"
@@ -37,7 +38,6 @@
 #include "../View/BaseView.h"
 #include "../View/MainWindow.h"
 #include "../View/TestWindow.h"
-
 
 using namespace std;
 using namespace RetroEnd;
@@ -111,15 +111,19 @@ namespace RetroEnd
 			static void setMatrix(const Eigen::Affine3f& transform);
 			static void setColor4bArray(GLubyte* array, unsigned int color);
 			static void buildGLColorArray(GLubyte* ptr, unsigned int color, unsigned int vertCount);
+			static void buildImageArray(float x, float y, GLfloat* points, GLfloat* texs, Eigen::Vector2f size, float percentageX = 1, float percentageY = 1); //writes 12 GLfloat points and 12 GLfloat texture coordinates to a given array at a given position
+			static void drawImageArray(GLuint textureID, GLfloat* points, GLfloat* texs, GLubyte* colors, unsigned int count = 6); //draws the given set of points and texture coordinates, number of coordinate pairs may be specified (default 6)
 		
 			void pushPopupMessage(string message, PopupMessageIcon icon = PopupMessageIcon::None);
 
 			void setTimeout(unsigned int delay, function<void ()> callback);
 		private:
+			recursive_mutex mMutex;
 			list<Timeout*> mTimeouts;
 			
-			queue<PopupMessage*> mPopupMessages;
+			queue<PopupMessage> mPopupMessages;
 			void showPopupMessages();
+			bool mNeedShowPopupMessage;
 			bool mShowingPopupMessage;
 
 			int display_width;
@@ -139,7 +143,7 @@ namespace RetroEnd
 			//---Singleton---
 			RenderController mInstance();
 
-			RenderController() : mLastTime(0), mPopupView(NULL) { }; //private instance costructor for Singleton Controller
+			RenderController() : mLastTime(0), mPopupView(NULL), mShowingPopupMessage(false), mNeedShowPopupMessage(false) { }; //private instance costructor for Singleton Controller
 
 			RenderController(RenderController const&);// Don't Implement
 			void operator=(RenderController const&); // Don't implement

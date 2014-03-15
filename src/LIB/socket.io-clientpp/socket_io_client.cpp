@@ -10,8 +10,8 @@
 #include "socket_io_client.hpp"
 
 // Comment this out to disable handshake logging to stdout
-#define LOG(x) std::cout << x
-//#define LOG(x)
+//#define LOG(x) std::cout << x
+#define LOG(x)
 
 using socketio::socketio_client_handler;
 using socketio::socketio_events;
@@ -193,6 +193,7 @@ std::string socketio_client_handler::perform_handshake(std::string url, std::str
 	std::stringstream iouri;
 	iouri << "ws://" << uo.get_host() << ":" << uo.get_port() << socketIoResource << "/1/websocket/" << m_sid;
 	m_socketIoUri = iouri.str();
+
 	return m_socketIoUri;
 }
 

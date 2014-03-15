@@ -98,7 +98,7 @@ Font::Font(const string& path, int size) : fontScale(1.0f), mSize(size), mPath(p
 
 Font::~Font()
 {
-	LOG(LogLevel::Info, "Destroying font \"" + mPath + "\" with size " + to_string( mSize ) + ".");
+	LOG(LogLevel::Debug, "Destroying font \"" + mPath + "\" with size " + to_string( mSize ) + ".");
 	deinit();
 }
 

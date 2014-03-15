@@ -1,11 +1,16 @@
 #pragma once
 
 #include "BaseView.h"
+
 #include "Image.h"
 
-#include "../Model/Font.h"
 #include "../Model/Game.h"
+#include "../Model/Font.h"
+#include "../Model/Observer.h"
+#include "../Model/Sound.h"
 #include "../Model/TextureResource.h"
+
+#define MOVE_DELAY 150
 
 namespace RetroEnd
 {
@@ -46,9 +51,25 @@ namespace RetroEnd
 			//SETTINGS
 			TextAlign HorizontalTextAlign;
 
-			//DRAW OVERRIDE
+			//OVERRIDES
 			void draw() override;
+			bool input(Model::Input input) override;
+			void update(unsigned int deltaTime) override;
+
+			//EVENTS
+			Model::Observer<Model::Game> onItemPressed;
+			Model::Observer<int> onSelectedItemChanged;
+			Model::Observer<int> onFastMoved;
 		private:
+			shared_ptr<Model::Sound> mMoveSound;
+			shared_ptr<Model::Sound> mSelectSound;
+
+			int mMoving; // 1 Next | 0 Stop | -1 Prev
+			clock_t mLastCheck;
+			clock_t mStartedMoving;
+			void startMoving(int direction); // 1 Next | -1 Prev
+			void stopMoving();
+
 			int firstRow;
 			int lastRow;
 			int mSelectedIndex;

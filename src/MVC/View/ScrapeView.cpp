@@ -16,7 +16,7 @@ ScrapeView::ScrapeView(vector<Game>& games) : BaseView(), mGames(games)
 
 	//dark background
 	mSize = Eigen::Vector2f(W,H);
-	mBackgroundColor = 0x1d1d1d99;
+	BackgroundColor = 0x1d1d1d99;
 
 	//show loading dialog
 	mDialog = new MessageDialog();

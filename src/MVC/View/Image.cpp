@@ -97,65 +97,12 @@ void Image::draw()
 			float yCount = mSize.y() / getTextureSize().y();
 			
 			RenderController::buildGLColorArray(colors, 0xFFFFFF00 | getAbsoluteOpacity(), 6);
-			buildImageArray(getAbsolutePosition().x(), getAbsolutePosition().y(), points, texs, xCount, yCount);
+			RenderController::buildImageArray(getAbsolutePosition().x(), getAbsolutePosition().y(), points, texs, mSize, xCount, yCount);
 		}else{
 			RenderController::buildGLColorArray(colors, 0xFFFFFF00 | getAbsoluteOpacity(), 6);
-			buildImageArray(getAbsolutePosition().x(), getAbsolutePosition().y(), points, texs);
+			RenderController::buildImageArray(getAbsolutePosition().x(), getAbsolutePosition().y(), points, texs, mSize);
 		}
 
-		drawImageArray(points, texs, colors, 6);
+		RenderController::drawImageArray(mTexture->getTextureID(), points, texs, colors, 6);
 	}
-}
-
-void Image::buildImageArray(float posX, float posY, GLfloat* points, GLfloat* texs, float px, float py)
-{
-	points[0]  = posX;				points[1]  = posY;
-	points[2]  = posX;				points[3]  = posY + mSize.y();
-	points[4]  = posX + mSize.x();	points[5]  = posY;
-
-	points[6]  = posX + mSize.x();	points[7]  = posY;
-	points[8]  = posX;				points[9]  = posY + mSize.y();
-	points[10] = posX + mSize.x();	points[11] = posY + mSize.y();
-
-
-
-	texs[0] = 0;		texs[1] = py;
-	texs[2] = 0;		texs[3] = 0;
-	texs[4] = px;		texs[5] = py;
-
-	texs[6] = px;		texs[7] = py;
-	texs[8] = 0;		texs[9] = 0;
-	texs[10] = px;		texs[11] = 0;
-}
-
-void Image::drawImageArray(GLfloat* points, GLfloat* texs, GLubyte* colors, unsigned int numArrays)
-{
-	mTexture->bind();
-
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	if(colors != NULL)
-	{
-		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
-	}
-
-	glVertexPointer(2, GL_FLOAT, 0, points);
-	glTexCoordPointer(2, GL_FLOAT, 0, texs);
-
-	glDrawArrays(GL_TRIANGLES, 0, numArrays);
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	if(colors != NULL)
-		glDisableClientState(GL_COLOR_ARRAY);
-
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);
 }

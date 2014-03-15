@@ -55,7 +55,6 @@ namespace RetroEnd
 			int mCurrentFrame, mFrameDuration, mTimeElapsedFromLastFrame, mFrameCount;
 
 			void buildImageArray(float x, float y, GLfloat* points, GLfloat* texs); //writes 12 GLfloat points and 12 GLfloat texture coordinates to a given array at a given position
-			void drawImageArray(GLfloat* points, GLfloat* texs, GLubyte* colors, unsigned int count = 6); //draws the given set of points and texture coordinates, number of coordinate pairs may be specified (default 6)
 		};
 	}
 }

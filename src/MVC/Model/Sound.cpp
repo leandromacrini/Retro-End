@@ -85,7 +85,7 @@ void Sound::play()
 	SDL_UnlockAudio();
 
 	//tell the AudioManager to start playing samples
-	AudioController::getInstance().startPlaySamples();
+	AudioController::getInstance().activate();
 }
 
 bool Sound::isPlaying() const

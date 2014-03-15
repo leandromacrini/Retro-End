@@ -29,6 +29,7 @@ namespace RetroEnd
 			TYPE_BUTTON,
 			TYPE_HAT,
 			TYPE_KEY,
+			TYPE_TEXT,
 			TYPE_UNKNOWN
 		};
 
@@ -52,6 +53,7 @@ namespace RetroEnd
 			BUTTON_R2,
 			BUTTON_R3,
 			SYSTEM,
+			TEXT_INPUT,
 			UNMAPPED
 		};
 

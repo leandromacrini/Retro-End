@@ -1,8 +1,14 @@
 #pragma once
 
+#include "../../globals.h"
+
+#include "../Model/Observer.h"
+#include "../Model/Font.h"
+
 #include "BaseView.h"
 #include "Image.h"
-#include "../Model/Font.h"
+
+#define MOVE_DELAY 150
 
 namespace RetroEnd
 {
@@ -20,10 +26,13 @@ namespace RetroEnd
 
 			void removeAllRows();
 
+			void setAllRows(vector<string>* values);
+
 			unsigned int countRow();
 
 			void setSelectedIndex(int index);
 			unsigned int getSelectedIndex();
+			string getSelectedTitle();
 
 			//ROW ITEM COLORS
 
@@ -40,15 +49,31 @@ namespace RetroEnd
 
 			//FONTS
 
-			std::shared_ptr<Model::Font> ItemFont;
+			shared_ptr<Model::Font> getFont() const;
+			void setFont(shared_ptr<Model::Font>);
 
 			//SETTINGS
 			TextAlign HorizontalTextAlign;
 
-			//DRAW OVERRIDE
-
+			//OVERRIDES
 			void draw() override;
+			bool input(Model::Input input) override;
+			void update(unsigned int deltaTime) override;
+
+			//EVENTS
+			Model::Observer<unsigned int> onItemPressed;
+			Model::Observer<int> onSelectedItemChanged;
+			Model::Observer<int> onFastMoved;
+
 		private:
+			std::shared_ptr<Model::Font> mFont;
+
+			int mMoving; // 1 Next | 0 Stop | -1 Prev
+			clock_t mLastCheck;
+			clock_t mStartedMoving;
+			void startMoving(int direction); // 1 Next | -1 Prev
+			void stopMoving();
+
 			int firstRow;
 			int lastRow;
 			vector<string> mItems;

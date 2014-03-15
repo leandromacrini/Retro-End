@@ -90,7 +90,6 @@ void InputController::addJoystick(int deviceID)
 
 	config->Joystick = joy;
 	
-	//TODO loadConfig(); re do this
 	mPlayersConfig[joyId] = config;
 
 	config->PlayerNumber = mPlayersConfig.size();
@@ -209,6 +208,8 @@ bool InputController::parseEvent(const SDL_Event& ev)
 	case SDL_KEYUP:
 	case SDL_KEYDOWN:
 		{
+			if(ev.key.repeat) break;
+
 			if(ev.key.keysym.sym == SDLK_F4)
 			{
 				SDL_Event* quit = new SDL_Event();
@@ -226,7 +227,11 @@ bool InputController::parseEvent(const SDL_Event& ev)
 			mWindow->input(Input(ev.key.state, mKeyboardInputConfig->PlayerNumber, semantic, raw.Type, raw.ValueID, ev.key.timestamp));
 			return true;
 		}
-	
+	case SDL_TEXTINPUT:
+		{
+			onTextInputReceived(ev.text.text);
+			return true;
+		}
 	case SDL_JOYDEVICEADDED:
 		{
 			addJoystick(ev.jdevice.which);
@@ -238,6 +243,7 @@ bool InputController::parseEvent(const SDL_Event& ev)
 			return true;
 		}
 	}
+
 
 	return false;
 }

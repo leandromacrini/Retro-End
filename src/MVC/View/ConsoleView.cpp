@@ -99,7 +99,7 @@ ConsoleView::ConsoleView() : mAnimating(false), mContainer(new BaseView()), mCur
 	//fade id
 	Animation* a = new Animation();
 	a->millisDuration = 2000;
-	a->newOpacity = new unsigned char(255);
+	a->newOpacity = 255;
 	this->animate(a);
 
 	Sprite* help = new Sprite();
@@ -169,18 +169,18 @@ void ConsoleView::move(int direction)
 
 	Animation* a = new Animation();
 	a->millisDuration = 500;
-	a->moveOffset = new Eigen::Vector3f(0, -direction*H, 0);
+	a->moveOffset = Eigen::Vector3f(0, -direction*H, 0);
 	mContainer->animate(a);
 
 	Animation* b = new Animation();
 	b->millisDuration = 400;
-	b->newOpacity = new unsigned char(0);
+	b->newOpacity = 0;
 	b->endCallback = [&] () {
 		updateCurrentConsoleData();
 
 		Animation* c = new Animation();
 		c->millisDuration = 100;
-		c->newOpacity = new unsigned char(255);
+		c->newOpacity = 255;
 		mInfoContainer->animate(c);
 	};
 
@@ -192,7 +192,6 @@ void ConsoleView::move(int direction)
 
 bool ConsoleView::input(Model::Input input)
 {
-	//TODO input from settings
 	if(input.Semantic == InputSemantic::DOWN && input.Value != SDL_RELEASED )
 	{
 		move(1);

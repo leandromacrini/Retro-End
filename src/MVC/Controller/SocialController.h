@@ -12,7 +12,6 @@
 #include "LogController.h"
 #include "RenderController.h"
 
-#include "../Model/User.h"
 #include "../Model/Observer.h"
 
 using socketio::socketio_client_handler;
@@ -24,8 +23,66 @@ using namespace socketio;
 
 namespace RetroEnd
 {
+	namespace Model
+	{
+		struct User
+		{
+			string ID;
+			string Username;
+			string Password;
+			string FirstName;
+			string LastName;
+			string EMail;
+
+			string NetAddress;
+			Uint32 NetPort;
+
+			bool IsOnline;
+
+			User() : NetPort(55435), IsOnline(false)
+			{
+
+			}
+		};
+	}
+
 	namespace Controller
 	{
+		struct SocialBoolResponse
+		{
+			bool Success;
+			string Description;
+
+			SocialBoolResponse(bool success, string description) : Success(success), Description(description) { }
+		};
+
+		struct SocialUserResponse
+		{
+			bool Success;
+			string Description;
+			Model::User UserData;
+
+			SocialUserResponse(bool success, string description, Model::User user) : Success(success), Description(description), UserData(user) { }
+		};
+
+		struct SocialUserListResponse
+		{
+			bool Success;
+			string Description;
+			vector<Model::User> Users;
+
+			SocialUserListResponse(bool success, string description, vector<Model::User> users) : Success(success), Description(description), Users(users) { }
+		};
+
+		struct SocialInvitationRequest
+		{
+			string Username;
+			bool IsLocal;
+			string LocalAddress;
+			string WebAddress;
+			Uint32 Port;
+		};
+
 		class SocialController : public BaseController
 		{
 
@@ -43,7 +100,9 @@ namespace RetroEnd
 			void deactivate();
 
 			const Model::User getLocalPlayer();
-			const vector<Model::User> getFriends();
+			const vector<Model::User> getSocialFriends();
+			const vector<Model::User> getSocialRequests();
+			const bool getIsLogged();
 
 			//async methods
 			void doLogin(string username, string password);
@@ -57,35 +116,43 @@ namespace RetroEnd
 			void doAddFriend(Model::User user);
 			void doDelFriend(Model::User user);
 			void doApproveFriend(Model::User user);
-			void doUpdateFriends();
+			void doGetFriends();
 
-			void doSendPlayInvitation(Model::User user);
-			void doAnswerPlayInvitation(Model::User user);
+			void doSendPlayInvitation(Model::User user, bool local);
+			void doAnswerPlayInvitation(Model::User user, bool answer, string reason);
 
 			//EVENTS
 
-			Model::Observer<int> onDoneLogin;
-			Model::Observer<int> onDoneLogout;
+			Model::Observer<SocialBoolResponse> onDoneLogin;
+			Model::Observer<SocialBoolResponse> onDoneLogout;
 
-			Model::Observer<Model::User> onDoneGetUser;
-			Model::Observer<Model::User> onDoneAddUser;
-			Model::Observer<Model::User> onDoneDelUser;
-			Model::Observer<vector<Model::User>> onDoneSearchUsers;
+			Model::Observer<SocialUserResponse> onDoneGetUser;
+			Model::Observer<SocialUserResponse> onDoneAddUser;
+			Model::Observer<SocialBoolResponse> onDoneDelUser;
+			Model::Observer<SocialUserListResponse> onDoneSearchUsers;
 
-			Model::Observer<int> onDoneAddFriend;
-			Model::Observer<int> onDoneDelFriend;
-			Model::Observer<int> onDoneApproveFriend;
-			Model::Observer<vector<Model::User>> onDoneFriendsUpdate;
+			Model::Observer<SocialBoolResponse> onDoneAddFriend;
+			Model::Observer<SocialBoolResponse> onDoneDelFriend;
+			Model::Observer<SocialBoolResponse> onDoneApproveFriend;
+			Model::Observer<SocialBoolResponse> onDoneGetFriends;
 
-			Model::Observer<bool> onAnswerPlayInvitationReceived;
+			Model::Observer<SocialBoolResponse> onFriendsUpdated;
 
-			Model::Observer<string> onSocialServerError;
+			Model::Observer<SocialBoolResponse> onDoneSendPlayInvitation;
+			Model::Observer<SocialBoolResponse> onDoneAnswerPlayInvitation;
+			
+			Model::Observer<SocialUserResponse> onAnswerInvitationReceived;
+			Model::Observer<SocialInvitationRequest> onPlayInvitationReceived;
+
+			Model::Observer<SocialBoolResponse> onSocialServerError;
 
 		protected:
 
 		private:
+			bool mIsLogged;
 			Model::User mLocalPlayer;
-			vector<Model::User> mFriends;
+			vector<Model::User> mSocialFriends;
+			vector<Model::User> mSocialRequests;
 
 			//connection objects
 			socketio_client_handler_ptr mHandler;
@@ -95,7 +162,9 @@ namespace RetroEnd
 			boost::thread* mThread;
 
 			SocialController mInstance();
-			SocialController() : mHandler(new socketio_client_handler()), mEndpoint(mHandler) {}; //private instance costructor for Singleton Controller
+			SocialController() : mHandler(new socketio_client_handler()), mEndpoint(mHandler) {
+				mLocalPlayer.IsOnline = false;
+			}; //private instance costructor for Singleton Controller
 			SocialController(SocialController const&);// Don't Implement
 			void operator=(SocialController const&); // Don't implement
 		};

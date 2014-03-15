@@ -12,11 +12,9 @@ using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
-GamesView::GamesView() : mIsPlaying(false), mMoving(0), mLastCheck(0), gameEnded(false)
+GamesView::GamesView() : mIsPlaying(false), gameEnded(false)
 {
 	//create sounds
-	mMoveSound = AudioController::getInstance().createSound("data/sounds/GS25.wav");
-	mSelectSound  = AudioController::getInstance().createSound("data/sounds/GS42.wav");
 	mCartridgeSound = AudioController::getInstance().createSound("data/sounds/cartridge_insert.wav");
 
 	//create graphics
@@ -42,12 +40,12 @@ GamesView::GamesView() : mIsPlaying(false), mMoving(0), mLastCheck(0), gameEnded
 	gameShadow->setSize( W/2, H );
 	gameShadow->setPosition( 0, 0 );
 	gameShadow->setPath("data/images/radial.png");
-	this->addChild( gameShadow );
+	addChild( gameShadow );
 
 	mDeviceLogo = new Image( );
 	mDeviceLogo->setPosition( W/2, 0 );
 	mDeviceLogo->setSize( W/2, H/6 );
-	this->addChild( mDeviceLogo );
+	addChild( mDeviceLogo );
 
 	mGamesList = new GameListView();
 	mGamesList->setPosition(W/2, H/6);
@@ -57,11 +55,38 @@ GamesView::GamesView() : mIsPlaying(false), mMoving(0), mLastCheck(0), gameEnded
 	mGamesList->TitleColor = 0x1D1D1D66;
 	mGamesList->SelectedTitleColor = 0x00000000FF;
 	mGamesList->SelectedRowBackgroundColor = 0x2B729533;
-	this->addChild( mGamesList );
+	mGamesList->Focused = true;
+	mGamesList->onItemPressed += [this](Game game)
+	{
+		if( ! mIsPlaying)
+		{
+			startGame();
+		}
+	};
+	mGamesList->onFastMoved += [this](int index)
+	{
+		cout<<"fast moved"<<endl;
+		Animation* a = new Animation();
+		a->millisDuration = 150;
+		a->newOpacity = 0;
+		mGameInfoContainer->animate(a);
+	};
+	mGamesList->onSelectedItemChanged += [this](int index)
+	{
+		mGameInfoContainer->animate(new Animation()); //abort fade animation
+		cout<<"item changed"<<endl;
+		updateCurrentGameData();
+	};
+	addChild( mGamesList );
+
+	mGameInfoContainer = new BaseView();
+	mGameInfoContainer->setSize(W/2, H);
+	mGameInfoContainer->setPosition(0, 0);
+	addChild(mGameInfoContainer);
 
 	mGameImage = new Image();
 	mGameImage->setPosition(H/4, H/6);
-	this->addChild(mGameImage);
+	mGameInfoContainer->addChild(mGameImage);
 
 	//selected game date and manufacturer
 	mDateManufacturer = new Label();
@@ -70,7 +95,7 @@ GamesView::GamesView() : mIsPlaying(false), mMoving(0), mLastCheck(0), gameEnded
 	mDateManufacturer->setFont(bigfont);
 	mDateManufacturer->setPosition(0, H/6/2 - bigfont->getSize()/2);
 	mDateManufacturer->HorizontalTextAlign = TextAlign::Center;
-	this->addChild(mDateManufacturer);
+	mGameInfoContainer->addChild(mDateManufacturer);
 
 	//selected game developer
 	mDeveloper = new Label();
@@ -79,7 +104,7 @@ GamesView::GamesView() : mIsPlaying(false), mMoving(0), mLastCheck(0), gameEnded
 	mDeveloper->setPosition(0, H*5/6 + H/6/2 - bigfont->getSize()/2);
 	mDeveloper->setFont(bigfont);
 	mDeveloper->HorizontalTextAlign = TextAlign::Center;
-	this->addChild(mDeveloper);
+	mGameInfoContainer->addChild(mDeveloper);
 
 	Sprite* help = new Sprite();
 	help->setPosition(W/2, H* 19/20);
@@ -89,7 +114,7 @@ GamesView::GamesView() : mIsPlaying(false), mMoving(0), mLastCheck(0), gameEnded
 	help->setLoop(true);
 	help->setFrameDuration( 1000 );
 	help->start();
-	this->addChild(help);
+	addChild(help);
 
 	//FOR LAST
 	mCartridge = new Image();
@@ -119,14 +144,14 @@ void GamesView::endGame()
 	Animation* a = new Animation();
 	a->millisDelay = 1500;
 	a->millisDuration = 150;
-	a->moveOffset = new Eigen::Vector3f(0, -Y/2, 0);
+	a->moveOffset = Eigen::Vector3f(0, -Y/2, 0);
 	a->endCallback = [this, Y] ()
 	{
 		//play cartridge sound
 		mCartridgeSound->play();
 		Animation* a = new Animation();
 		a->millisDuration = 350;
-		a->moveOffset = new Eigen::Vector3f(0, Y, 0);
+		a->moveOffset = Eigen::Vector3f(0, Y, 0);
 		a->endCallback = [this] ()
 		{
 			//toggle game block
@@ -146,7 +171,7 @@ void GamesView::startGame()
 	//cartridge animation
 	Animation* a = new Animation();
 	a->millisDuration = 350;
-	a->moveOffset = new Eigen::Vector3f(0, -mCartridge->getSize().y(), 0);
+	a->moveOffset = Eigen::Vector3f(0, -mCartridge->getSize().y(), 0);
 	a->endCallback = [this] ()
 	{
 		//play cartridge sound
@@ -155,7 +180,7 @@ void GamesView::startGame()
 		//put down the cartridge
 		Animation* a = new Animation();
 		a->millisDuration = 150;
-		a->moveOffset = new Eigen::Vector3f(0, mCartridge->getSize().y()/2, 0);
+		a->moveOffset = Eigen::Vector3f(0, mCartridge->getSize().y()/2, 0);
 		a->endCallback = [this] ()
 		{
 			//wait for sound to end and start the game
@@ -164,7 +189,7 @@ void GamesView::startGame()
 			a->endCallback = [this] ()
 			{
 				//launch game
-				GamingController::getInstance().launchGame(mDevice, mGames.at(mGamesList->getSelectedIndex()));
+				GamingController::getInstance().launchSingleGame(mDevice, mGames.at(mGamesList->getSelectedIndex()));
 			};
 		mCartridge->animate(a);
 		};
@@ -251,7 +276,7 @@ void GamesView::updateCurrentGameData()
 	Game game = mGames[mGamesList->getSelectedIndex()];
 
 	//date and data text
-
+	
 	mDeveloper->setText(game.Developer);
 	mDateManufacturer->setText(game.getReleaseYear() + game.Publisher);
 
@@ -271,86 +296,21 @@ void GamesView::updateCurrentGameData()
 		mGameImage->setPath( game.ImageScreen );
 	}
 	updateImageSizeAndPosition();
+	mGameInfoContainer->setOpacity(255);
 
-}
-
-void GamesView::startMoving(int direction)
-{
-	mLastCheck = clock();
-	mMoving = direction;
-}
-
-void GamesView::stopMoving()
-{
-	mMoving = 0;
-}
-
-void GamesView::move(int direction)
-{
-
-	mGamesList->setSelectedIndex( mGamesList->getSelectedIndex() + direction );
-
-	float H = (float)RenderController::getInstance().getScreenHeight();
-
-	updateCurrentGameData();
-
-	mMoveSound->play();
 }
 
 bool GamesView::input(Model::Input input)
 {
-	if(mIsPlaying) return false;
-
-	//TODO input from settings
-	if(input.Semantic == InputSemantic::DOWN)
+	if(input.Semantic == InputSemantic::BUTTON_Y && input.Value != SDL_RELEASED )
 	{
-		if( input.Value == SDL_PRESSED )
-		{
-			//down
-			move(1);
-			startMoving(1);
-		}
-		else
-		{
-			//up
-			stopMoving();
-		}
-		return true;
-	}
-
-	if(input.Semantic == InputSemantic::UP)
-	{
-		if( input.Value == SDL_PRESSED )
-		{
-			//down
-			move(-1);
-			startMoving(-1);
-		}
-		else
-		{
-			//up
-			stopMoving();
-		}
-		return true;
-	}
-
-	if(mMoving) return false;
-
-	if(input.Semantic == InputSemantic::LEFT && input.Value != SDL_RELEASED )
-	{
-		move(- min(10,(int) mGamesList->getSelectedIndex()));
-		return true;
-	}
-
-	if(input.Semantic == InputSemantic::RIGHT && input.Value != SDL_RELEASED )
-	{
-		move(min(10u, mGames.size() -1 - mGamesList->getSelectedIndex()));
+		toggleGameFavorite();
 		return true;
 	}
 
 	if(input.Semantic == InputSemantic::START && input.Value != SDL_RELEASED )
 	{
-		toggleGameFavorite();
+		onOpenNetplayScreen(NetplayRequest(mDevice, mGames.at(mGamesList->getSelectedIndex())));
 		return true;
 	}
 
@@ -372,25 +332,14 @@ bool GamesView::input(Model::Input input)
 		return true;
 	}
 
-	if(input.Semantic == InputSemantic::BUTTON_A && input.Value != SDL_RELEASED )
-	{
-		startGame();
-		return true;
-	}
+	//send input to GameList
+	if(mGamesList->input(input)) return true;
 
 	return false;
 }
 
 void GamesView::update(unsigned int deltaTime)
 {
-	//check if we need to move the list for long pressure
-	clock_t now = clock();
-	if(mMoving != 0 && now - mLastCheck > 250)
-	{
-		move(mMoving);
-		mLastCheck = now;
-	}
-
 	//local state to avoid lambda problem
 	if(gameEnded)
 	{

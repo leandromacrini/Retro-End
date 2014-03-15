@@ -13,19 +13,18 @@ InputConfigurationView::InputConfigurationView(InputConfig* config) : mConfig(co
 
 	//shadow
 	mSize = Eigen::Vector2f(W,H);
-	mBackgroundColor = 0x1d1d1d77;
+	BackgroundColor = 0x1d1d1d77;
 
 	//container
 	mBack = new BaseView();
-	mBack->setBackgroundColor(0xEDEDEDFF);
+	mBack->BackgroundColor = 0xEDEDEDFF;
 	mBack->setSize(W * 5/6, H * 5/6);
 	mBack->setPosition(W/6 / 2, H);
-	mBack->setBackgroundColor(0xEDEDEDFF);
 
 	//title
 	mTitle = new Label();
 	mTitle->setSize( mBack->getSize().x(), 0);
-	mTitle->setBackgroundColor(0x2B729533);
+	mTitle->BackgroundColor = 0x2B729533;
 	mTitle->setFont(Font::get("data/fonts/eurof35.ttf", FONT_SIZE_LARGE));
 	mTitle->HorizontalTextAlign = TextAlign::Center;
 	mTitle->setText("BUTTON CONFIGURATION");
@@ -54,12 +53,12 @@ InputConfigurationView::InputConfigurationView(InputConfig* config) : mConfig(co
 
 	//animation
 	Animation* a = new Animation();
-	a->moveOffset = new Eigen::Vector3f(0, -(H * 5/6)-(H/6 / 2) - H/6 / 4, 0);
+	a->moveOffset = Eigen::Vector3f(0, -(H * 5/6)-(H/6 / 2) - H/6 / 4, 0);
 	a->millisDuration = 250;
 	a->endCallback = [H, this] () 
 	{
 		Animation* a = new Animation();
-		a->moveOffset = new Eigen::Vector3f(0, H/6 / 4, 0);
+		a->moveOffset = Eigen::Vector3f(0, H/6 / 4, 0);
 		a->millisDuration = 100;
 		mBack->animate(a);
 	};
@@ -142,12 +141,12 @@ void InputConfigurationView::configureNextButton()
 
 			//EXIT ANIMATION
 			Animation* a = new Animation();
-			a->moveOffset = new Eigen::Vector3f(0, -H/6 / 4, 0);
+			a->moveOffset = Eigen::Vector3f(0, -H/6 / 4, 0);
 			a->millisDuration = 100;
 			a->endCallback = [this] () 
 			{
 				Animation* a = new Animation();
-				a->moveOffset = new Eigen::Vector3f(0, mBack->getSize().y(), 0);
+				a->moveOffset = Eigen::Vector3f(0, mBack->getSize().y(), 0);
 				a->millisDuration = 250;
 				a->endCallback = [this] () 
 				{

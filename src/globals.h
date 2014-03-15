@@ -28,6 +28,7 @@
 #include <functional> 
 #include <cctype>
 #include <locale>
+#include <ctime>
 
 //the Makefiles define these via command line
 //#define USE_OPENGL_ES
@@ -51,8 +52,10 @@ using namespace std;
 namespace RetroEnd
 {
 	const string DB_NAME = "data/retro.db";
+	const string IMAGES_PATH = "data/images/";
 
-	const string APP_DIRECTORY = "retro-end";
+	const string RETROARCH_PATH = "data/emulators/retroarch/retroarch.exe";
+	const string CORE_PATH = "data/emulators/retroarch/libretro";
 }
 
 #pragma region Global Functions
@@ -88,4 +91,8 @@ static inline string& trim(string &s) {
         return ltrim(rtrim(s));
 }
 
+template < class T, class U > 
+static bool isType(U u) {
+   return dynamic_cast< T >(u) != nullptr;
+}
 #pragma endregion

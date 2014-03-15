@@ -77,6 +77,63 @@ void RenderController::buildGLColorArray(GLubyte* ptr, unsigned int color, unsig
 	}
 }
 
+
+void RenderController::buildImageArray(float posX, float posY, GLfloat* points, GLfloat* texs, Eigen::Vector2f size, float px, float py)
+{
+	points[0]  = posX;				points[1]  = posY;
+	points[2]  = posX;				points[3]  = posY + size.y();
+	points[4]  = posX + size.x();	points[5]  = posY;
+
+	points[6]  = posX + size.x();	points[7]  = posY;
+	points[8]  = posX;				points[9]  = posY + size.y();
+	points[10] = posX + size.x();	points[11] = posY + size.y();
+
+
+
+	texs[0] = 0;		texs[1] = py;
+	texs[2] = 0;		texs[3] = 0;
+	texs[4] = px;		texs[5] = py;
+
+	texs[6] = px;		texs[7] = py;
+	texs[8] = 0;		texs[9] = 0;
+	texs[10] = px;		texs[11] = 0;
+}
+
+void RenderController::drawImageArray(GLuint textureID, GLfloat* points, GLfloat* texs, GLubyte* colors, unsigned int numArrays)
+{
+	if(textureID != 0)
+		glBindTexture(GL_TEXTURE_2D, textureID);
+	else
+		LOG(LogLevel::Error, "Tried to bind uninitialized texture!");
+
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	if(colors != NULL)
+	{
+		glEnableClientState(GL_COLOR_ARRAY);
+		glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
+	}
+
+	glVertexPointer(2, GL_FLOAT, 0, points);
+	glTexCoordPointer(2, GL_FLOAT, 0, texs);
+
+	glDrawArrays(GL_TRIANGLES, 0, numArrays);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	if(colors != NULL)
+		glDisableClientState(GL_COLOR_ARRAY);
+
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+}
+
 void RenderController::drawRect(int x, int y, int w, int h, unsigned int color)
 {
 
@@ -136,6 +193,9 @@ void RenderController::update()
 {
 	//if we are playing avoid any update
 	if(GamingController::getInstance().IsPlaying()) return;
+
+	//start show messages if not already showing
+	if(mNeedShowPopupMessage && !mShowingPopupMessage) showPopupMessages();
 
 	//compute the delta time with last update
 	unsigned int curTime = SDL_GetTicks();
@@ -198,31 +258,31 @@ void RenderController::setTimeout(unsigned int delay, function<void ()> callback
 
 void RenderController::pushPopupMessage(string message, PopupMessageIcon icon)
 {
-	//init popup view
-	if(mPopupView == NULL)
-	{
-		mPopupView = new View::BaseView();
-		mPopupView->setSize((float)getScreenWidth(), (float)getScreenWidth());
-		mShowingPopupMessage = false;
-	}
-
-	PopupMessage* popup = new PopupMessage(message, icon);
-
-	mPopupMessages.push(popup);
-
-	//start show messages if not already showing
-	if( ! mShowingPopupMessage ) showPopupMessages();
+	mMutex.lock();
+	
+	mPopupMessages.push(PopupMessage(message, icon));
+	mNeedShowPopupMessage = true;
+	
+	mMutex.unlock();
 }
 
 void RenderController::showPopupMessages()
 {
+	//init popup view online the first time
+	//is here because at constructor time we don't have the surface to get H and W
+	if(mPopupView == NULL)
+	{
+		mPopupView = new View::BaseView();
+		mPopupView->setSize((float)getScreenWidth(), (float)getScreenWidth());
+	}
+
 	if(mPopupMessages.empty())
 	{
 		mShowingPopupMessage = false;
+		mNeedShowPopupMessage = false;
 		return;
 	}
-
-	PopupMessage* popup = mPopupMessages.front();
+	PopupMessage& popup = mPopupMessages.front();
 
 	mShowingPopupMessage = true;
 
@@ -238,23 +298,21 @@ void RenderController::showPopupMessages()
 
 	float leftMargin = 0;
 
-	if(popup->Icon != PopupMessageIcon::None)
+	if(popup.Icon != PopupMessageIcon::None)
 	{
 		leftMargin = H/6;
 
 		Image* icon = new Image();
-		icon->setPath("data/images/" + PopupMessageIconPath[popup->Icon]);
+		icon->setPath("data/images/" + PopupMessageIconPath[popup.Icon]);
 		icon->setSize(leftMargin, leftMargin);
 		icon->setPosition( 0, 0);
 		container->addChild(icon);
-
-		
 	}
 
 	Label* text = new Label();
 	text->setColor(0xFFFFFFFF);
 	text->setSize( W/2 - leftMargin, 0 );
-	text->setText(popup->Message);
+	text->setText(popup.Message);
 	text->setPosition( leftMargin, (H/6 - text->getSize().y()) / 2 );
 	text->WrapText = true;
 	text->HorizontalTextAlign = TextAlign::Center;
@@ -269,18 +327,20 @@ void RenderController::showPopupMessages()
 	//ANIMATE MESSAGE
 	Animation* a = new Animation();
 	a->millisDuration = 500;
-	a->newOpacity = new unsigned char(255);
+	a->newOpacity = 255;
 	a->endCallback = [this, container] ()
 	{
 		Animation* b = new Animation();
-		b->millisDuration = 1500;
+		b->millisDuration = 2000;
 		b->endCallback = [this, container] ()
 		{
 			Animation* c = new Animation();
 			c->millisDuration = 500;
-			c->newOpacity = new unsigned char(0);
+			c->newOpacity = 0;
 			c->endCallback = [this, container] ()
 			{
+				mMutex.lock();
+
 				//remove old popup
 				mPopupMessages.pop();
 
@@ -288,6 +348,8 @@ void RenderController::showPopupMessages()
 
 				//go to next message
 				showPopupMessages();
+
+				mMutex.unlock();
 			};
 			container->animate(c);
 		};
@@ -323,7 +385,7 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
 #endif   
 
-#ifdef _DEBUG_
+#ifdef _DEBUG
 	display_width = 1280;
 	display_height = 720;
 
@@ -367,7 +429,7 @@ void RenderController::start()
 void RenderController::manta()
 {
 	//create the main window
-	mainWindow = new View::MainWindow();
+	mainWindow = new View::TestWindow();
 	mPopupView = NULL;
 
 	mRunning = true;

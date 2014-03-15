@@ -1,8 +1,8 @@
 #pragma once
 
 #include <deque>
-#include <boost/filesystem.hpp>
-#include <mutex>
+#include <boost/function.hpp>
+#include <boost/function_equal.hpp>
 
 using namespace std;
 
@@ -12,34 +12,38 @@ namespace RetroEnd
 	{
 		template <typename T> class Observer
 		{
-			std::deque<function<void (T arg)>> observers;
+			std::deque<boost::function<void (T arg)>> observers;
 
 		public:
+			Observer() : observers() {};
+
 			Observer& operator +=(function<void (T arg)> f)
 			{
-				mMutex.lock();
 				observers.push_back(f);
-				mMutex.unlock();
 				return *this;
 			}
 
 			Observer& operator -=(function<void (T arg)> f)
 			{
-				mMutex.lock();
-				observers.erase(find(observers.begin(), observers.end(), f));
-				mMutex.unlock();
+				for(auto it = observers.begin(); it != observers.end(); it++)
+				{
+					if(boost::function_equal(f, *it))
+					{
+						observers.erase(it);
+						break;
+					}
+				}
 				return *this;
 			}
 
 			void operator()(T arg) 
 			{
-				mMutex.lock();
 				for (auto it(observers.begin()); it != observers.end(); ++it)
 					(*it)(arg);
-				mMutex.unlock();
+
 			}
 		private:
-			std::mutex mMutex;
+
 		};
 	}
 }

@@ -1,12 +1,13 @@
 #include "GameListView.h"
 
+#include "../Controller/AudioController.h"
 #include "../Controller/LogController.h"
 
 using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
-GameListView::GameListView() : BaseView()
+GameListView::GameListView() : BaseView(), mMoving(0), mLastCheck(0), mStartedMoving(0)
 {
 	TitleColor = 0xFFFFFFFF;
 	SelectedTitleColor = 0xFFFFFFFF;
@@ -18,6 +19,11 @@ GameListView::GameListView() : BaseView()
 	HorizontalTextAlign = TextAlign::Left;
 	firstRow = 0;
 	lastRow = 0;
+	Focusable = true;
+
+	//create sounds
+	mMoveSound = AudioController::getInstance().createSound("data/sounds/GS25.wav");
+	mSelectSound  = AudioController::getInstance().createSound("data/sounds/GS42.wav");
 
 	mPointer = new Image();
 	mPointer->Visible = false;
@@ -43,6 +49,7 @@ void GameListView::addRow(Game game, int index)
 	if(mSelectedIndex <= index && mSelectedIndex != 0)
 	{
 		mSelectedIndex++;
+		onSelectedItemChanged(mSelectedIndex);
 	}
 }
 
@@ -53,6 +60,7 @@ void GameListView::removeRow(int index)
 	if(mSelectedIndex >= index && mSelectedIndex != 0)
 	{
 		mSelectedIndex--;
+		onSelectedItemChanged(mSelectedIndex);
 	}
 }
 
@@ -75,6 +83,9 @@ void GameListView::setSelectedIndex(int index)
 		mSelectedIndex = mItems.size() - 1;
 	else
 		mSelectedIndex = index;
+
+	if(!mMoving)
+		onSelectedItemChanged(mSelectedIndex);
 }
 
 unsigned int GameListView::getSelectedIndex()
@@ -222,8 +233,6 @@ void GameListView::drawGameIcon( shared_ptr<Model::TextureResource> texture, flo
 	points[8]  = posX;				points[9]  = posY + side;
 	points[10] = posX + side;		points[11] = posY + side;
 
-
-
 	texs[0] = 0;		texs[1] = 1;
 	texs[2] = 0;		texs[3] = 0;
 	texs[4] = 1;		texs[5] = 1;
@@ -232,7 +241,10 @@ void GameListView::drawGameIcon( shared_ptr<Model::TextureResource> texture, flo
 	texs[8] = 0;		texs[9] = 0;
 	texs[10] = 1;		texs[11] = 0;
 
-	texture->bind();
+	if(texture->getTextureID() != 0)
+		glBindTexture(GL_TEXTURE_2D, texture->getTextureID());
+	else
+		LOG(LogLevel::Error, "Tried to bind uninitialized texture!");
 
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
@@ -260,4 +272,100 @@ void GameListView::drawGameIcon( shared_ptr<Model::TextureResource> texture, flo
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_BLEND);
+}
+
+void GameListView::startMoving(int direction)
+{
+	mLastCheck = clock();
+	mStartedMoving = clock();
+	mMoving = direction;
+}
+
+void GameListView::stopMoving()
+{
+	mMoving = 0;
+	clock_t now = clock();
+	if(mStartedMoving && now - mStartedMoving > MOVE_DELAY)
+	{
+		onSelectedItemChanged(mSelectedIndex);
+		mMoveSound->play();
+		mStartedMoving = 0;
+	}
+}
+
+bool GameListView::input(Input input)
+{
+	if(input.Semantic == InputSemantic::DOWN)
+	{
+		if( input.Value == SDL_PRESSED )
+		{
+			//down
+			setSelectedIndex( getSelectedIndex() + 1 );
+			startMoving(1);
+			mMoveSound->play();
+		}
+		else
+		{
+			//up
+			stopMoving();
+		}
+		return true;
+	}
+
+	if(input.Semantic == InputSemantic::UP)
+	{
+		if( input.Value == SDL_PRESSED )
+		{
+			//down
+			setSelectedIndex( getSelectedIndex() - 1 );
+			startMoving(-1);
+			mMoveSound->play();
+		}
+		else
+		{
+			//up
+			stopMoving();
+		}
+		return true;
+	}
+
+	if(mMoving) return false;
+
+	if(input.Semantic == InputSemantic::LEFT && input.Value != SDL_RELEASED )
+	{
+		setSelectedIndex(- (int)min(10u, getSelectedIndex()));
+		mMoveSound->play();
+		return true;
+	}
+
+	if(input.Semantic == InputSemantic::RIGHT && input.Value != SDL_RELEASED )
+	{
+		setSelectedIndex(min(10u, mItems.size() -1 - getSelectedIndex()));
+		mMoveSound->play();
+		return true;
+	}
+
+	if(input.Semantic == InputSemantic::BUTTON_A && input.Value != SDL_RELEASED )
+	{
+		onItemPressed(mItems[getSelectedIndex()]);
+		return true;
+	}
+
+	return false;
+}
+
+void GameListView::update(unsigned int deltaTime)
+{
+	//call father method
+	BaseView::update(deltaTime);
+
+	//check if we need to move the list for long pressure
+	clock_t now = clock();
+	if(mMoving != 0 && now - mLastCheck > MOVE_DELAY)
+	{
+		setSelectedIndex( getSelectedIndex() + mMoving);
+		mLastCheck = now;
+		mMoveSound->play();
+		onFastMoved(mSelectedIndex);
+	}	
 }

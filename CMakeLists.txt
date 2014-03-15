@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(retro-end) 
+project(MANTA) 
 
 #-------------------------------------------------------------------------------
 #add local find scripts to CMAKE path
@@ -39,6 +39,7 @@ find_package(Boost REQUIRED COMPONENTS system filesystem regex date_time)
 find_package(Eigen3 REQUIRED)
 find_package(CURL REQUIRED)
 find_package(Sqlite3 REQUIRED)
+find_package(Websocketpp REQUIRED)
 
 #add ALSA for Linux
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -65,7 +66,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     #check for G++ 4.7+
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE G++_VERSION)
     if (G++_VERSION VERSION_LESS 4.7)
-            message(SEND_ERROR "You need at least G++ 4.7 to compile retro-end!")
+            message(SEND_ERROR "You need at least G++ 4.7 to compile MANTA!")
     endif()
     #set up compiler flags for GCC
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-attributes") #support C++11 for std::, optimize
@@ -122,6 +123,7 @@ endif()
 #-------------------------------------------------------------------------------
 #define basic sources and headers
 set(ES_HEADERS
+	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/socket.io-clientpp/socket_io_client.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/pugiXML/pugiconfig.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/pugiXML/pugixml.hpp
 
@@ -147,14 +149,19 @@ set(ES_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Observer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Sound.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/TextureResource.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/User.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/BaseView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MultiSelect.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Image.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Sprite.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Button.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Switch.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ProgressBar.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Label.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MessageDialog.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MultiChoiceDialog.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/DatePickerDialog.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/TextInputDialog.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameInfoView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleInfoView.h
@@ -163,12 +170,14 @@ set(ES_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GamesView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ListView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/HelpView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/NetplayView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ScrapeView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/TestWindow.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MainWindow.h
 
 )
 set(ES_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/socket.io-clientpp/socket_io_client.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/LIB/pugiXML/pugixml.cpp
 	
 	${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
@@ -191,9 +200,11 @@ set(ES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/InputConfig.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/Sound.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/TextureResource.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/Model/User.cpp
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/BaseView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Switch.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Button.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ProgressBar.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameInfoView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleInfoView.cpp
@@ -206,8 +217,12 @@ set(ES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MainWindow.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MessageDialog.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MultiChoiceDialog.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/DatePickerDialog.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/TextInputDialog.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/MultiSelect.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ScrapeView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/HelpView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/NetplayView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Sprite.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/TestWindow.cpp
 )
@@ -241,6 +256,7 @@ set(ES_LIBRARIES
     ${SDL2MAIN_LIBRARY}
     ${CURL_LIBRARIES}
 	${SQLITE3_LIBRARY_RELEASE}
+	${WEBSOCKETPP_LIBRARIES}
 )
 
 #add ALSA for Linux
@@ -282,17 +298,23 @@ set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 #-------------------------------------------------------------------------------
 #define target
 include_directories(${ES_INCLUDE_DIRS})
-add_executable(retro-end ${ES_SOURCES} ${ES_HEADERS})
-target_link_libraries(retro-end ${ES_LIBRARIES})
+
+SOURCE_GROUP("Model" REGULAR_EXPRESSION "src/MVC/Model/.+")
+SOURCE_GROUP("View" REGULAR_EXPRESSION "src/MVC/View/.+")
+SOURCE_GROUP("Controller" REGULAR_EXPRESSION "src/MVC/Controller/.+")
+SOURCE_GROUP("Libs" REGULAR_EXPRESSION "src/LIB/.+")
+
+add_executable(MANTA ${ES_SOURCES} ${ES_HEADERS})
+target_link_libraries(MANTA ${ES_LIBRARIES})
 
 #special properties for windows builds
 if(MSVC)
     #show console in debug builds, but not in proper release builds
     #Note that up to CMake 2.8.10 this feature is broken: http://public.kitware.com/Bug/view.php?id=12566
-    set_target_properties(retro-end PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-    set_target_properties(retro-end PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
-    set_target_properties(retro-end PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-    set_target_properties(retro-end PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
-    set_target_properties(retro-end PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-    set_target_properties(retro-end PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
+    set_target_properties(MANTA PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+    set_target_properties(MANTA PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+    set_target_properties(MANTA PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
+    set_target_properties(MANTA PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
+    set_target_properties(MANTA PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+    set_target_properties(MANTA PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()

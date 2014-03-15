@@ -9,6 +9,7 @@
 #include "Image.h"
 #include "Label.h"
 #include "GameListView.h"
+#include "NetplayView.h"
 
 #include "../Model/Observer.h"
 #include "../Model/Sound.h"
@@ -34,17 +35,12 @@ namespace RetroEnd
 
 			Model::Observer<Model::Game> onOpenGameInfo;	//open game info event
 			Model::Observer<int> onOpenGameHelpScreen;		//open game help screen
+			Model::Observer<NetplayRequest> onOpenNetplayScreen;			//open Netplay screen
 
 			bool input(Model::Input input) override;
 		private:
 			void startGame();
 			void endGame();
-			void move(int direction); // 1 Next | -1 Prev
-
-			int mMoving; // 1 Next | 0 Stop | -1 Prev
-			clock_t mLastCheck;
-			void startMoving(int direction); // 1 Next | -1 Prev
-			void stopMoving();
 
 			void updateCurrentGameData();
 			void toggleGameFavorite();
@@ -53,8 +49,6 @@ namespace RetroEnd
 			//toggle to avoid multi click on games
 			bool mIsPlaying;
 
-			shared_ptr<Model::Sound> mMoveSound;
-			shared_ptr<Model::Sound> mSelectSound;
 			shared_ptr<Model::Sound> mCartridgeSound;
 
 			Model::Device mDevice;
@@ -64,12 +58,13 @@ namespace RetroEnd
 			Image* mBackgroundImage;
 			Image* mDeviceLogo;
 			Image* mCartridge;
-			Image* mGameImage;
 
+			BaseView* mGameInfoContainer;
+
+			Image* mGameImage;
 			Label* mDateManufacturer;
 			Label* mDeveloper;
 
-			Sprite* mLeftLegend;
 			Sprite* mRightLegend;
 
 			bool gameEnded;

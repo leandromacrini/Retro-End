@@ -43,9 +43,8 @@ namespace RetroEnd
 			shared_ptr<Sound> createSound(string file);
 			bool SoundsEnabled;
 
-			//TODO private and friend of Sound
-			void startPlaySamples();
-			void stopPlaySamples();
+			void activate();
+			void deactivate();
 
 			friend class Sound;
 

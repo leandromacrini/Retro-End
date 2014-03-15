@@ -25,9 +25,14 @@ namespace RetroEnd
 
 			//EVENTS
 
-			Model::Observer<Model::Device> onOpenConsoleInfo;	//open Console info event
-			Model::Observer<int> onOpenConsoleHelpScreen;		//open Console help screen
-			Model::Observer<Model::Device> onOpenGamesList;		//open Game List 
+			//open Console info event
+			Model::Observer<Model::Device> onOpenConsoleInfo;
+
+			//open Console help screen
+			Model::Observer<int> onOpenConsoleHelpScreen;
+
+			//open Game List
+			Model::Observer<Model::Device> onOpenGamesList;
 
 			bool input(Model::Input input) override;
 		private:

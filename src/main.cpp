@@ -68,13 +68,13 @@ void onExit()
 	#endif
 
 	//stop any other controllers
+	Controller::SocialController::getInstance().stop();
 	Controller::SettingsController::getInstance().stop();
 	Controller::ScraperController::getInstance().stop();
 	Controller::GamingController::getInstance().stop();
 	Controller::AudioController::getInstance().stop();
 	Controller::InputController::getInstance().stop();
 	Controller::RenderController::getInstance().stop();
-	Controller::SocialController::getInstance().stop();
 	
 	LOG(LogLevel::Info,  "***** RETRO-END IS CLOSING *****");
 

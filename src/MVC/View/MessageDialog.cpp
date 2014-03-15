@@ -11,10 +11,10 @@ MessageDialog::MessageDialog() : BaseView()
 	float H = (float) RenderController::getInstance().getScreenHeight();
 
 	mSize = Eigen::Vector2f(W,H);
-	mBackgroundColor = 0x1d1d1d99;
+	BackgroundColor = 0x1d1d1d99;
 
 	BaseView* mBack = new BaseView();
-	mBack->setBackgroundColor(0xEDEDEDFF);
+	mBack->BackgroundColor = 0xEDEDEDFF;
 	mBack->setSize(W * 5/10, H * 4/10);
 	mBack->setPosition(W* 2.5f/10, H * 3/10);
 	addChild(mBack);

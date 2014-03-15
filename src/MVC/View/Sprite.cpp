@@ -114,7 +114,7 @@ void Sprite::draw()
 		RenderController::buildGLColorArray(colors, 0xFFFFFF00 | mOpacity, 6);
 		buildImageArray(getAbsolutePosition().x(), getAbsolutePosition().y(), points, texs);
 
-		drawImageArray(points, texs, colors, 6);
+		RenderController::drawImageArray(mTexture->getTextureID(), points, texs, colors, 6);
 	}
 }
 
@@ -140,34 +140,3 @@ void Sprite::buildImageArray(float posX, float posY, GLfloat* points, GLfloat* t
 	texs[10] = 1;		texs[11] = yStart;
 }
 
-void Sprite::drawImageArray(GLfloat* points, GLfloat* texs, GLubyte* colors, unsigned int numArrays)
-{
-	mTexture->bind();
-
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	if(colors != NULL)
-	{
-		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
-	}
-
-	glVertexPointer(2, GL_FLOAT, 0, points);
-	glTexCoordPointer(2, GL_FLOAT, 0, texs);
-
-	glDrawArrays(GL_TRIANGLES, 0, numArrays);
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	if(colors != NULL)
-		glDisableClientState(GL_COLOR_ARRAY);
-
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);
-}

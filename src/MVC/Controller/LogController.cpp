@@ -58,6 +58,7 @@ void LogController::log(LogLevel level, const string& message)
 {
 	if(level <= mReportingLevel)
 	{
+		mMutex.lock();
 		string output = "[ " + timeToString() + " - " + logLevelToString(level) + " ] - " + message + "\n";
 
 		//log to file
@@ -65,6 +66,7 @@ void LogController::log(LogLevel level, const string& message)
 
 		//if debug print to cout too
 		std::cout << output;
+		mMutex.unlock();
 	}
 }
 

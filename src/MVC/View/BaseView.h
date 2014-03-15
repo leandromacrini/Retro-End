@@ -8,6 +8,8 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <mutex>
+#include <boost/optional.hpp>
 
 #include "../../globals.h"
 
@@ -29,12 +31,12 @@ namespace RetroEnd
 		struct Animation
 		{
 		public:
-			Animation( ) : moveOffset(NULL), newSize(NULL), newOpacity(NULL), millisDuration(0), millisDelay(0), endCallback([](){}), completed(false) {};
+			Animation( ) : millisDuration(0), millisDelay(0), endCallback(nullptr), completed(false) {};
 			
 			//Optionals
-			Eigen::Vector3f* moveOffset;
-			Eigen::Vector2f* newSize;
-			unsigned char*   newOpacity;
+			boost::optional<Eigen::Vector3f> moveOffset;
+			boost::optional<Eigen::Vector2f> newSize;
+			boost::optional<unsigned char>   newOpacity;
 
 			//Animation duration in milliseconds
 			unsigned int millisDuration;
@@ -77,7 +79,6 @@ namespace RetroEnd
 			Eigen::Vector3f getPosition() const;
 			void setPosition(const Eigen::Vector3f& offset);
 			void setPosition(float x, float y, float z = 0.0f);
-			virtual void onPositionChanged() {};
 
 			Eigen::Vector2f getSize() const;
 			void setSize(const Eigen::Vector2f& size);
@@ -87,11 +88,8 @@ namespace RetroEnd
 			unsigned char getOpacity() const;
 			void setOpacity(unsigned char opacity);
 
-			unsigned int getBackgroundColor() const;
-			void setBackgroundColor(unsigned int color);
-
-			unsigned int getSelectedBackgroundColor() const;
-			void setSelectedBackgroundColor(unsigned int color);
+			unsigned int BackgroundColor;
+			boost::optional< unsigned int> FocusedBackgroundColor;
 
 			void setParent(BaseView* parent);
 			BaseView* getParent() const;
@@ -107,14 +105,26 @@ namespace RetroEnd
 			void animate(Animation* data);
 			bool isAnimating();
 
-			void setSelected(bool selected);
-			bool getSelected() const;
+			//a bool that indicate if the view is actually selected
+			bool Focused;
+			//a bool that indicate if the view is selectable (ex. Label is not focusable)
+			bool Focusable;
+			//a uint that indicate the focus index
+			Uint32 FocusIndex;
+
+			//focus the child view with the next FocusIndex value of the current Focused child (if any)
+			void focusNext();
+
+			//focus the child view with the prev FocusIndex value of the current Focused child (if any)
+			void focusPrev();
 
 			bool Visible;
 
-			int debugID;
+			string debugName;
 
 		protected:
+
+			bool mMarkerdToDelete;
 
 			//the Parent View
 			BaseView* mParent;
@@ -128,18 +138,13 @@ namespace RetroEnd
 			//float size of the view
 			Eigen::Vector2f mSize;
 
-			//a bool that indicate if the view is actually selected
-			bool mSelected;
-
-			unsigned int mBackgroundColor;
-			unsigned int mSelectedBackgroundColor;
-
 			std::vector<BaseView*> mChildren;
 		
 			Eigen::Vector3f getAbsolutePosition();
 			unsigned char   getAbsoluteOpacity();
 			Eigen::Vector4i getAbsoluteClipRect();
 		private:
+
 			Eigen::Affine3f mTransform;
 			View::Animation * mAnimation;
 			

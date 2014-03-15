@@ -24,10 +24,8 @@ namespace RetroEnd
 		public:
 			MultiChoiceDialog();
 			
-			void showDialog(string message, string title, vector<string>* values, function<void (unsigned int selectedIndex)> callback);
-			void move(int direction); // 1 Next | -1 Prev
+			void showDialog(string message, string title, vector<string>* values, function<void (unsigned int selectedIndex)> callback, int selected = 0);
 
-			bool input(Model::Input input) override;
 		private:
 			vector<string>* mValues;
 			function<void (unsigned int selectedIndex)> mCallback;

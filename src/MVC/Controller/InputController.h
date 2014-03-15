@@ -63,7 +63,7 @@ namespace RetroEnd
 			Model::Observer<int> onControllerAdded;
 			Model::Observer<int> onControllerRemoved;
 			Model::Observer<Model::InputConfig* > onControllerNeedConfiguration;
-
+			Model::Observer<string> onTextInputReceived;
 		protected:
 
 		private:

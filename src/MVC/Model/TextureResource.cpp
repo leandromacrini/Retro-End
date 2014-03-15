@@ -67,6 +67,11 @@ void TextureResource::initFromResource(const ResourceData data)
 	mTextureSize << width, height;
 }
 
+GLuint TextureResource::getTextureID()
+{
+	return mTextureID;
+}
+
 void TextureResource::initFromScreen()
 {
 	deinit();
@@ -102,15 +107,6 @@ Eigen::Vector2i TextureResource::getSize() const
 {
 	return mTextureSize;
 }
-
-void TextureResource::bind() const
-{
-	if(mTextureID != 0)
-		glBindTexture(GL_TEXTURE_2D, mTextureID);
-	else
-		LOG(LogLevel::Error, "Tried to bind uninitialized texture!");
-}
-
 
 shared_ptr<TextureResource> TextureResource::get(const string& path)
 {

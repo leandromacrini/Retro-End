@@ -22,9 +22,9 @@ namespace RetroEnd
 			void reload() override;
 
 			Eigen::Vector2i getSize() const;
-			void bind() const;
 
 			void initFromScreen();
+			GLuint getTextureID();
 
 		private:
 			TextureResource(const string& path);

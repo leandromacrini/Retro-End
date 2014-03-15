@@ -85,7 +85,7 @@ void AudioController::init()
 void AudioController::quit()
 {
 	//stop all playback
-	stopPlaySamples();
+	deactivate();
 	//completely tear down SDL audio. else SDL hogs audio resources and emulators might fail to start...
 	SDL_CloseAudio();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
@@ -134,8 +134,9 @@ void AudioController::unregisterSound(std::shared_ptr<Sound> & sound)
 	LOG(LogLevel::Error, "AudioController Error - tried to unregister a sound that wasn't registered!");
 }
 
-void AudioController::startPlaySamples()
+void AudioController::activate()
 {
+	BaseController::activate();
 
 	//set internal audio volume. important after launching a game and returning here
 	//VolumeControl::getInstance()->setVolume(50);
@@ -144,8 +145,10 @@ void AudioController::startPlaySamples()
 	SDL_PauseAudio(0);
 }
 
-void AudioController::stopPlaySamples()
+void AudioController::deactivate()
 {
+	BaseController::deactivate();
+
 	//stop playing all Sounds
 	for(unsigned int i = 0; i < sSoundVector.size(); i++)
 	{

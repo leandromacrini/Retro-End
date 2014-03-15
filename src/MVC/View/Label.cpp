@@ -6,7 +6,8 @@ using namespace RetroEnd::Model;
 using namespace RetroEnd::View;
 using namespace RetroEnd::Controller;
 
-Label::Label() : BaseView(), 
+Label::Label(bool obfuscated) : BaseView(),
+	mObfuscated(obfuscated),
 	mFont(NULL), mColor(0x000000FF), mAutoCalcExtent(true, true)
 {
 	HorizontalTextAlign = TextAlign::Left;
@@ -27,16 +28,19 @@ void Label::onSizeChanged()
 void Label::setColor(unsigned int color)
 {
 	mColor = color;
-	mOpacity = mColor & 0x000000FF;
 }
 
-void Label::setText(const std::string& text)
+void Label::setText(const string& text)
 {
 	mText = text;
 
 	calculateExtent();
 }
 
+string Label::getText()
+{
+	return mText;
+}
 void Label::setFont(std::shared_ptr<Font> font)
 {
 	mFont = font;
@@ -52,6 +56,18 @@ std::shared_ptr<Font> Label::getFont() const
 		return Font::getDefaultFont();
 }
 
+bool Label::input(Input input)
+{
+
+	if(Focused && input.Semantic == BUTTON_A && input.Value == SDL_PRESSED )
+	{
+		onLabelPressed(1);
+		return true;
+	}
+
+	return BaseView::input(input);
+}
+
 void Label::draw()
 {
 	//draw the parent
@@ -62,6 +78,10 @@ void Label::draw()
 	{
 		Eigen::Vector3f absPos = getAbsolutePosition();
 
+		string text = mText;
+
+		if(mObfuscated) text = string(mText.length(), '*');
+
 		//compute the text align offset
 		int xTextOffset = 0; // this MUST be an INTEGER
 	
@@ -71,10 +91,10 @@ void Label::draw()
 			xTextOffset = (int)absPos.x();
 			break;
 		case RetroEnd::View::Center:
-			xTextOffset = (int)(absPos.x() + ( ( mSize.x() - getFont()->sizeText(mText).x() ) / 2));
+			xTextOffset = (int)(absPos.x() + ( ( mSize.x() - getFont()->sizeText(text).x() ) / 2));
 			break;
 		case RetroEnd::View::Right:
-			xTextOffset = (int)(absPos.x() + mSize.x() - getFont()->sizeText(mText).x());
+			xTextOffset = (int)(absPos.x() + mSize.x() - getFont()->sizeText(text).x());
 			break;
 		default:
 			break;
@@ -89,15 +109,15 @@ void Label::draw()
 			{
 				//TODO Shadow Global Opacity ?
 				if(WrapText)
-					getFont()->drawWrappedText(mText, Eigen::Vector2f(absPos.x() + ShadowOffset.x(), absPos.y() + ShadowOffset.y()), mSize.x() , ShadowColor >> 8 << 8  | getAbsoluteOpacity(), HorizontalTextAlign);
+					getFont()->drawWrappedText(text, Eigen::Vector2f(absPos.x() + ShadowOffset.x(), absPos.y() + ShadowOffset.y()), mSize.x() , ShadowColor >> 8 << 8  | getAbsoluteOpacity(), HorizontalTextAlign);
 				else
-					getFont()->drawText(mText, Eigen::Vector2f(xTextOffset + ShadowOffset.x(), absPos.y() + ShadowOffset.y()), ShadowColor >> 8 << 8  | getAbsoluteOpacity());
+					getFont()->drawText(text, Eigen::Vector2f(xTextOffset + ShadowOffset.x(), absPos.y() + ShadowOffset.y()), ShadowColor >> 8 << 8  | getAbsoluteOpacity());
 			}
 			//draw text
 			if(WrapText)
-				getFont()->drawWrappedText(mText, Eigen::Vector2f(absPos.x(), absPos.y()), mSize.x() , mColor >> 8 << 8  | getAbsoluteOpacity(), HorizontalTextAlign);
+				getFont()->drawWrappedText(text, Eigen::Vector2f(absPos.x(), absPos.y()), mSize.x() , mColor >> 8 << 8  | getAbsoluteOpacity(), HorizontalTextAlign);
 			else
-				getFont()->drawText(mText, Eigen::Vector2f(xTextOffset, absPos.y()), mColor >> 8 << 8  | getAbsoluteOpacity());
+				getFont()->drawText(text, Eigen::Vector2f(xTextOffset, absPos.y()), mColor >> 8 << 8  | getAbsoluteOpacity());
 		}
 	}
 }
@@ -106,13 +126,17 @@ void Label::calculateExtent()
 {
 	std::shared_ptr<Font> font = getFont();
 
+	string text = mText;
+
+	if(mObfuscated) text = string(mText.length(), '*');
+
 	if(mAutoCalcExtent.x())
 	{
-		mSize = font->sizeText(mText);
+		mSize = font->sizeText(text);
 	}else{
 		if(mAutoCalcExtent.y())
 		{
-			mSize[1] = font->sizeWrappedText(mText, getSize().x()).y();
+			mSize[1] = font->sizeWrappedText(text, getSize().x()).y();
 		}
 	}
 }
