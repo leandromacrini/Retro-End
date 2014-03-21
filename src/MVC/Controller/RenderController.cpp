@@ -385,7 +385,7 @@ bool RenderController::createSurface() //unsigned int display_width, unsigned in
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
 #endif   
 
-#ifdef _DEBUG
+#ifndef _DEBUG
 	display_width = 1280;
 	display_height = 720;
 
@@ -429,7 +429,7 @@ void RenderController::start()
 void RenderController::manta()
 {
 	//create the main window
-	mainWindow = new View::TestWindow();
+	mainWindow = new View::MainWindow();
 	mPopupView = NULL;
 
 	mRunning = true;

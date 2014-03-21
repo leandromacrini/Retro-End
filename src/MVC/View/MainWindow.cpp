@@ -42,8 +42,54 @@ MainWindow::MainWindow() : mScrapeComplete(false), mScrapeView(NULL)
 		addChild(view);
 	};
 
-	//activate Social Controller
-	SocialController::getInstance().activate();
+	//play invitation event
+	SocialController::getInstance().onPlayInvitationReceived += [this](Controller::SocialInvitationRequest sir)
+	{
+		MultiChoiceDialog* dialog = new MultiChoiceDialog();
+
+		vector<string>* values = new vector<string>();
+		values->push_back("Yes");
+		values->push_back("No");
+
+		dialog->showDialog("User: " + sir.Username + " want to play " + sir.Game->Title +" with you ("+sir.WebAddress+").\nDo you accept?", "NetPlay invitation", values,
+		[this, values, dialog, sir] (unsigned int index)
+		{
+			//yes
+			if(index == 0)
+			{
+				SocialController::getInstance().doAnswerPlayInvitation(sir.Username, true, "OK", sir.Device, sir.Game);
+
+				//TODO SYNC with a message
+				RenderController::getInstance().pushPopupMessage("Game is starting, please wait ...", PopupMessageIcon::Info);
+				RenderController::getInstance().setTimeout(5000, [this, sir]()
+				{
+					string address = sir.IsLocal? sir.LocalAddress : sir.WebAddress;
+					GamingController::getInstance().launchNetplayGameClient(sir.Device, sir.Game, sir.Port, address);
+				});
+			}
+			//no
+			else
+			{
+				SocialController::getInstance().doAnswerPlayInvitation(SocialController::getInstance().getLocalPlayer().Username, false, "User refused the invite", sir.Device, sir.Game);
+			}
+			delete values;
+			removeChild(dialog);
+		});
+		addChild(dialog);
+	};
+
+	SocialController::getInstance().onAnswerInvitationReceived += [this](Controller::SocialInvitationResponse sir)
+	{
+		if(sir.Accepted)
+		{
+			//start server game
+			GamingController::getInstance().launchNetplayGameServer(sir.Device, sir.Game, SocialController::getInstance().getLocalPlayer().NetPort);
+		}
+		else
+		{
+			RenderController::getInstance().pushPopupMessage(sir.Username + " : " + sir.Description, PopupMessageIcon::Warning);
+		}
+	};
 
 	showLogo();
 }
@@ -67,7 +113,7 @@ void MainWindow::checkForNewGames()
 		values->push_back("No");
 
 		dialog->showDialog(to_string(newGames->size()) + " new games was found.\n Do you want to try to automatically get Game informations from The Games DB?", "Attention", values,
-		[this, newGames, dialog] (unsigned int index)
+		[this, newGames, dialog, values] (unsigned int index)
 		{
 			if(index == 0) //yes
 			{
@@ -90,6 +136,7 @@ void MainWindow::checkForNewGames()
 				}
 			}
 			removeChild(dialog);
+			delete values;
 		});
 		addChild(dialog);
 	}
@@ -108,7 +155,7 @@ void MainWindow::checkForOldGames()
 		values->push_back("Yes");
 		values->push_back("No");
 
-		dialog->showDialog(to_string(oldGames->size()) + " games as been removed from the roms folder. Would you like to remove those games from Manta's database?", "Attention", values,
+		dialog->showDialog(to_string(oldGames->size()) + " games as been removed from the roms folder. Would you like to remove those games from MANTA's database?", "Attention", values,
 		[this, oldGames, dialog] (unsigned int index)
 		{
 			for(auto it = oldGames->begin(); it != oldGames->end(); ++it)
@@ -134,22 +181,6 @@ void MainWindow::checkForOldGames()
 		//we have ended with old games, check the new games
 		checkForNewGames();
 	}
-}
-
-bool MainWindow::input(Input input)
-{
-	if(input.RawData.ValueID == SDLK_p && input.Value != SDL_RELEASED )
-	{
-		RenderController::getInstance().pushPopupMessage("Miao testo lungo lungo lungo lungo lungo lungo lungo lungo lungo!", PopupMessageIcon::Info);
-		return true;
-	}
-
-	//set input only to the last view added
-	if(mChildren.size() > 0)
-	{
-		mChildren.at(mChildren.size() - 1)->input(input);
-	}
-	return true;
 }
 
 void MainWindow::showLogo()
@@ -237,11 +268,6 @@ void MainWindow::showLogo()
 				{
 					//tell inputcontroller to start handling controllers
 					InputController::getInstance().enableJoystickHandling();
-					SocialController::getInstance().doLogin("leon", "homerj2");
-					SocialController::getInstance().onDoneLogin += [this] (SocialBoolResponse r)
-					{
-						SocialController::getInstance().doGetFriends();
-					};
 					
 					//async check if old games are still available
 					checkForOldGames();

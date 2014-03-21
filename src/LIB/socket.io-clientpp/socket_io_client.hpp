@@ -52,7 +52,9 @@ namespace socketio {
 	public:
 		socketio_client_handler() :
 			m_heartbeatActive(false),
-			m_connected(false)
+			m_connected(false),
+			m_heartbeatTimeout(30),
+			m_disconnectTimeout(60)
 		{ }
 
 		~socketio_client_handler() {

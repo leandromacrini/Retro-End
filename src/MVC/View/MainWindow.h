@@ -34,8 +34,6 @@ namespace RetroEnd
 			void checkForOldGames();
 
 			void update(unsigned int deltaTime) override;
-
-			bool input(Model::Input input) override;
 		private:
 			BaseView* mConsoleView;
 

@@ -22,7 +22,8 @@ void SocialController::activate()
 
 	try
 	{
-		mConnection = mEndpoint.get_connection(mHandler->perform_handshake("ws://localhost"));
+		mConnection = mEndpoint.get_connection(mHandler->perform_handshake("ws://anarkpu.no-ip.org"));
+		//mConnection = mEndpoint.get_connection(mHandler->perform_handshake("wss://c95d8e8553c66445cfd81c2fd438c6e51eca3767.cloudapp.appcelerator.com"));
 		mEndpoint.connect(mConnection);
 
 		mThread = new boost::thread(boost::bind(&client::run, &mEndpoint, false));
@@ -52,13 +53,17 @@ void SocialController::activate()
 				mLocalPlayer.ID = args[SizeType(0)]["result"]["id"].GetString();
 				mLocalPlayer.Username = args[SizeType(0)]["result"]["username"].GetString();
 				mLocalPlayer.EMail = args[SizeType(0)]["result"]["email"].GetString();
-				mLocalPlayer.FirstName = args[SizeType(0)]["result"]["first_name"].GetString();
-				mLocalPlayer.LastName = args[SizeType(0)]["result"]["last_name"].GetString();
+				if(args[SizeType(0)]["result"]["first_name"].IsString())
+					mLocalPlayer.FirstName = args[SizeType(0)]["result"]["first_name"].GetString();
+				if(args[SizeType(0)]["result"]["last_name"].IsString())
+					mLocalPlayer.LastName = args[SizeType(0)]["result"]["last_name"].GetString();
 				mLocalPlayer.IsOnline = true;
 			}
 
 			onDoneLogin(SocialBoolResponse(success, description));
-			RenderController::getInstance().pushPopupMessage("Manta Social Login!", PopupMessageIcon::Info); //TODO move to mainwindow
+
+			//update friends so MANTA Social Server can store those
+			doGetFriends();
 		});
 
 		mHandler->bind_event("logoutResponse", [this](socketio_events& evt, const Value& args)
@@ -69,16 +74,10 @@ void SocialController::activate()
 			if(success)
 			{
 				//update Local User
-				mLocalPlayer.ID = args[SizeType(0)]["result"]["id"].GetString();
-				mLocalPlayer.Username = args[SizeType(0)]["result"]["username"].GetString();
-				mLocalPlayer.EMail = args[SizeType(0)]["result"]["email"].GetString();
-				mLocalPlayer.FirstName = args[SizeType(0)]["result"]["first_name"].GetString();
-				mLocalPlayer.LastName = args[SizeType(0)]["result"]["last_name"].GetString();
-				mLocalPlayer.IsOnline = true;
+				mLocalPlayer = User();
 			}
 
 			onDoneLogout(SocialBoolResponse(success, description));
-			RenderController::getInstance().pushPopupMessage("Manta Social Logout!", PopupMessageIcon::Info); //TODO move to mainwindow
 		});
 
 		mHandler->bind_event("getUserResponse", [this](socketio_events& evt, const Value& args)
@@ -92,8 +91,10 @@ void SocialController::activate()
 			{
 				result.ID = args[SizeType(0)]["result"]["id"].GetString();
 				result.Username = args[SizeType(0)]["result"]["username"].GetString();
-				result.FirstName = args[SizeType(0)]["result"]["first_name"].GetString();
-				result.LastName = args[SizeType(0)]["result"]["last_name"].GetString();
+				if(args[SizeType(0)]["result"]["first_name"].IsString())
+					result.FirstName = args[SizeType(0)]["result"]["first_name"].GetString();
+				if(args[SizeType(0)]["result"]["last_name"].IsString())
+					result.LastName = args[SizeType(0)]["result"]["last_name"].GetString();
 				result.IsOnline = args[SizeType(0)]["result"]["online"].GetBool();
 			}
 
@@ -111,8 +112,10 @@ void SocialController::activate()
 			{
 				result.ID = args[SizeType(0)]["result"]["id"].GetString();
 				result.Username = args[SizeType(0)]["result"]["username"].GetString();
-				result.FirstName = args[SizeType(0)]["result"]["first_name"].GetString();
-				result.LastName = args[SizeType(0)]["result"]["last_name"].GetString();
+				if(args[SizeType(0)]["result"]["first_name"].IsString())
+					result.FirstName = args[SizeType(0)]["result"]["first_name"].GetString();
+				if(args[SizeType(0)]["result"]["last_name"].IsString())
+					result.LastName = args[SizeType(0)]["result"]["last_name"].GetString();
 			}
 
 			onDoneAddUser(SocialUserResponse(success, description, result));
@@ -141,8 +144,10 @@ void SocialController::activate()
 
 					user.ID = args[SizeType(0)]["result"][i]["id"].GetString();
 					user.Username = args[SizeType(0)]["result"][i]["username"].GetString();
-					user.FirstName = args[SizeType(0)]["result"][i]["first_name"].GetString();
-					user.LastName = args[SizeType(0)]["result"][i]["last_name"].GetString();
+					if(args[SizeType(0)]["result"][i]["first_name"].IsString())
+						user.FirstName = args[SizeType(0)]["result"][i]["first_name"].GetString();
+					if(args[SizeType(0)]["result"][i]["last_name"].IsString())
+						user.LastName = args[SizeType(0)]["result"][i]["last_name"].GetString();
 
 					users.push_back(user);
 				}
@@ -157,6 +162,15 @@ void SocialController::activate()
 			string description = args[SizeType(0)]["description"].GetString();
 
 			onDoneAddFriend(SocialBoolResponse(success, description));
+
+			if(success)
+			{
+				RenderController::getInstance().pushPopupMessage("Friendship request sent correctly", PopupMessageIcon::Info);
+			}
+			else
+			{
+				RenderController::getInstance().pushPopupMessage(description, PopupMessageIcon::Error);
+			}
 		});
 
 		mHandler->bind_event("delFriendResponse", [this](socketio_events& evt, const Value& args)
@@ -165,6 +179,15 @@ void SocialController::activate()
 			string description = args[SizeType(0)]["description"].GetString();
 
 			onDoneDelFriend(SocialBoolResponse(success, description));
+			
+			if(success)
+			{
+				RenderController::getInstance().pushPopupMessage("Friend correctly removed", PopupMessageIcon::Info);
+			}
+			else
+			{
+				RenderController::getInstance().pushPopupMessage(description, PopupMessageIcon::Error);
+			}
 		});
 
 		mHandler->bind_event("approveFriendResponse", [this](socketio_events& evt, const Value& args)
@@ -173,6 +196,15 @@ void SocialController::activate()
 			string description = args[SizeType(0)]["description"].GetString();
 
 			onDoneApproveFriend(SocialBoolResponse(success, description));
+
+			if(success)
+			{
+				RenderController::getInstance().pushPopupMessage("Friend added correctly", PopupMessageIcon::Info);
+			}
+			else
+			{
+				RenderController::getInstance().pushPopupMessage(description, PopupMessageIcon::Error);
+			}
 		});
 
 		mHandler->bind_event("updateFriends", [this](socketio_events& evt, const Value& args)
@@ -221,10 +253,10 @@ void SocialController::activate()
 					user.ID = args[SizeType(0)]["result"]["Requests"][i]["user"]["id"].GetString();
 					user.Username = args[SizeType(0)]["result"]["Requests"][i]["user"]["username"].GetString();
 					
-					if( ! args[SizeType(0)]["result"]["Friends"][i]["first_name"].IsNull())
+					if( ! args[SizeType(0)]["result"]["Requests"][i]["user"]["first_name"].IsNull())
 						user.FirstName = args[SizeType(0)]["result"]["Requests"][i]["user"]["first_name"].GetString();
 					
-					if( ! args[SizeType(0)]["result"]["Friends"][i]["last_name"].IsNull())
+					if( ! args[SizeType(0)]["result"]["Requests"][i]["user"]["last_name"].IsNull())
 						user.LastName = args[SizeType(0)]["result"]["Requests"][i]["user"]["last_name"].GetString();
 
 					mSocialRequests.push_back(user);
@@ -253,12 +285,19 @@ void SocialController::activate()
 
 		mHandler->bind_event("answerInvitation", [this](socketio_events& evt, const Value& args)
 		{
-			bool answer = args[SizeType(0)]["answer"].GetBool();
-			string reason = args[SizeType(0)]["reason"].GetString();
-			User user;
-			user.Username = args[SizeType(0)]["username"].GetString();
+			SocialInvitationResponse response;
 
-			onAnswerInvitationReceived(SocialUserResponse(answer, reason, user));
+			response.Accepted = args[SizeType(0)]["answer"].GetBool();
+			response.Description = args[SizeType(0)]["reason"].GetString();
+			response.Username = args[SizeType(0)]["username"].GetString();
+
+			string device_id = args[SizeType(0)]["device_id"].GetString();
+			string game_file = args[SizeType(0)]["game_file"].GetString();
+
+			response.Device = Device::getDeviceByTGDBID(device_id);
+			response.Game = Game::getGameByFileName(game_file);
+
+			onAnswerInvitationReceived(response);
 		});
 
 		mHandler->bind_event("playInvitation", [this](socketio_events& evt, const Value& args)
@@ -268,8 +307,14 @@ void SocialController::activate()
 			request.Username = args[SizeType(0)]["username"].GetString();
 			request.IsLocal = args[SizeType(0)]["local"].GetBool();
 			request.LocalAddress = args[SizeType(0)]["local_address"].GetString();
-			request.WebAddress = args[SizeType(0)]["web_address"].GetString();
+			if(args[SizeType(0)]["web_address"].IsString())
+				request.WebAddress = args[SizeType(0)]["web_address"].GetString();		
 			request.Port = args[SizeType(0)]["port"].GetUint();
+			string device_id = args[SizeType(0)]["device_id"].GetString();
+			string game_file = args[SizeType(0)]["game_file"].GetString();
+
+			request.Device = Device::getDeviceByTGDBID(device_id);
+			request.Game = Game::getGameByFileName(game_file);
 
 			onPlayInvitationReceived(request);
 		});
@@ -288,6 +333,7 @@ void SocialController::deactivate()
 		BaseController::deactivate();
 
 		mEndpoint.stop(false); //TODO check if we can wait without exception
+		mEndpoint.reset();
 	}
 }
 
@@ -316,6 +362,20 @@ const vector<User> SocialController::getSocialFriends()
 	return mSocialFriends;
 }
 
+const vector<User> SocialController::getSocialFriendsOnline()
+{
+	vector<User> result;
+	stable_sort(mSocialFriends.begin(), mSocialFriends.end(), nameSorter);
+	stable_sort(mSocialFriends.begin(), mSocialFriends.end(), onlineSorter);
+
+	for(auto it = mSocialFriends.begin(); it != mSocialFriends.end(); it++)
+	{
+		if(it->IsOnline) result.push_back(*it);
+	}
+
+	return result;
+}
+
 const vector<User> SocialController::getSocialRequests()
 {
 	return mSocialRequests;
@@ -324,6 +384,11 @@ const vector<User> SocialController::getSocialRequests()
 const bool SocialController::getIsLogged()
 {
 	return mLocalPlayer.IsOnline;
+}
+
+const bool SocialController::getIsConnected()
+{
+	return mHandler->connected();
 }
 
 //async methods
@@ -536,7 +601,7 @@ void SocialController::doGetFriends()
 	}
 }
 
-void SocialController::doSendPlayInvitation(Model::User user, bool local)
+void SocialController::doSendPlayInvitation(Model::User user, Model::Device device, Model::Game game, bool local)
 {
 	if( ! mHandler->connected() || ! mLocalPlayer.IsOnline )
 	{
@@ -556,13 +621,15 @@ void SocialController::doSendPlayInvitation(Model::User user, bool local)
 		v.AddMember("game_port", mLocalPlayer.NetPort, d.GetAllocator());
 		v.AddMember("local", local, d.GetAllocator());
 		v.AddMember("local_address", local_address.c_str() , d.GetAllocator());
+		v.AddMember("device_id", device.TGDBId.c_str(), d.GetAllocator());
+		v.AddMember("game_file", game.GameFile.c_str(), d.GetAllocator());
 		d.AddMember("args", v, d.GetAllocator());
 
 		mHandler->emit("sendPlayInvitation", d);
 	}
 }
 
-void SocialController::doAnswerPlayInvitation(Model::User user, bool answer, string reason)
+void SocialController::doAnswerPlayInvitation(string username, bool answer, string reason,Model::Device* device, Model::Game* game)
 {
 	if( ! mHandler->connected() || ! mLocalPlayer.IsOnline )
 	{
@@ -574,11 +641,13 @@ void SocialController::doAnswerPlayInvitation(Model::User user, bool answer, str
 		Document d;d.SetObject();
 		Value v;v.SetObject();
 
-		v.AddMember("friend_username", user.Username.c_str(), d.GetAllocator());
+		v.AddMember("friend_username", username.c_str(), d.GetAllocator());
 		v.AddMember("answer", answer, d.GetAllocator());
 		v.AddMember("reason", reason.c_str(), d.GetAllocator());
+		
+		v.AddMember("device_id", device->TGDBId.c_str(), d.GetAllocator());
+		v.AddMember("game_file", game->GameFile.c_str(), d.GetAllocator());
 		d.AddMember("args", v, d.GetAllocator());
-
 		mHandler->emit("answerPlayInvitation", d);
 	}
 }

@@ -9,6 +9,7 @@ using namespace RetroEnd::Controller;
 Switch::Switch(bool checked) : BaseView(), 
 	mChecked(checked)
 {
+	Focusable = true;
 	mCheckedTexture = TextureResource::get(IMAGES_PATH + "icon_checked.png");
 	mUncheckedTexture = TextureResource::get(IMAGES_PATH + "icon_unchecked.png");
 
@@ -53,7 +54,7 @@ void Switch::draw()
 
 bool Switch::input(Input input)
 {
-	if(input.Semantic == InputSemantic::BUTTON_A && input.Value != SDL_RELEASED )
+	if(Focused && input.Semantic == InputSemantic::BUTTON_A && input.Value != SDL_RELEASED )
 	{
 		toggle();
 	}

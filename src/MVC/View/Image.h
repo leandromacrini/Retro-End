@@ -22,7 +22,6 @@ namespace RetroEnd
 		{
 		public:
 			 Image	();
-			~Image	();
 
 			void	setPath (string image);
 			string& getPath ();

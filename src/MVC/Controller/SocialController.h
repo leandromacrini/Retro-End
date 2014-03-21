@@ -12,6 +12,8 @@
 #include "LogController.h"
 #include "RenderController.h"
 
+#include "../Model/Device.h"
+#include "../Model/Game.h"
 #include "../Model/Observer.h"
 
 using socketio::socketio_client_handler;
@@ -81,6 +83,18 @@ namespace RetroEnd
 			string LocalAddress;
 			string WebAddress;
 			Uint32 Port;
+			Model::Game* Game;
+			Model::Device* Device;
+		};
+
+		struct SocialInvitationResponse
+		{
+			bool Accepted;
+			string Description;
+			string Username;
+			Uint32 Port;
+			Model::Game* Game;
+			Model::Device* Device;
 		};
 
 		class SocialController : public BaseController
@@ -101,8 +115,10 @@ namespace RetroEnd
 
 			const Model::User getLocalPlayer();
 			const vector<Model::User> getSocialFriends();
+			const vector<Model::User> getSocialFriendsOnline();
 			const vector<Model::User> getSocialRequests();
 			const bool getIsLogged();
+			const bool getIsConnected();
 
 			//async methods
 			void doLogin(string username, string password);
@@ -118,8 +134,8 @@ namespace RetroEnd
 			void doApproveFriend(Model::User user);
 			void doGetFriends();
 
-			void doSendPlayInvitation(Model::User user, bool local);
-			void doAnswerPlayInvitation(Model::User user, bool answer, string reason);
+			void doSendPlayInvitation(Model::User user, Model::Device device, Model::Game game, bool local);
+			void doAnswerPlayInvitation(string username, bool answer, string reason, Model::Device* device, Model::Game* game);
 
 			//EVENTS
 
@@ -141,7 +157,7 @@ namespace RetroEnd
 			Model::Observer<SocialBoolResponse> onDoneSendPlayInvitation;
 			Model::Observer<SocialBoolResponse> onDoneAnswerPlayInvitation;
 			
-			Model::Observer<SocialUserResponse> onAnswerInvitationReceived;
+			Model::Observer<SocialInvitationResponse> onAnswerInvitationReceived;
 			Model::Observer<SocialInvitationRequest> onPlayInvitationReceived;
 
 			Model::Observer<SocialBoolResponse> onSocialServerError;

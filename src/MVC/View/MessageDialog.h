@@ -23,7 +23,6 @@ namespace RetroEnd
 		{
 		public:
 			 MessageDialog	();
-			~MessageDialog	();
 
 			void setMessage(string message);
 

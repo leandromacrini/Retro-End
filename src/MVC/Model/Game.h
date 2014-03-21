@@ -76,6 +76,9 @@ namespace RetroEnd
 			//retrive the Game identified by "TGDBId" or NULL if not present
 			static Game* getGameByTGDBId(string& TGDBId);
 
+			//retrive the Game identified by "file" or NULL if not present
+			static Game* getGameByFileName(string& file);
+
 			//create the table, 
 			static void init();
 

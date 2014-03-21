@@ -124,11 +124,6 @@ GameInfoView::GameInfoView(Game& game) : mGame(game)
 	this->addChild(mBack);
 }
 
-GameInfoView::~GameInfoView()
-{
-
-}
-
 bool GameInfoView::input(Model::Input input)
 {
 	if(input.Semantic == InputSemantic::BUTTON_X && input.Value != SDL_RELEASED )

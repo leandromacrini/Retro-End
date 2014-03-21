@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <mutex>
 #include <boost/function.hpp>
 #include <boost/function_equal.hpp>
 
@@ -19,12 +20,14 @@ namespace RetroEnd
 
 			Observer& operator +=(function<void (T arg)> f)
 			{
+				lock_guard<mutex> lock(mMutex);
 				observers.push_back(f);
 				return *this;
 			}
 
 			Observer& operator -=(function<void (T arg)> f)
 			{
+				lock_guard<mutex> lock(mMutex);
 				for(auto it = observers.begin(); it != observers.end(); it++)
 				{
 					if(boost::function_equal(f, *it))
@@ -38,12 +41,13 @@ namespace RetroEnd
 
 			void operator()(T arg) 
 			{
+				lock_guard<mutex> lock(mMutex);
 				for (auto it(observers.begin()); it != observers.end(); ++it)
 					(*it)(arg);
 
 			}
 		private:
-
+			mutex mMutex;
 		};
 	}
 }

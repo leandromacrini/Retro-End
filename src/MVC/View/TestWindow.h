@@ -13,7 +13,6 @@ namespace RetroEnd
 		{
 		public:
 			TestWindow();
-			~TestWindow();
 
 			bool input(Model::Input input) override;
 

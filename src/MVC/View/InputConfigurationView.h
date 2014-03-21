@@ -25,7 +25,6 @@ namespace RetroEnd
 
 		public:
 			InputConfigurationView(Model::InputConfig* config);
-			~InputConfigurationView();
 
 			bool input(Model::Input input) override;
 

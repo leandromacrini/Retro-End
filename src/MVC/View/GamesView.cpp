@@ -332,10 +332,7 @@ bool GamesView::input(Model::Input input)
 		return true;
 	}
 
-	//send input to GameList
-	if(mGamesList->input(input)) return true;
-
-	return false;
+	return BaseView::input(input);
 }
 
 void GamesView::update(unsigned int deltaTime)

@@ -166,6 +166,7 @@ set(ES_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameInfoView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleInfoView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/InputConfigurationView.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/OptionsListView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameListView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GamesView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ListView.h
@@ -210,6 +211,7 @@ set(ES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/ConsoleInfoView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/InputConfigurationView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GameListView.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/OptionsListView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/GamesView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Image.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MVC/View/Label.cpp

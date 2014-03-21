@@ -275,6 +275,40 @@ Game* Game::getGameByTGDBId(string& TGDBId)
 	return game;
 }
 
+Game* Game::getGameByFileName(string& file)
+{
+	Game* game = NULL;
+
+	string query = "SELECT * FROM " + Game::table + " WHERE GAME_FILE = '" + file +"' LIMIT 1";
+
+	sqlite3* db;
+
+	sqlite3_open(RetroEnd::DB_NAME.c_str(), &db);
+
+	sqlite3_stmt *statement;
+
+	if(sqlite3_prepare_v2(db, query.c_str(), -1, &statement, 0) == SQLITE_OK)
+	{
+		int result = sqlite3_step(statement);
+
+		if(result == SQLITE_ROW)
+		{
+			game = new Game(statement);
+		}
+		
+		sqlite3_finalize(statement);
+	}
+	else
+	{
+		string message = sqlite3_errmsg(db);
+		LOG(Error, "Game getGameById : " + message);
+	}
+
+	sqlite3_close(db);
+
+	return game;
+}
+
 string Game::getReleaseYear()
 {
 	if(ReleaseDate.empty())

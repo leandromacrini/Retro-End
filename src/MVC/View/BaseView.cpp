@@ -238,10 +238,8 @@ bool BaseView::isAnimating()
 
 bool BaseView::input(Input input)
 {
-	for(unsigned int i = 0; i < getChildCount(); i++)
+	for(int i = getChildCount()-1 ; i >= 0; i--)
 	{
-		BaseView* child = mChildren[i];
-		
 		if(mChildren[i]->input(input)) return true;
 	}
 	return false;

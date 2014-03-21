@@ -10,8 +10,8 @@
 #include "socket_io_client.hpp"
 
 // Comment this out to disable handshake logging to stdout
-//#define LOG(x) std::cout << x
-#define LOG(x)
+#define LOG(x) std::cout << x
+//#define LOG(x)
 
 using socketio::socketio_client_handler;
 using socketio::socketio_events;

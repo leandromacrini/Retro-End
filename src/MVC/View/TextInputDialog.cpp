@@ -1,9 +1,13 @@
 #include "TextInputDialog.h"
 
+#include "boost/bind.hpp"
+
 #include "../Controller/LogController.h"
 #include "../Controller/InputController.h"
 #include "../Controller/RenderController.h"
-#include "boost/bind.hpp"
+
+
+
 
 using namespace RetroEnd::Model;
 using namespace RetroEnd::View;

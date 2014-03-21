@@ -56,7 +56,7 @@ namespace RetroEnd
 
 		public:
 			BaseView();
-			~BaseView();
+			virtual ~BaseView();
 
 			//Called when input is received.
 			//Return true if the input is consumed, false if it should continue to be passed to other children.

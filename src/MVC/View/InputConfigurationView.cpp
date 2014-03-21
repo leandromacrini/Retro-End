@@ -163,11 +163,6 @@ void InputConfigurationView::configureNextButton()
 	}
 }
 
-InputConfigurationView::~InputConfigurationView()
-{
-
-}
-
 bool InputConfigurationView::input(Model::Input input)
 {
 	//check if user press RETURN or A on other controller

@@ -58,6 +58,9 @@ namespace RetroEnd
 			//retrive the Device identified by "id" (if any)
 			static Device getDeviceById(sqlite3_int64 id);
 
+			//retrive the Device identified by "tgdb_id" (if any)
+			static Device* getDeviceByTGDBID(string& tgdb_id);
+
 			//create the table, 
 			static void init();
 		protected:

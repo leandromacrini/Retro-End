@@ -159,32 +159,30 @@ void ListView::draw()
 			}
 
 			//draw pointer
-			if(mSelectedIndex == i)
+			if(Focused)
 			{
-				Uint32 selectedBack = SelectedRowBackgroundColor;
-				//make SelectedTitleColor more transparent if list is not focused
-				if (! Focused ) selectedBack = (SelectedRowBackgroundColor>>8<<8) | 0x00000055;
-
-				//draw background
-				RenderController::drawRect(
-					(int)absPos.x(), (int)(absPos.y() + rowYPosition*RowHeight), (int)mSize.x(), RowHeight,
-					selectedBack
-				);
-			}
-			else
-			{
-				//draw background
-				RenderController::drawRect(
-					(int)absPos.x(), (int)(absPos.y() + rowYPosition*RowHeight), (int)mSize.x(), RowHeight,
-					RowBackgroundColor
-				);
+				if(mSelectedIndex == i)
+				{
+					RenderController::drawRect(
+						(int)absPos.x(), (int)(absPos.y() + rowYPosition*RowHeight), (int)mSize.x(), RowHeight,
+						SelectedRowBackgroundColor
+					);
+				}
+				else
+				{
+					//draw background
+					RenderController::drawRect(
+						(int)absPos.x(), (int)(absPos.y() + rowYPosition*RowHeight), (int)mSize.x(), RowHeight,
+						RowBackgroundColor
+					);
+				}
 			}
 		
 			//draw text
 			mFont->drawText(mItems.at(i), Eigen::Vector2f(
 				xTextOffset,
 				absPos.y() + (rowYPosition)*RowHeight + (RowHeight - mFont->sizeText(mItems.at(i)).y())/2),
-				i == mSelectedIndex? SelectedTitleColor : TitleColor, (int)mSize.x());
+				i == mSelectedIndex && Focused? SelectedTitleColor : TitleColor, (int)mSize.x());
 		}
 	}
 }

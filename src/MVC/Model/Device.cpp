@@ -216,6 +216,44 @@ Device Device::getDeviceById(sqlite3_int64 id)
 	return *device;
 }
 
+Device* Device::getDeviceByTGDBID(string& tgdb_id)
+{
+	Device* device = NULL;
+
+	string query = "SELECT * FROM " + Device::table + " WHERE TGDB_ID = '" + tgdb_id +"' LIMIT 1";
+
+	sqlite3* db;
+
+	sqlite3_open(RetroEnd::DB_NAME.c_str(), &db);
+
+	sqlite3_stmt *statement;
+
+	if(sqlite3_prepare_v2(db, query.c_str(), -1, &statement, 0) == SQLITE_OK)
+	{
+		int result = sqlite3_step(statement);
+
+		if(result == SQLITE_ROW)
+		{
+			device = new Device(statement);
+		}
+		else
+		{
+			device = new Device();
+		}
+		
+		sqlite3_finalize(statement);
+	}
+	else
+	{
+		string message = sqlite3_errmsg(db);
+		LOG(Error, "Device getDeviceById : " + message);
+	}
+
+	sqlite3_close(db);
+
+	return device;
+}
+
 string Device::getRomsPath()
 {
 	return "data/roms/" + Name;

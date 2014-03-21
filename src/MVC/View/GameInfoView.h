@@ -23,7 +23,6 @@ namespace RetroEnd
 
 		public:
 			GameInfoView(Model::Game& game);
-			~GameInfoView();
 
 			bool input(Model::Input input) override;
 

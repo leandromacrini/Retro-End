@@ -224,5 +224,5 @@ bool ConsoleView::input(Model::Input input)
 		return true;
 	}
 
-	return false;
+	return BaseView::input(input);
 }

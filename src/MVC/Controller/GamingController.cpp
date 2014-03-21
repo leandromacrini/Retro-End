@@ -1,6 +1,7 @@
 #include "GamingController.h"
 
 #include "SettingsController.h"
+#include "SocialController.h"
 #include <boost/algorithm/string.hpp>
 
 namespace fs = boost::filesystem;
@@ -38,8 +39,15 @@ void GamingController::launchRetroarch(string& command, Model::Game game)
 	}
 
 	//we must start SDL here so the reload of resources is done before all start to use those
-	RenderController::getInstance().initSDL();
-
+	try
+	{
+		RenderController::getInstance().initSDL();
+	}
+	catch (exception& ex)
+	{
+		string error = ex.what();
+		LOG(LogLevel::Error, "Error occurred while re init SDL: " + error) ;
+	}
 	LOG(LogLevel::Info, "Ended game: " + game.Title);
 
 	mIsPlaying = false;
@@ -50,55 +58,54 @@ void GamingController::launchRetroarch(string& command, Model::Game game)
 	game.save();
 }
 
-void GamingController::launchNetplayGameServer(Model::Device& device, Model::Game& game, int port)
+void GamingController::launchNetplayGameServer(Model::Device* device, Model::Game* game, int port)
 {
-	if(device.LaunchCommand.empty())
+	if(device->LaunchCommand.empty())
 	{
-		LOG(LogLevel::Error, "Unable to start game: " + game.Title + " because Device: " + device.Name + " does't have a valid Retroarch core!");
+		LOG(LogLevel::Error, "Unable to start game: " + game->Title + " because Device: " + device->Name + " does't have a valid Retroarch core!");
 		onGameError("No valid core defined for this device!");
-	} else if(game.GameFile.empty())
+	} else if(game->GameFile.empty())
 	{
-		LOG(LogLevel::Error, "Unable to start game: " + game.Title + " because the game's rom is not available!");
+		LOG(LogLevel::Error, "Unable to start game: " + game->Title + " because the game's rom is not available!");
 		onGameError("No valid rom found for this game!");
 	}
 	else
 	{
-		fs::path romPath = (fs::path(device.getRomsPath()) / game.GameFile).make_preferred().native();
+		fs::path romPath = (fs::path(device->getRomsPath()) / game->GameFile).make_preferred().native();
 
 		fs::path retroarch = fs::path(RetroEnd::RETROARCH_PATH).make_preferred().native();
 
-		fs::path corePath = (fs::path(RetroEnd::CORE_PATH) / device.LaunchCommand).make_preferred().native();
+		fs::path corePath = (fs::path(RetroEnd::CORE_PATH) / device->LaunchCommand).make_preferred().native();
 
-		string command = retroarch.string()+" -L \"" + corePath.string() + "\" \""+romPath.string()+"\" -H --port " + to_string(port);
+		string command = retroarch.string()+" -L \"" + corePath.string() + "\" \""+romPath.string()+"\" -H --port " + to_string(port) + " -F 10 --nick " + SocialController::getInstance().getLocalPlayer().Username;
 		
-		launchRetroarch(command, game);
+		launchRetroarch(command, *game);
 
 	}
 }
 
-void GamingController::launchNetplayGameClient(Model::Device& device, Model::Game& game, int port, string& server)
+void GamingController::launchNetplayGameClient(Model::Device* device, Model::Game* game, int port, string& server)
 {
-	if(device.LaunchCommand.empty())
+	if(device->LaunchCommand.empty())
 	{
-		LOG(LogLevel::Error, "Unable to start game: " + game.Title + " because Device: " + device.Name + " does't have a valid Retroarch core!");
+		LOG(LogLevel::Error, "Unable to start game: " + game->Title + " because Device: " + device->Name + " does't have a valid Retroarch core!");
 		onGameError("No valid core defined for this device!");
-	} else if(game.GameFile.empty())
+	} else if(game->GameFile.empty())
 	{
-		LOG(LogLevel::Error, "Unable to start game: " + game.Title + " because the game's rom is not available!");
+		LOG(LogLevel::Error, "Unable to start game: " + game->Title + " because the game's rom is not available!");
 		onGameError("No valid rom found for this game!");
 	}
 	else
 	{
-		fs::path romPath = (fs::path(device.getRomsPath()) / game.GameFile).make_preferred().native();
+		fs::path romPath = (fs::path(device->getRomsPath()) / game->GameFile).make_preferred().native();
 
 		fs::path retroarch = fs::path(RetroEnd::RETROARCH_PATH).make_preferred().native();
 
-		fs::path corePath = (fs::path(RetroEnd::CORE_PATH) / device.LaunchCommand).make_preferred().native();
+		fs::path corePath = (fs::path(RetroEnd::CORE_PATH) / device->LaunchCommand).make_preferred().native();
 
-		string command = retroarch.string()+" -L \"" + corePath.string() + "\" \""+romPath.string()+"\" -C " + server + " --port " + to_string(port);
+		string command = retroarch.string()+" -L \"" + corePath.string() + "\" \""+romPath.string()+"\" -C " + server + " --port " + to_string(port) + " --nick " + SocialController::getInstance().getLocalPlayer().Username;
 		
-		launchRetroarch(command, game);
-
+		launchRetroarch(command, *game);
 	}
 }
 
